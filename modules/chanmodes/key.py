@@ -7,7 +7,7 @@ from handle.core import Numeric, Channelmode, Hook
 
 def key_is_ok(client, channel, action, mode, param, CHK_TYPE):
     if CHK_TYPE == Channelmode.CHK_ACCESS:
-        if channel.client_has_membermodes(client, "oaq"):
+        if channel.client_has_membermodes(client, "aq"):
             return 1
         return 0
 
@@ -60,6 +60,6 @@ def init(module):
     Cmode_k.sjoin_check = sjoin_check_key
     Cmode_k.param_help = "<key>"
     Cmode_k.desc = "Channel requires a key to join"
-    Cmode_k.level = 3
+    Cmode_k.level = 4
     Channelmode.add(module, Cmode_k)
     Hook.add(Hook.CAN_JOIN, can_join_key)
