@@ -10,7 +10,7 @@ from handle.core import Channelmode
 def validate_member(client, channel, action, mode, param, CHK_TYPE):
 
     if CHK_TYPE == Channelmode.CHK_ACCESS:
-        if action == "+" and (channel.client_has_membermodes(client, "aq") or not client.local):
+        if action == "+" and (channel.client_has_membermodes(client, "q") or not client.local):
             return 1
         elif action == "-":
             # Always allow unset.
