@@ -103,7 +103,9 @@ def accept_socket(sock, listen_obj):
     client.last_ping_sent = time() * 1000
     client.local.last_msg_received = int(time())
     client.local.incoming = 1
-    client.ip, client.port = addr
+    client.ip, client.port, _, _ = addr
+    if client.ip[:7] == "::ffff:":
+        client.ip = client.ip.replace("::ffff:", "")
     IRCD.run_parallel_function(post_accept, args=(conn, client, listen_obj))
 
 

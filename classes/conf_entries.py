@@ -44,9 +44,6 @@ class Listen:
         self.options = []
         self.tls = 0
         self.tlsctx = None
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         self.listening = 0
         self.cert = None
         self.key = None
@@ -62,8 +59,7 @@ class Listen:
 
             if not self.listening:
                 ip = "" if self.ip == '*' else self.ip
-                self.sock.bind((ip, int(self.port)))
-                self.sock.listen(10)
+                self.sock = socket.create_server((ip, int(self.port)), family=socket.AF_INET6, reuse_port=True, dualstack_ipv6=True)
                 self.listening = 1
                 IRCD.configuration.our_ports.append(int(self.port))
                 if output:

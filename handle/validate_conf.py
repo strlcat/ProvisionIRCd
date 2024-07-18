@@ -311,24 +311,12 @@ def config_test_allow(block):
 
 def config_test_listen(block):
     def is_port_in_use(host, port):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        s = None
         try:
-            location = (host, port)
-            s.bind(location)  # Try to bind to the port.
-            close_port_check(s)
+            s = socket.create_server((host, int(port)), family=socket.AF_INET6, reuse_port=True, dualstack_ipv6=True)
             return 0  # If the bind succeeds, the port is not in use.
         except:
-            close_port_check(s)
             return 1
-
-    def close_port_check(s):
-        try:
-            s.shutdown(socket.SHUT_WR)
-        except:
-            s.close()
-        s.close()
 
     if not (ip_item := block.get_item("ip")):
         conf_error(f"'ip' is missing from listen block", block)
