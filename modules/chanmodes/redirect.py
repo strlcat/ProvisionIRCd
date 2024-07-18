@@ -7,7 +7,7 @@ from handle.core import IRCD, Channelmode, Numeric, Hook, Command
 
 def validate_redirect(client, channel, action, mode, param, CHK_TYPE):
     if CHK_TYPE == Channelmode.CHK_ACCESS:
-        if channel.client_has_membermodes(client, "oaq"):
+        if channel.client_has_membermodes(client, "aq"):
             return 1
         return 0
 
@@ -86,7 +86,7 @@ def init(module):
     Cmode_L.is_ok = validate_redirect
     Cmode_L.conv_param = conv_param_redirect
     Cmode_L.sjoin_check = sjoin_check_redirect
-    Cmode_L.level = 3
+    Cmode_L.level = 4
     Cmode_L.unset_with_param = 1
     Cmode_L.param_help = "<channel>"
     Cmode_L.desc = "If a user is unable to join the channel, it will be redirected to the specified channel"
