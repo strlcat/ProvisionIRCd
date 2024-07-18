@@ -81,7 +81,7 @@ def cmd_nick_local(client, recv):
     users = [client]
     for channel in client.channels:
         if not client.has_permission("channel:override:no-nick"):
-            if 'N' in channel.modes and not channel.client_has_membermodes(client, "q"):
+            if 'N' in channel.modes and not channel.client_has_membermodes(client, "aq"):
                 return client.sendnumeric(Numeric.ERR_NONICKCHANGE, channel.name)
 
         for broadcast_client in channel.clients():
