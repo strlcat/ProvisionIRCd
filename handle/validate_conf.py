@@ -311,19 +311,19 @@ def config_test_allow(block):
 
 def config_test_listen(block):
     def is_port_in_use(host, port):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            try:
-                location = (host, port)
-                s.bind(location)  # Try to bind to the port.
-                close_port_check(s)
-                return 0  # If the bind succeeds, the port is not in use.
-            except:
-                close_port_check(s)
-                return 1
-
-    def close_port_check(s):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        try:
+            location = (host, port)
+            s.bind(location)  # Try to bind to the port.
+            close_port_check(s)
+            return 0  # If the bind succeeds, the port is not in use.
+        except:
+            close_port_check(s)
+            return 1
+
+    def close_port_check(s):
         try:
             s.shutdown(socket.SHUT_WR)
         except:
