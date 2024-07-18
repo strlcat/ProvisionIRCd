@@ -15,7 +15,6 @@ import socket
 import OpenSSL
 from enum import Enum
 from random import randrange
-from sys import version
 from threading import Thread
 from time import time
 from datetime import datetime
@@ -1699,8 +1698,8 @@ class IRCD:
     process_after_eos: ClassVar[list] = []
     send_after_eos: ClassVar[dict] = {}
     delayed_connections: ClassVar[list] = []
-    versionnumber: str = '3.0'
-    version: str = f'ProvisionIRCd-{versionnumber}-beta'
+    versionnumber: str = '4.0'
+    version: str = f'unreal40-notreally'
     forked: int = 1
     use_poll: int = 1
     boottime: int = 0
@@ -1725,8 +1724,7 @@ class IRCD:
             IRCD.forked = 0
         IRCD.running = 1
         IRCD.boottime = int(time())
-        v = version.split('\\n')[0].strip()
-        IRCD.hostinfo = f"Python {v}"
+        IRCD.hostinfo = f"Unreal4.0.1+strlcat"
         Isupport.add("NETWORK", IRCD.me.info.replace(" ", "-"))
         if fork and os.name == "posix":
             pid = os.fork()

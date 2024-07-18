@@ -6,11 +6,6 @@ from handle.core import IRCD, Command, Flag, Numeric, Usermode, Channelmode, Sno
 
 
 def cmd_ircdhelp(client, recv):
-    client.sendnumeric(Numeric.RPL_HELPTLR, '-')
-    client.sendnumeric(Numeric.RPL_HELPTLR, '§~¤§¤~~¤§¤~~¤§¤~~¤§¤~~¤§¤~~¤§¤~~¤§¤~§')
-    client.sendnumeric(Numeric.RPL_HELPTLR, '~~~~~~~~~ ProvisionIRCd Help ~~~~~~~~~')
-    client.sendnumeric(Numeric.RPL_HELPTLR, '§~¤§¤~~¤§¤~~¤§¤~~¤§¤~~¤§¤~~¤§¤~~¤§¤~§')
-    client.sendnumeric(Numeric.RPL_HELPTLR, '-')
     if len(recv) == 1:
         client.sendnumeric(Numeric.RPL_HELPTLR, 'This section shows you some information about this')
         client.sendnumeric(Numeric.RPL_HELPTLR, 'IRCd and her commands. For a more detailed description')
