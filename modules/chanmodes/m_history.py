@@ -79,7 +79,7 @@ def history_conv_param(param):
 
 def history_validate_param(client, channel, action, mode, param, CHK_TYPE):
     if CHK_TYPE == Channelmode.CHK_ACCESS:
-        if channel.client_has_membermodes(client, "oaq"):
+        if channel.client_has_membermodes(client, "aq"):
             return 1
         return 0
 
@@ -334,7 +334,7 @@ def init(module):
     Chmode_H.conv_param = history_conv_param
     Chmode_H.is_ok = history_validate_param
     Chmode_H.paramcount = 1
-    Chmode_H.level = 3
+    Chmode_H.level = 4
     Channelmode.add(module, Chmode_H)
     Command.add(module, cmd_history, "HISTORY", 1)
     Hook.add(Hook.LOCAL_CHANMSG, add_to_historybuf_privmsg)
