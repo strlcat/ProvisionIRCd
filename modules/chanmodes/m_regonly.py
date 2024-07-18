@@ -15,5 +15,6 @@ def init(module):
     Hook.add(Hook.CAN_JOIN, reg_only_join)
     Chmode_R = Channelmode()
     Chmode_R.flag = 'R'
+    Chmode_R.is_ok = Channelmode.allow_chanadmin
     Chmode_R.desc = "Only registered users may join"
     Channelmode.add(module, Chmode_R)
