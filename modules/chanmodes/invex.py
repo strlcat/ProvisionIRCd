@@ -30,6 +30,7 @@ def init(module):
     Chmode_I.paramcount = 1
     Chmode_I.unset_with_param = 1
     Chmode_I.is_ok = invexlist_is_ok
+    Chmode_I.level = 3
     Chmode_I.type = Channelmode.LISTMODE
     Chmode_I.param_help = "<nick!ident@host>"
     Chmode_I.desc = "Hosts matching an invex can bypass +i"
