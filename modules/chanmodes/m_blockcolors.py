@@ -11,7 +11,7 @@ def blockcolors_c(client, channel, msg, sendtype):
     if 'c' not in channel.modes:
         return 1
 
-    if channel.client_has_membermodes(client, "oaq") or client.has_permission("channel:override:message:color"):
+    if channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:override:message:color"):
         return 1
 
     testmsg = ' '.join(msg)

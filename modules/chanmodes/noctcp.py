@@ -9,7 +9,7 @@ def msg_ctcp(client, channel, message, sendtype):
     if 'C' not in channel.modes:
         return 1
 
-    if channel.client_has_membermodes(client, "aq") or client.has_permission("channel:override:message:ctcp"):
+    if channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:override:message:ctcp"):
         return 1
 
     if message[0] == '' and message[-1] == '':
