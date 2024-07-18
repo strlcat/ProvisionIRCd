@@ -323,6 +323,7 @@ def config_test_listen(block):
 
     def close_port_check(s):
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         try:
             s.shutdown(socket.SHUT_WR)
         except:
