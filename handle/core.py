@@ -2009,42 +2009,75 @@ class IRCD:
         host = received hostname, depending on resolve settings.
         Can either be IP or realhost.
         """
+
+        def xor_block(x, y):
+            return bytes(a ^ b for a, b in zip(x, y))
+
+        def xor_shrink(b, mx):
+            r = b'\0' * mx
+            n = len(b)
+            if n % mx:
+                n -= n % mx
+            for x in range(0, n, mx):
+                r = xor_block(r, b[x:])
+            if n % mx:
+                r = xor_block(r, b[n].ljust(mx, b'\0'))
+            return r
+
+        def isxdigit(s):
+            return all(c in string.hexdigits for c in s)
+
+        def hash_data(key, data):
+            return hashlib.sha256(bytes(key, "utf-8") + data).digest()
+
+        def b2h_upper(b):
+            return b.hex().upper()
+
         if not host:
             host = client.user.realhost
             ip = client.ip
         else:
             ip = host
 
-        if "static" in host or '.ip-' in host:
+        if "static" in host or ".ip-" in host:
             host = ip
 
         cloak_key = IRCD.get_setting("cloak-key")
-        key = f'{host}{cloak_key}'
-        hashhost = hashlib.sha512(bytes(key, "utf-8"))
-        hex_dig = hashhost.hexdigest()
-        cloak1 = hex(binascii.crc32(bytes(hex_dig[0:32], "utf-8")) % (1 << 32))[2:]
-        cloak2 = hex(binascii.crc32(bytes(hex_dig[32:64], "utf-8")) % (1 << 32))[2:]
 
+        # ipv4 check
         if host.replace('.', '').isdigit():
-            cloak3 = hex(binascii.crc32(bytes(hex_dig[64:96], "utf-8")) % (1 << 32))[2:]
+            binip = socket.inet_pton(socket.AF_INET, host)
 
-            cloakhost = cloak1 + '.' + cloak2 + '.' + cloak3 + '.IP'
+            # just make a.b.c.d
+            a = xor_shrink(hash_data(cloak_key, binip[:1]), 2)
+            b = xor_shrink(hash_data(cloak_key, binip[1:2] + a), 2)
+            c = xor_shrink(hash_data(cloak_key, binip[2:3] + b), 2)
+            d = xor_shrink(hash_data(cloak_key, binip[3:] + c), 2)
+
+            # result: "37BD.D2A7.38A9.37D6.IP"
+            cloakhost = b2h_upper(a) + '.' + b2h_upper(b) + '.' + b2h_upper(c) + '.' + b2h_upper(d) + ".IP"
+
             return cloakhost
-        c = 0
-        for part in host.split('.'):
-            c += 1
-            if part.replace('-', '').isalpha():
-                break
-        if c == 1:
-            c += 1
-        host = '.'.join(host.split('.')[c - 1:])
 
-        prefix = ''
-        if IRCD.get_setting("cloak-prefix"):
-            prefix = IRCD.get_setting("cloak-prefix") + '-'
+        # ipv6 check
+        if isxdigit(host.replace(':', '')):
+            binip6 = socket.inet_pton(socket.AF_INET6, host)
 
-        cloakhost = prefix + cloak1 + '.' + cloak2 + '.' + host
-        cloakhost = cloakhost.removesuffix(".")
+            a = xor_shrink(hash_data(cloak_key, binip6[:6]), 6)  # CIDR /48: minimum globally routable
+            b = xor_shrink(hash_data(cloak_key, binip6[6:8] + a), 2)  # 16bit subnet might come from ISP: /56, /60 or /64
+            c = xor_shrink(hash_data(cloak_key, binip6[8:12] + b), 4)  # filter inner subnets: /96
+            d = xor_shrink(hash_data(cloak_key, binip6[12:] + c), 4)  # filter innet subnets: for example, VDS providers practice very limited /108 or /112 allocations
+
+            # result: "37BDD2A738A9:37D6:E6EB6681:4E3D79D4.IP6"
+            cloakhost = b2h_upper(a) + ':' + b2h_upper(b) + ':' + b2h_upper(c) + ':' + b2h_upper(d) + ".IP6"
+
+            return cloakhost
+
+        # produce 96bit unique hostid
+        hostid = xor_shrink(hash_data(cloak_key, bytes(host, "utf-8")), 12)
+        # result: "37BDD2A738A937D6E6EB6681.ID"
+        cloakhost = b2h_upper(hostid) + ".ID"
+
         return cloakhost
 
     @staticmethod

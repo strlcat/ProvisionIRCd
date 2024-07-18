@@ -208,16 +208,6 @@ def config_test_settings(block):
 
             IRCD.set_setting(check, value)
 
-    def check_settings_cloak_prefix():
-        check = "cloak-prefix"
-        if item := block.get_item(check):
-            value = block.get_single_value(check)
-            if not value.strip():
-                # Why throw error on empty value? Just leave it empty.
-                return  # conf_error(f"Missing `{check}` value.", block, item)
-
-            IRCD.set_setting(check, value)
-
     def check_settings_cloak_key():
         check = "cloak-key"
         if item := block.get_item(check):
@@ -251,7 +241,6 @@ def config_test_settings(block):
     check_settings_regtimeout()
     check_settings_oper_auto_join()
     check_settings_static_part()
-    check_settings_cloak_prefix()
     check_settings_cloak_key()
 
     for entry in block.get_all_entries():
