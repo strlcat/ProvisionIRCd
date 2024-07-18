@@ -66,7 +66,7 @@ def cmd_invite(client, recv):
 
     broadcast_users = []
     for user in [c for c in channel.clients() if c.local and c.has_capability("invite-notify")
-                                                 and (channel.client_has_membermodes(c, "hoaq") or c.has_permission("channel:see:invites"))]:
+                                                 and (channel.client_has_membermodes(c, "oaq") or c.has_permission("channel:see:invites"))]:
         # Only broadcast to +h or above.
         broadcast_users.append(user)
 
@@ -75,7 +75,7 @@ def cmd_invite(client, recv):
 
     # Users who do not have the invite-notify capability should still receive a traditional notice.
     notice_users = [c for c in channel.clients() if c.local and c not in broadcast_users
-                    and (channel.client_has_membermodes(c, "hoaq") or c.has_permission("channel:see:invites"))]
+                    and (channel.client_has_membermodes(c, "oaq") or c.has_permission("channel:see:invites"))]
     broadcast_data = f"NOTICE {channel.name} :{client.name} ({client.user.username}@{client.user.cloakhost}) has invited {invite_client.name} to join the channel"
     for notice_user in notice_users:
         IRCD.server_notice(notice_user, broadcast_data)
@@ -105,7 +105,7 @@ def init(module):
     Cmode_i.flag = 'i'
     Cmode_i.desc = "You need to be invited to join the channel"
     Cmode_i.paramcount = 0
-    Cmode_i.is_ok = Channelmode.allow_halfop
+    Cmode_i.is_ok = Channelmode.allow_chanop
     Channelmode.add(module, Cmode_i)
     Command.add(module, cmd_invite, "INVITE", 2, Flag.CMD_USER)
     Capability.add("invite-notify")

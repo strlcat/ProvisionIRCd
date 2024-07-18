@@ -15,7 +15,7 @@ def invexlist_is_ok(client, channel, action, param):
 
 def display_invexlist(client, channel, mode):
     if mode == "I":
-        if channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:see:banlist"):
+        if channel.client_has_membermodes(client, "oaq") or client.has_permission("channel:see:banlist"):
             for entry in reversed(channel.List[mode]):
                 client.sendnumeric(Numeric.RPL_INVEXLIST, channel.name, entry.mask, entry.set_by, entry.set_time)
         client.sendnumeric(Numeric.RPL_ENDOFINVEXLIST, channel.name)
