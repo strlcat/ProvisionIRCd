@@ -1,0 +1,15 @@
+_*
+*.swp
+*.o
+*.out
+*.key
+*.diff
+*.patch
+*.pyc
+*.pyo
+conf/*.conf
+conf/*.motd
+conf/*.rules
+logs/
+ircdenv/
+tags
