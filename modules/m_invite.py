@@ -30,7 +30,7 @@ def cmd_invite(client, recv):
             oper_override = 1
 
     if 'V' in channel.modes:
-        if not channel.client_has_membermodes(client, "q") and not client.has_permission("channel:override:invite:no-invite"):
+        if not channel.client_has_membermodes(client, "aq") and not client.has_permission("channel:override:invite:no-invite"):
             return client.sendnumeric(Numeric.ERR_NOINVITE, channel.name)
         elif client.has_permission("channel:override:invite:no-invite"):
             oper_override = 1
