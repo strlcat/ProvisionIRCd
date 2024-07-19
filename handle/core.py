@@ -1713,7 +1713,7 @@ class IRCD:
     CHANPREFIXES = "#+&"
     CHANLEN = 32
     CHANCHARS = "abcdefghijklmnopqrstuvwxyz0123456789`#$^*()-=_[]{}|;':\"<>"
-    HOSTCHARS = "abcdefghijklmnopqrstuvwxyz0123456789.-"
+    HOSTCHARS = "abcdefghijklmnopqrstuvwxyz0123456789.:-"
 
     @staticmethod
     def boot(fork=1):
