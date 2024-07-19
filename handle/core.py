@@ -1552,7 +1552,8 @@ class Channel:
 
         if len(self.members) == 1 and client.local:
             if self.name[0] != '+' and "P" not in self.modes:
-                self.member_give_modes(client, 'q')
+                if default_join_opmode := IRCD.get_setting("default-join-opmode"):
+                    self.member_give_modes(client, default_join_opmode)
                 if modes_on_join := IRCD.get_setting("modes-on-join"):
                     Command.do(IRCD.me, "MODE", self.name, *modes_on_join.split(), str(self.creationtime))
 
