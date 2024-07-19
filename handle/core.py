@@ -1455,7 +1455,7 @@ class Channel:
                 return 1
 
             for extban in Extban.table:
-                if len(check_mask.split(':')) < 2:
+                if len(check_mask.split('@')[0].split(':')) < 2:
                     continue
                 try:
                     if extban.is_match(client, self, check_mask):
@@ -2862,7 +2862,7 @@ class Extban:
         +b ~t:1:~T:block:xd     ->  ~b ~timed:1:~text:block:xd
         """
 
-        param_split = param.split(':')
+        param_split = param.split('@')[0].split(':')
         converted = []
         for item in param_split:
             if item[0] == Extban.symbol:
