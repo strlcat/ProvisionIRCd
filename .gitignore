@@ -10,6 +10,7 @@ _*
 conf/*.conf
 conf/*.motd
 conf/*.rules
+data/
 logs/
 ircdenv/
 tags

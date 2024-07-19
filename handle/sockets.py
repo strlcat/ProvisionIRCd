@@ -8,7 +8,7 @@ from handle.client import (find_client_from_socket,
                            make_client, make_server, make_user,
                            find_listen_obj_from_socket)
 from handle.core import Client, IRCD, Hook
-from handle.functions import logging
+from handle.functions import logging, fixup_ip6
 from modules.m_connect import connect_to
 
 try:
@@ -105,7 +105,8 @@ def accept_socket(sock, listen_obj):
     client.local.incoming = 1
     client.ip, client.port, _, _ = addr
     if client.ip[:7] == "::ffff:":
-        client.ip = client.ip.replace("::ffff:", "")
+        client.ip = client.ip.replace("::ffff:", "")  # client connected through ipv6 compatible mode -- strip away cruft
+    client.ip = fixup_ip6(client.ip)  # make address look safe, e.g. "::1" is invalid but "0::1" is
     IRCD.run_parallel_function(post_accept, args=(conn, client, listen_obj))
 
 

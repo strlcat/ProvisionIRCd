@@ -15,12 +15,20 @@ def ip_type(ip):
         return socket.AF_INET
     return 0
 
+def fixup_ip6(ip6):
+    ipt = ip_type(ip6)
+    if ipt != socket.AF_INET6:
+        return ip6
+    if ip6[:2] == "::":
+        return '0' + ip6
+    return ip6
+
 def reverse_ip(ip):
     try:
         ipt = ip_type(ip)
         binip = socket.inet_pton(ipt, ip)
         revip = socket.inet_ntop(ipt, binip[::-1])
-        return revip
+        return fixup_ip6(revip)
     except Exception as ex:
         logging.exception(ex)
 
@@ -55,7 +63,7 @@ def base64_to_ip(b64):
             ip = socket.inet_ntop(socket.AF_INET, binip)
         elif n == 16:
             ip = socket.inet_ntop(socket.AF_INET6, binip)
-        return ip
+        return fixup_ip6(ip)
     except Exception as ex:
         logging.exception(ex)
 
