@@ -2,5 +2,4 @@
 
 * CIDR bans for both IPv4 and IPv6, like 192.0.2.0/24 or 2001:db8:754a:7a30::/60
 * IPv6 transparency
-* BUG: Don't assign cloakhost if no default +x mode is granted
 * BUG: Extban syntax misuses "::" in host part, resulting in exception

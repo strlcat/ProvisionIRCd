@@ -603,7 +603,7 @@ class Client:
             IRCD.server_notice(self, f"*** Host resolution disabled, using IP address instead")
             self.user.realhost = self.ip
 
-        self.user.cloakhost = IRCD.get_cloak(self)
+        self.user.cloakhost = self.user.realhost
 
     def add_user_modes(self, modes):
         if not self.local:
@@ -741,7 +741,6 @@ class Client:
         self.sendnumeric(Numeric.RPL_CREATED, created_date, created_time)
         self.sendnumeric(Numeric.RPL_MYINFO, IRCD.me.name, IRCD.version, IRCD.get_umodes_str(), IRCD.get_chmodes_str())
         Isupport.send_to_client(self)
-        self.sendnumeric(Numeric.RPL_HOSTHIDDEN, self.user.cloakhost)
 
         msg = f"*** Client connecting: {self.name} ({self.user.username}@{self.user.realhost}) [{self.ip}] {self.get_ext_info()}"
         IRCD.log(self, "info", "connect", "LOCAL_USER_CONNECT", msg, sync=0)
@@ -758,6 +757,10 @@ class Client:
             modes = list(set(modes))
             if len(modes) > 0:
                 self.add_user_modes(modes)
+
+        if 'x' in self.user.modes:
+            self.user.cloakhost = IRCD.get_cloak(self)
+        self.sendnumeric(Numeric.RPL_HOSTHIDDEN, self.user.cloakhost)
 
         IRCD.run_hook(Hook.LOCAL_CONNECT, self)
         self.flood_safe_off()
