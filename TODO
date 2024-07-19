@@ -1,5 +1,4 @@
 ### TODO/Bug items by strlcat
 
-* CIDR bans for both IPv4 and IPv6, like 192.0.2.0/24 or 2001:db8:754a:7a30::/60
 * IPv6 transparency
 * BUG: broken/invalid param extban like "::@::" causes exception thrown

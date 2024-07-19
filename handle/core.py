@@ -24,7 +24,7 @@ from typing import NewType, ClassVar, Callable
 import select
 from _socket import gethostbyaddr
 
-from handle.functions import is_match, ip_to_base64, ip_type
+from handle.functions import is_match, ip_to_base64, ip_type, cidr_match
 from handle.logger import logging, IRCDLogger
 
 gc.enable()
@@ -1956,6 +1956,12 @@ class IRCD:
         if is_match(mask, f'{client.name}!{client.user.username}@{client.ip}'):
             return 1
         if is_match(mask, f'{client.name}!{client.user.username}@{client.user.cloakhost}'):
+            return 1
+        if cidr_match(mask, f'{client.name}!{client.user.username}@{client.user.realhost}'):
+            return 1
+        if cidr_match(mask, f'{client.name}!{client.user.username}@{client.ip}'):
+            return 1
+        if cidr_match(mask, f'{client.name}!{client.user.username}@{client.user.cloakhost}'):
             return 1
         return 0
 

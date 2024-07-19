@@ -3,6 +3,7 @@ import binascii
 import time
 import string
 import socket
+import ipaddress as ipaddr
 from handle.logger import logging
 
 def ip_type(ip):
@@ -113,3 +114,17 @@ def is_match(first, second):
     if first and first[0] == '*':
         return is_match(first[1:], second) or is_match(first, second[1:])
     return False
+
+def cidr_match(first, second):
+    match_nickuser = False
+    match_cidr = False
+    try:
+        match_nickuser = is_match(first.split('@')[0] + "@*", second)
+        cidr = first.split('@')[1]
+        addr = second.split('@')[1]
+        match_cidr = ipaddr.ip_address(addr) in ipaddr.ip_network(cidr)
+        if match_nickuser and match_cidr:
+            return True
+        return False
+    except:
+        pass  # deliberately ignore error because user input might be asinine.
