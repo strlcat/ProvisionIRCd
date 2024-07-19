@@ -24,7 +24,7 @@ from typing import NewType, ClassVar, Callable
 import select
 from _socket import gethostbyaddr
 
-from handle.functions import is_match, IPtoBase64
+from handle.functions import is_match, ip_to_base64, ip_type
 from handle.logger import logging, IRCDLogger
 
 gc.enable()
@@ -300,7 +300,7 @@ class Client:
             umode = IRCD.get_usermode_by_flag(mode)
             if umode and umode.is_global:
                 sync_modes += mode
-        binip = IPtoBase64(self.ip) if self.ip.replace('.', '').isdigit() else self.ip
+        binip = ip_to_base64(self.ip)
         data = f":{self.uplink.id} UID {self.name} {self.hopcount + 1} {self.creationtime} {self.user.username} {self.user.realhost} {self.id} {self.user.account} +{sync_modes} {self.user.cloakhost} {self.user.cloakhost} {binip} :{self.info}"
         if server:
             server.send(s2smd_tags, data)
@@ -2024,9 +2024,6 @@ class IRCD:
                 r = xor_block(r, b[n].ljust(mx, b'\0'))
             return r
 
-        def isxdigit(s):
-            return all(c in string.hexdigits for c in s)
-
         def hash_data(key, data):
             return hashlib.sha256(bytes(key, "utf-8") + data).digest()
 
@@ -2044,8 +2041,10 @@ class IRCD:
 
         cloak_key = IRCD.get_setting("cloak-key")
 
+        ipt = ip_type(host)
+
         # ipv4 check
-        if host.replace('.', '').isdigit():
+        if ipt == socket.AF_INET:
             binip = socket.inet_pton(socket.AF_INET, host)
 
             # just make a.b.c.d
@@ -2060,7 +2059,7 @@ class IRCD:
             return cloakhost
 
         # ipv6 check
-        if isxdigit(host.replace(':', '')):
+        elif ipt == socket.AF_INET6:
             binip6 = socket.inet_pton(socket.AF_INET6, host)
 
             a = xor_shrink(hash_data(cloak_key, binip6[:6]), 6)  # CIDR /48: minimum globally routable
@@ -2073,12 +2072,13 @@ class IRCD:
 
             return cloakhost
 
-        # produce 96bit unique hostid
-        hostid = xor_shrink(hash_data(cloak_key, bytes(host, "utf-8")), 12)
-        # result: "37BDD2A738A937D6E6EB6681.ID"
-        cloakhost = b2h_upper(hostid) + ".ID"
+        else:
+            # produce 96bit unique hostid
+            hostid = xor_shrink(hash_data(cloak_key, bytes(host, "utf-8")), 12)
+            # result: "37BDD2A738A937D6E6EB6681.ID"
+            cloakhost = b2h_upper(hostid) + ".ID"
 
-        return cloakhost
+            return cloakhost
 
     @staticmethod
     def get_member_prefix_str_sorted():

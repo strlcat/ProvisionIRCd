@@ -1,22 +1,28 @@
 import base64
 import binascii
 import time
+import string
+import socket
 from handle.logger import logging
 
+def ip_type(ip):
+    def isxdigit(s):
+        return all(c in string.hexdigits for c in s)
+
+    if isxdigit(ip.replace(':', '')):
+        return socket.AF_INET6
+    if ip.replace('.', '').isdigit():
+        return socket.AF_INET
+    return 0
 
 def reverse_ip(ip):
-    x = 3
-    revip = ''
-    while 1:
-        if revip:
-            revip = revip + '.' + ip.split('.')[x]
-        else:
-            revip = ip.split('.')[x]
-        if x == 0:
-            break
-        x -= 1
-    return revip
-
+    try:
+        ipt = ip_type(ip)
+        binip = socket.inet_pton(ipt, ip)
+        revip = socket.inet_ntop(ipt, binip[::-1])
+        return revip
+    except Exception as ex:
+        logging.exception(ex)
 
 def valid_expire(s):
     spu = {"s": 1, "m": 60, "h": 3600, "d": 86400, "w": 604800, "M": 2592000}
@@ -31,40 +37,27 @@ def valid_expire(s):
     except ValueError:
         return False
 
-
-def IPtoBase64(ip):
-    if ip == '*':
-        return
+def ip_to_base64(ip):
     try:
-        ip = ip.split('.')
-        s = ''
-        for g in ip:
-            b = "%X" % int(g)
-            if len(b) == 1:
-                b = '0' + b
-            s += b
-        result = binascii.unhexlify(s.rstrip().encode("utf-8"))
-        binip = base64.b64encode(result)
-        binip = binip.decode()
-        return binip
+        ipt = ip_type(ip)
+        binip = socket.inet_pton(ipt, ip)
+        b64ip = base64.b64encode(binip)
+        b64ip = b64ip.decode()
+        return b64ip
     except Exception as ex:
         logging.exception(ex)
 
-
-def Base64toIP(base):
+def base64_to_ip(b64):
     try:
-        ip = []
-        string = base64.b64decode(base)
-        hex_string = binascii.hexlify(string).decode()
-        for e in range(0, len(hex_string), 2):
-            a = hex_string[e:e + 2]
-            num = int(a, 16)
-            ip.append(str(num))
-        ip = '.'.join(ip)
+        binip = base64.b64decode(b64)
+        n = len(binip)
+        if n == 4:
+            ip = socket.inet_ntop(socket.AF_INET, binip)
+        elif n == 16:
+            ip = socket.inet_ntop(socket.AF_INET6, binip)
         return ip
     except Exception as ex:
         logging.exception(ex)
-
 
 def make_mask(data):
     nick, ident, host = '', '', ''
@@ -101,7 +94,6 @@ def make_mask(data):
         host = '*'
     result = f'{nick}!{ident}@{host}'
     return result
-
 
 def is_match(first, second):
     if not first and not second:

@@ -7,7 +7,7 @@ import time
 from handle.core import Flag, Numeric, Isupport, Command, IRCD, Client, Hook
 from classes.errors import Error
 from handle.client import make_client, make_user
-from handle.functions import Base64toIP
+from handle.functions import base64_to_ip
 from handle.logger import logging
 from classes.conf_entries import ConnectClass, Operclass
 
@@ -151,8 +151,8 @@ def create_user_from_uid(client, info: list):
     cloakhost = info[10]
     ip = info[11]
     new_client.ip = ip
-    if ip != '*' and not ip.replace('.', '').isdigit() and ip is not None:
-        new_client.ip = Base64toIP(ip)
+    if ip != '*' and ip is not None:
+        new_client.ip = base64_to_ip(ip)
     else:
         new_client.ip = ip
     new_client.info = ' '.join(info[12:]).removeprefix(':')
