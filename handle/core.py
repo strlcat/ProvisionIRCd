@@ -2837,9 +2837,9 @@ class Extban:
     @staticmethod
     def is_extban(client, channel, action, mode, param):
         if param.startswith(Extban.symbol):
-            if len(param.split(':')) < 2:
+            if len(param.split('@')[0].split(':')) < 2:
                 return -1
-            param_split = param.split(':')
+            param_split = param.split('@')[0].split(':')
             name = param_split[0][1:]
             for extban in Extban.table:
                 valid = (extban.name and extban.name == name) or extban.flag == name
