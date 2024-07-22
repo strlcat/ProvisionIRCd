@@ -2840,6 +2840,9 @@ class Extban:
             if len(param.split('@')[0].split(':')) < 2:
                 return -1
             param_split = param.split('@')[0].split(':')
+            for it in param_split:
+                if not it:
+                    return -1
             name = param_split[0][1:]
             for extban in Extban.table:
                 valid = (extban.name and extban.name == name) or extban.flag == name
@@ -2871,6 +2874,9 @@ class Extban:
         param_split = param.split('@')[0].split(':')
         converted = []
         for item in param_split:
+            if not item:
+                # Invalid extban, returning raw param.
+                return param
             if item[0] == Extban.symbol:
                 if main_ext := Extban.find(item):
                     converted.append(Extban.symbol + main_ext.flag if not convert_to_name else Extban.symbol + main_ext.name)

@@ -1,4 +1,3 @@
 ### TODO/Bug items by strlcat
 
 * IPv6 transparency
-* BUG: broken/invalid param extban like "::@::" causes exception thrown
