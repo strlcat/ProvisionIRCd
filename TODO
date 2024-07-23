@@ -1,3 +1,5 @@
 ### TODO/Bug items by strlcat
 
 * IPv6 transparency
+* Reserved nicknames?
+* CIDR parsing of ip definitions in config
