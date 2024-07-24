@@ -1824,6 +1824,8 @@ class IRCD:
             for ip in e.ip_mask:
                 if is_match(ip, client.ip):
                     return 1
+                if cidr_match(client.ip, ip):
+                    return 1
             for e_mask in e.mask:
                 ident = client.user.username
                 if not ident:

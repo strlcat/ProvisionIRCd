@@ -7,6 +7,7 @@ import re
 from classes.data import OperData
 from handle.core import IRCD, Command, Numeric, Flag, Client, Swhois, Capability, Hook
 from handle.logger import logging
+from handle.functions import address_inside_subnetlist
 
 try:
     import bcrypt
@@ -135,6 +136,9 @@ def cmd_oper(client, recv):
         mask_match = 1
 
     if client.ip in oper.ip_mask:
+        mask_match = 1
+
+    if address_inside_subnetlist(client.ip, oper.ip_mask):
         mask_match = 1
 
     if not mask_match:

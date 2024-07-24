@@ -537,7 +537,7 @@ def config_test_oper(block):
 
             if mask_what == "ip":
                 try:
-                    ipaddress.ip_address(mask_value)
+                    ipaddress.ip_network(mask_value)
                 except ValueError:
                     conf_error(f"Invalid IP address '{mask_value}'", item=oper_mask_item)
                     continue
@@ -582,7 +582,7 @@ def config_test_link(block):
             if not ip == '*':
                 valid_check = ip.replace('*', '0')
                 try:
-                    ipaddress.ip_address(valid_check)
+                    ipaddress.ip_network(valid_check)
                 except ValueError:
                     conf_error(f"Invalid IP address '{ip}' in incoming:mask", item=mask_item)
                     continue
@@ -691,7 +691,7 @@ def config_test_except(block):
             elif mask_what == "ip":
                 valid_check = mask_value.replace('*', '0')
                 try:
-                    ipaddress.ip_address(valid_check)
+                    ipaddress.ip_network(valid_check)
                 except ValueError:
                     conf_error(f"Invalid IP address '{mask_value}'", item=mask_item)
                     continue
@@ -703,7 +703,7 @@ def config_test_except(block):
                     if not re.match(r"^[\w*.]+@[\w*.]+$", normal_mask):
                         valid_check = normal_mask.replace('*', '0')
                         try:
-                            ipaddress.ip_address(valid_check)
+                            ipaddress.ip_network(valid_check)
                         except ValueError:
                             conf_error(f"Invalid except mask '{normal_mask}'. Must be either a ident@host or IP", item=mask_item)
                             continue

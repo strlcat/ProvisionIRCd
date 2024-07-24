@@ -6,7 +6,7 @@ import re
 from handle.core import Flag, Command, Client, IRCD
 from classes.errors import Error
 from handle.client import make_client, make_server
-from handle.functions import is_match
+from handle.functions import is_match, address_inside_subnet
 from handle.logger import logging
 from handle.handleLink import (sync_data, start_link_negotiation, broadcast_network_to_new_server,
                                broadcast_new_server_to_network, deny_direct_link)
@@ -63,6 +63,9 @@ def auth_incoming_link(client):
         mask_match = 0
         for mask in link.incoming_mask:
             if is_match(mask, client.ip):
+                mask_match = 1
+                break
+            if address_inside_subnet(client.ip, mask):
                 mask_match = 1
                 break
         if not mask_match:

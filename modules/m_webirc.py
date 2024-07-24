@@ -6,6 +6,7 @@ import ipaddress
 from handle.core import IRCD, Command, Flag
 from handle.validate_conf import conf_error
 from handle.core import logging
+from handle.functions import address_inside_subnetlist
 
 
 class WebIRCConf:
@@ -48,7 +49,7 @@ def init(module):
 
 
 def cmd_webirc(client, recv):
-    if client.registered or recv[1] != WebIRCConf.password or client.ip not in WebIRCConf.ip_whitelist:
+    if client.registered or recv[1] != WebIRCConf.password or not address_in_subnetlist(client.ip, WebIRCConf.ip_whitelist):
         return
     client.user.realhost = recv[3] if IRCD.get_setting("resolvehost") else recv[4]
     client.ip = recv[4]
