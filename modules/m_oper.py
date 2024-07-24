@@ -36,8 +36,8 @@ def do_oper_up(client, oper):
     client.set_class_obj(IRCD.get_class_from_name(oper.connectclass))
     modes = 'o'
     if oper.modes:
-        # Do not automatically set following modes: gqrzH
-        modes += re.sub(r"[ogqrzH]", '', oper.modes)
+        # Do not automatically set following modes: grz
+        modes += re.sub(r"[ogrz]", '', oper.modes)
     client.user.opermodes = ''
     for m in [m for m in modes if IRCD.get_usermode_by_flag(m) if m not in client.user.opermodes]:
         client.user.opermodes += m
