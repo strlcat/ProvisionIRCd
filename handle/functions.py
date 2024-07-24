@@ -3,7 +3,7 @@ import binascii
 import time
 import string
 import socket
-import ipaddress as ipaddr
+import ipaddress
 from handle.logger import logging
 
 def ip_type(ip):
@@ -115,16 +115,25 @@ def is_match(first, second):
         return is_match(first[1:], second) or is_match(first, second[1:])
     return False
 
-def cidr_match(first, second):
-    match_nickuser = False
-    match_cidr = False
+def address_inside_subnet(addr, subnet):
     try:
-        match_nickuser = is_match(first.split('@')[0] + "@*", second)
-        cidr = first.split('@')[1]
-        addr = second.split('@')[1]
-        match_cidr = ipaddr.ip_address(addr) in ipaddr.ip_network(cidr)
-        if match_nickuser and match_cidr:
-            return True
-        return False
+        return ipaddress.ip_address(addr) in ipaddress.ip_network(subnet)
     except:
-        pass  # deliberately ignore error because user input might be asinine.
+        return False
+
+def address_inside_subnetlist(addr, subnetlist):
+    for subnet in subnetlist:
+        if not subnet:
+            continue
+        if address_inside_subnet(addr, subnet):
+            return True
+    return False
+
+def cidr_match(first, second):
+    match_nickuser = is_match(first.split('@')[0] + "@*", second)
+    cidr = first.split('@')[1]
+    addr = second.split('@')[1]
+    match_cidr = address_inside_subnet(addr, cidr)
+    if match_nickuser and match_cidr:
+        return True
+    return False
