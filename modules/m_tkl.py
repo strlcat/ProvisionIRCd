@@ -227,7 +227,7 @@ def cmd_line(client, recv):
             except ValueError:
                 return IRCD.server_notice(client, f"Invalid IP address for {cmd_tkl.name}: {mask}")
 
-        if "*" not in recv[1] and "@" not in recv[1] and "." not in recv[1]:
+        if "*" not in recv[1] and "@" not in recv[1] and ("." not in recv[1] and ":" not in recv[1]):
             if not (target := IRCD.find_user(recv[1])):
                 return client.sendnumeric(Numeric.ERR_NOSUCHNICK, recv[1])
             ident = "*"
