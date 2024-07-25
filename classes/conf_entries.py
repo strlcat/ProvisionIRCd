@@ -52,11 +52,6 @@ class Listen:
 
     def start_listen(self, output=1):
         try:
-            if self.tls and self.cert and self.key:
-                self.tlsctx = create_ctx(cert=self.cert, key=self.key, name=IRCD.me.name)
-                self.sock = wrap_socket(self)
-                self.sock.set_accept_state()
-
             if not self.listening:
                 ip = "" if self.ip == '*' else self.ip
                 self.sock = socket.create_server((ip, int(self.port)), family=socket.AF_INET6, reuse_port=True, dualstack_ipv6=True)
@@ -67,6 +62,12 @@ class Listen:
                                  f'({"servers" if "servers" in self.options else "clients"})')
                 if IRCD.use_poll:
                     IRCD.poller.register(self.sock, select.POLLIN)
+
+            if self.tls and self.cert and self.key:
+                self.tlsctx = create_ctx(cert=self.cert, key=self.key, name=IRCD.me.name)
+                self.sock = wrap_socket(self)
+                self.sock.set_accept_state()
+
         except Exception as ex:
             logging.exception(ex)
 
