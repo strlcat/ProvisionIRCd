@@ -55,6 +55,12 @@ def cmd_nick_local(client, recv):
 
     newnick = newnick[:NICKLEN]
 
+    if nickminlen := IRCD.get_setting("nickminlen"):
+        nickminlen = int(nickminlen)
+        if not client.has_permission("immune:nick-minlength"):
+            if len(newnick) < nickminlen:
+                newnick = newnick.center(nickminlen, '_')
+
     for c in newnick:
         if c.lower() not in IRCD.NICKCHARS:
             return client.sendnumeric(Numeric.ERR_ERRONEUSNICKNAME, newnick, c)
