@@ -122,7 +122,7 @@ def cmd_who(client, recv):
      h <host>       = User has <host> in the hostname.
      o              = Show only IRC operators.
      r <realname>   = Filter by realname.
-     s <server      = Filter by server.
+     s <server>     = Filter by server.
      u <ident>      = Filter by username/ident.
     """
 
