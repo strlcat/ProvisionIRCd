@@ -59,7 +59,9 @@ def cmd_nick_local(client, recv):
         nickminlen = int(nickminlen)
         if not client.has_permission("immune:nick-minlength"):
             if len(newnick) < nickminlen:
+                reqnick = newnick
                 newnick = newnick.center(nickminlen, '_')
+                IRCD.server_notice(client, f"Requested nickname \2{reqnick}\2 is too short (less than {nickminlen} characters), it will be changed to \2{newnick}\2")
 
     for c in newnick:
         if c.lower() not in IRCD.NICKCHARS:
