@@ -65,10 +65,10 @@ def cmd_kick(client, recv):
     elif channel.level(target_client) > channel.level(client) or 'q' in target_client.user.modes:
         oper_override = 1
 
-    if 'Q' in channel.modes and channel.level(client) < 5 and not client.has_permission("channel:override:kick:no-kick"):
+    if 'Q' in channel.modes and channel.level(client) < 4 and not client.has_permission("channel:override:kick:no-kick"):
         return client.sendnumeric(Numeric.ERR_CANNOTDOCOMMAND, channel.name, "KICKs are not permitted in this channel")
 
-    elif 'Q' in channel.modes and not channel.client_has_membermodes(client, "q"):
+    elif 'Q' in channel.modes and not channel.client_has_membermodes(client, "aq"):
         oper_override = 1
 
     if not client_can_kick_target(client, target_client, channel, reason):
