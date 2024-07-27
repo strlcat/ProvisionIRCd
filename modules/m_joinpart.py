@@ -13,6 +13,10 @@ def cmd_join(client, recv):
     Joins a given channel with optional [key].
     """
 
+    # The syntax "JOIN :#main" was seen in wild. Workaround it.
+    if recv[1][0] == ':':
+        recv[1] = recv[1][1:]
+
     if recv[1] == '0':
         for channel in client.channels:
             IRCD.new_message(client)
