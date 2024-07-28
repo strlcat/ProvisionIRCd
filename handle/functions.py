@@ -130,10 +130,12 @@ def address_inside_subnetlist(addr, subnetlist):
     return False
 
 def cidr_match(first, second):
+    if len(first.split('@')) != 2 or len(second.split('@')) != 2:
+        return False
+
     match_nickuser = is_match(first.split('@')[0] + "@*", second)
     cidr = first.split('@')[1]
     addr = second.split('@')[1]
     match_cidr = address_inside_subnet(addr, cidr)
-    if match_nickuser and match_cidr:
-        return True
-    return False
+
+    return match_nickuser and match_cidr
