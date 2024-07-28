@@ -79,7 +79,7 @@ def send_channel_message(client, channel, message: str, sendtype: str, prefix: s
         IRCD.run_hook(hook, client, channel, message)
 
     if oper_override and not client.ulined:
-        if not client.has_permission("self:become-service"):
+        if not client.has_permission("self:become-service") or 'S' not in client.user.modes:
             override_string = f"*** OperOverride: {client.name} ({client.user.username}@{client.user.realhost}) bypassed modes '{oper_override}' on channel {channel.name} with {sendtype}"
             IRCD.log(client, "info", "oper", "OPER_OVERRIDE", override_string, sync=0)
 

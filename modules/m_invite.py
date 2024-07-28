@@ -57,7 +57,7 @@ def cmd_invite(client, recv):
             s = ' [Overriding +R]'
         elif 'z' in channel.modes and 'z' not in invite_client.modes:
             s = ' [Overriding +z]'
-        if not client.has_permission("self:become-service"):
+        if not client.has_permission("self:become-service") or 'S' not in client.user.modes:
             msg = f"*** OperOverride by {client.name} ({client.user.username}@{client.user.realhost}) with INVITE {invite_client.name} {channel.name}{s}"
             IRCD.log(client, "info", "oper", "OPER_OVERRIDE", msg, sync=0)
 

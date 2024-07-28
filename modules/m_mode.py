@@ -351,11 +351,12 @@ def cmd_channelmode(client, recv):
             continue
 
         if client.user:
+            is_servbot = cmode.is_ok == Channelmode.allow_servbots
             allowed = cmode.is_ok(client, channel, action, mode, param, cmode.CHK_ACCESS) or not client.local
-            if not allowed and client.has_permission("channel:override:mode"):
+            if not allowed and client.has_permission("channel:override:mode") and not is_servbot:
                 override = 1
             elif not allowed:
-                if allowed == 0:
+                if allowed == 0 and not is_servbot:
                     client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name)
                 continue
 
@@ -440,7 +441,7 @@ def cmd_channelmode(client, recv):
         send_modelines(client, channel, modebuf, parambuf, send_ts)
 
         if override and not client.ulined and client.user:
-            if not client.has_permission("self:become-service"):
+            if not client.has_permission("self:become-service") or 'S' not in client.user.modes:
                 modes_set = ''.join(modebuf)
                 params_set = ' '.join(parambuf)
                 mode_string = f"{modes_set}{' ' + params_set if parambuf else ''}"

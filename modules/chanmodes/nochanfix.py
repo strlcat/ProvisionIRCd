@@ -6,9 +6,10 @@ Disable chanfix service on channel.
 from handle.core import IRCD, Channelmode
 
 def chmode_F_ok(client, channel, action, mode, param, CHK_TYPE):
+    # It shall not be loaded anyway.
     if not IRCD.get_setting("chanfix"):
         return 0
-    if Channelmode.allow_chanadmin(client, channel, action, *[]):
+    if Channelmode.allow_servbots(client, channel, action, *[]):
         if action == '+':
             channel.founder = ''
         elif action == '-':
@@ -20,6 +21,6 @@ def init(module):
     Cmode_F = Channelmode()
     Cmode_F.flag = 'F'
     Cmode_F.is_ok = chmode_F_ok
-    Cmode_F.level = 4
+    Cmode_F.level = 7
     Cmode_F.desc = "Disable chanfix service on channel"
     Channelmode.add(module, Cmode_F)

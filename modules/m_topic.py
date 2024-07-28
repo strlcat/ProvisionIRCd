@@ -84,7 +84,7 @@ def cmd_topic(client, recv):
         send_topic(client, channel)
 
     if oper_override:
-        if not client.has_permission("self:become-service"):
+        if not client.has_permission("self:become-service") or 'S' not in client.user.modes:
             override_string = f"*** OperOverride by {client.name} ({client.user.username}@{client.user.realhost}) with TOPIC {channel.name} \'{channel.topic}\'"
             IRCD.log(client, "info", "oper", "OPER_OVERRIDE", override_string)
 
