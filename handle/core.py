@@ -1562,15 +1562,19 @@ class Channel:
                     if modes_on_join := IRCD.get_setting("modes-on-join"):
                         Command.do(IRCD.me, "MODE", self.name, *modes_on_join.split(), str(self.creationtime))
 
-                elif len(self.members) > 1:
+                elif len(self.members) > 1 and IRCD.get_setting("chanfix"):
+                    chanfix_types = IRCD.get_setting("chanfix-types")
+                    if not chanfix_types:
+                        chanfix_types = "mask,certfp"
+
                     match = 0
-                    if self.founder[:7] == "certfp:":
+                    if "certfp" in chanfix_types.split(',') and self.founder[:7] == "certfp:":
                         fp = client.get_md_value("certfp")
                         if fp:
                             fp = "certfp:" + fp
                             if fp == self.founder:
                                 match = 1
-                    else:
+                    elif "mask" in chanfix_types.split(','):
                         if IRCD.client_match_mask(client, self.founder):
                             match = 1
                     if match == 1:
