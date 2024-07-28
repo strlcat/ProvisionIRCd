@@ -1255,7 +1255,7 @@ class Channelmode:
             case Channelmode.allow_chanadmin:
                 return "+a"
             case Channelmode.allow_chanowner:
-                return "+q"
+                return "Limited to one user"
             case Channelmode.allow_opers:
                 return "IRCops only"
             case Channelmode.allow_servbots:
@@ -1266,7 +1266,7 @@ class Channelmode:
         level = ''.join([{2: '+h',
                           3: '+o',
                           4: '+a',
-                          5: '+q',
+                          5: 'Limited to one user',
                           6: 'IRCops only',
                           7: 'Settable by service bots',
                           8: 'Settable by servers'}
