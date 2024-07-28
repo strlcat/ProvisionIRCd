@@ -2278,15 +2278,20 @@ class IRCD:
         return next((c for c in IRCD.get_channels() if c.find_member(p1) and c.find_member(p2)), 0)
 
     @staticmethod
-    def create_channel(client, name: str):
-        channel = Channel()
-        channel.name = name
-        channel.creationtime = int(time())
+    def channel_founder_fingerprint(client: Client):
+        creator_mask = ''
         if fp := client.get_md_value("certfp"):
             creator_mask = f"certfp:{fp}"
         else:
             creator_mask = client.fullrealhost
-        channel.founder = creator_mask
+        return creator_mask
+
+    @staticmethod
+    def create_channel(client, name: str):
+        channel = Channel()
+        channel.name = name
+        channel.creationtime = int(time())
+        channel.founder = IRCD.channel_founder_fingerprint(client)
         channel.init_lists()
         Channel.table.append(channel)
         IRCD.channel_count += 1
