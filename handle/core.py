@@ -1114,6 +1114,12 @@ class Usermode:
         return 1 if 'o' in client.user.modes else 0
 
     @staticmethod
+    def allow_servbots(client):
+        if Usermode.allow_none(client):
+            return 1
+        return 1 if 'o' in client.user.modes and 'S' in client.user.modes else 0
+
+    @staticmethod
     def allow_none(client):
         if client == IRCD.me or client.server:
             return 1
@@ -1127,6 +1133,8 @@ class Usermode:
         match self.can_set:
             case Usermode.allow_opers:
                 return "IRCops only"
+            case Usermode.allow_servbots:
+                return "Settable by service bots"
             case Usermode.allow_none:
                 return "Settable by servers"
             case _:
@@ -1232,6 +1240,12 @@ class Channelmode:
     def allow_none(client, channel, *args):
         return client.server or not client.local
 
+    @staticmethod
+    def allow_servbots(client, channel, *args):
+        if Channelmode.allow_none(client, channel, *args):
+            return True
+        return 'o' in client.user.modes and 'S' in client.user.modes
+
     def level_help_string(self):
         match self.is_ok:
             case Channelmode.allow_halfop:
@@ -1244,6 +1258,8 @@ class Channelmode:
                 return "+q"
             case Channelmode.allow_opers:
                 return "IRCops only"
+            case Channelmode.allow_servbots:
+                return "Settable by service bots"
             case Channelmode.allow_none:
                 return "Settable by servers"
 
@@ -1252,7 +1268,8 @@ class Channelmode:
                           4: '+a',
                           5: '+q',
                           6: 'IRCops only',
-                          7: 'Settable by servers'}
+                          7: 'Settable by service bots',
+                          8: 'Settable by servers'}
                          [self.level]])
         return level
 

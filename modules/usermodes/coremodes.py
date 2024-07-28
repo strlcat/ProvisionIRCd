@@ -7,25 +7,31 @@ from handle.logger import logging as log
 
 
 def umode_x_isok(client):
-    if client == IRCD.me or client.server:
+    if Usermode.allow_none(client):
         return 1
     chanlist = client.channels
     if len(chanlist) == 0:
         return 1
     return 1 if 'o' in client.user.modes else 0
 
+def umode_S_isok(client):
+    if Usermode.allow_none(client):
+        return 1
+    if 'o' in client.user.modes and client.has_permission("self:become-service"):
+        return 1
+    return 0
 
 def init(module):
     # Params: mode flag, is_global (will be synced to servers), unset_on_deoper bool, can_set method, desc
     Usermode.add(module, 'i', 1, 0, Usermode.allow_all, "User does not show up in outside /who")
     Usermode.add(module, 'o', 1, 1, Usermode.allow_opers, "Marks the user as an IRC Operator")
     Usermode.add(module, 'q', 1, 1, Usermode.allow_opers, "Protected on all channels")
-    Usermode.add(module, 'r', 1, 0, Usermode.allow_none, "Identifies the nick as being logged in")
+    Usermode.add(module, 'r', 1, 0, Usermode.allow_servbots, "Identifies the nick as being logged in")
     Usermode.add(module, 's', 1, 1, Usermode.allow_opers, "Can receive server notices")
     Usermode.add(module, "x", 1, 0, umode_x_isok, "Hides real host with cloaked host")
     Usermode.add(module, 'z', 1, 0, Usermode.allow_none, "User is using a secure connection")
     Usermode.add(module, 'H', 1, 1, Usermode.allow_opers, "Hide IRCop status")
-    Usermode.add(module, 'S', 1, 0, Usermode.allow_none, "Marks the client as a network service")
+    Usermode.add(module, 'S', 1, 1, umode_S_isok, "Marks the client as a network service [Settable by service bots]")
 
     Snomask.add(module, 'c', 0, "Can read local connect/disconnect notices")
     Snomask.add(module, 'f', 1, "See excess flood alerts")

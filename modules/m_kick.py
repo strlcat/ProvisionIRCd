@@ -77,8 +77,9 @@ def cmd_kick(client, recv):
     do_kick(client, channel, target_client, reason)
 
     if oper_override and not client.ulined and client.user:
-        msg = f"*** OperOverride by {client.name} ({client.user.username}@{client.user.realhost}) with KICK {channel.name} {target_client.name} ({reason})"
-        IRCD.log(client, "info", "oper", "OPER_OVERRIDE", msg, sync=0)
+        if not client.has_permission("self:become-service"):
+            msg = f"*** OperOverride by {client.name} ({client.user.username}@{client.user.realhost}) with KICK {channel.name} {target_client.name} ({reason})"
+            IRCD.log(client, "info", "oper", "OPER_OVERRIDE", msg, sync=0)
 
 
 def init(module):

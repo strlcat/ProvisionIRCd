@@ -440,11 +440,12 @@ def cmd_channelmode(client, recv):
         send_modelines(client, channel, modebuf, parambuf, send_ts)
 
         if override and not client.ulined and client.user:
-            modes_set = ''.join(modebuf)
-            params_set = ' '.join(parambuf)
-            mode_string = f"{modes_set}{' ' + params_set if parambuf else ''}"
-            override_string = f"*** OperOverride by {client.name} ({client.user.username}@{client.user.realhost}) with MODE {channel.name} {mode_string}"
-            IRCD.log(client, "info", "oper", "OPER_OVERRIDE", override_string, sync=0)
+            if not client.has_permission("self:become-service"):
+                modes_set = ''.join(modebuf)
+                params_set = ' '.join(parambuf)
+                mode_string = f"{modes_set}{' ' + params_set if parambuf else ''}"
+                override_string = f"*** OperOverride by {client.name} ({client.user.username}@{client.user.realhost}) with MODE {channel.name} {mode_string}"
+                IRCD.log(client, "info", "oper", "OPER_OVERRIDE", override_string, sync=0)
 
     if unknown and client.user:
         client.sendnumeric(Numeric.ERR_UNKNOWNMODE, ''.join(unknown))
