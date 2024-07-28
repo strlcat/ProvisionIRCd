@@ -1293,6 +1293,7 @@ class Channel:
     topic_author: str = None
     topic_time: int = 0
     creationtime: int = 0
+    founder: str = ''
     List: dict = field(default_factory=dict)
 
     def init_lists(self):
@@ -1553,12 +1554,28 @@ class Channel:
                 data += f" {client.user.account} :{client.info}"
             member.client.send(mtags, data)
 
-        if len(self.members) == 1 and client.local:
+        if client.local:
             if self.name[0] != '+' and "P" not in self.modes:
-                if default_join_opmode := IRCD.get_setting("default-join-opmode"):
-                    self.member_give_modes(client, default_join_opmode)
-                if modes_on_join := IRCD.get_setting("modes-on-join"):
-                    Command.do(IRCD.me, "MODE", self.name, *modes_on_join.split(), str(self.creationtime))
+                if len(self.members) == 1:
+                    if default_join_opmode := IRCD.get_setting("default-join-opmode"):
+                        self.member_give_modes(client, default_join_opmode)
+                    if modes_on_join := IRCD.get_setting("modes-on-join"):
+                        Command.do(IRCD.me, "MODE", self.name, *modes_on_join.split(), str(self.creationtime))
+
+                elif len(self.members) > 1:
+                    match = 0
+                    if self.founder[:7] == "certfp:":
+                        fp = client.get_md_value("certfp")
+                        if fp:
+                            fp = "certfp:" + fp
+                            if fp == self.founder:
+                                match = 1
+                    else:
+                        if IRCD.client_match_mask(client, self.founder):
+                            match = 1
+                    if match == 1:
+                        if default_join_opmode := IRCD.get_setting("default-join-opmode"):
+                            Command.do(IRCD.me, "MODE", self.name, *default_join_opmode.split(), *([client.name] * len(default_join_opmode)), str(self.creationtime))
 
         if self.name[0] != '&':
             prefix = self.get_sjoin_prefix_sorted_str(client)
@@ -2244,6 +2261,11 @@ class IRCD:
         channel = Channel()
         channel.name = name
         channel.creationtime = int(time())
+        if fp := client.get_md_value("certfp"):
+            creator_mask = f"certfp:{fp}"
+        else:
+            creator_mask = client.fullrealhost
+        channel.founder = creator_mask
         channel.init_lists()
         Channel.table.append(channel)
         IRCD.channel_count += 1

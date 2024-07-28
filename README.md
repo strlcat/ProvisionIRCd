@@ -25,6 +25,7 @@ When you are done editting the configuration files, you can start ProvisionIRCd 
 - Flexible oper permissions system
 - Unique channel owner status (there can be only one)
 - Configurable default channel operator status (you can even disable implicit operator status at all)
+- Channel founder fixing if founder disconnected
 
 ## Services
 
