@@ -1572,14 +1572,14 @@ class Channel:
             member.client.send(mtags, data)
 
         if client.local:
-            if self.name[0] != '+' and "P" not in self.modes:
+            if self.name[0] != '+' and 'P' not in self.modes:
                 if len(self.members) == 1:
                     if default_join_opmode := IRCD.get_setting("default-join-opmode"):
                         self.member_give_modes(client, default_join_opmode)
                     if modes_on_join := IRCD.get_setting("modes-on-join"):
                         Command.do(IRCD.me, "MODE", self.name, *modes_on_join.split(), str(self.creationtime))
 
-                elif len(self.members) > 1 and IRCD.get_setting("chanfix"):
+                elif len(self.members) > 1 and not 'r' in self.modes and IRCD.get_setting("chanfix"):
                     chanfix_types = IRCD.get_setting("chanfix-types")
                     if not chanfix_types:
                         chanfix_types = "mask,certfp"
