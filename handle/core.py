@@ -2280,6 +2280,8 @@ class IRCD:
     @staticmethod
     def channel_founder_fingerprint(client: Client):
         creator_mask = ''
+        if client.server:
+            return creator_mask
         if fp := client.get_md_value("certfp"):
             creator_mask = f"certfp:{fp}"
         else:
