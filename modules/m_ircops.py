@@ -9,7 +9,6 @@ def cmd_ircops(client, recv):
     """
     Displays all online IRC Operators.
     """
-    client.sendnumeric(Numeric.RPL_IRCOPS, '§~¤§¤~~¤§¤~~¤§¤~~¤§¤~~¤§¤~~¤§¤~~¤§¤~~¤§¤~~¤§¤~§')
     client.sendnumeric(Numeric.RPL_IRCOPS, 'Nick                  Status             Server')
     client.sendnumeric(Numeric.RPL_IRCOPS, '------------------------------------------')
     aways, opers = 0, 0
@@ -25,7 +24,6 @@ def cmd_ircops(client, recv):
         s = oper_client.uplink.name.rjust(33 - (len(status)) - nick_len)
         client.sendnumeric(Numeric.RPL_IRCOPS, f'{oper_client.name:22}Oper {status} {s}')
     client.sendnumeric(Numeric.RPL_IRCOPS, f'Total: {opers} IRCOP{"s" if opers != 1 else ""} connected - {aways} Away')
-    client.sendnumeric(Numeric.RPL_IRCOPS, '§~¤§¤~~¤§¤~~¤§¤~~¤§¤~~¤§¤~~¤§¤~~¤§¤~~¤§¤~~¤§¤~§')
     client.sendnumeric(Numeric.RPL_ENDOFIRCOPS)
 
 
