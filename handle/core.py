@@ -1536,7 +1536,7 @@ class Channel:
         else:
             logging.debug(f"Unable to remove {client.name} (uplink={client.uplink.name}) from channel {self.name}: member not found")
 
-        if self.membercount == 0:
+        if self.membercount == 0 and 'P' not in self.modes:
             IRCD.destroy_channel(IRCD.me, self)
 
     def do_part(self, client: Client, reason: str = ''):
@@ -1579,24 +1579,24 @@ class Channel:
                     if modes_on_join := IRCD.get_setting("modes-on-join"):
                         Command.do(IRCD.me, "MODE", self.name, *modes_on_join.split(), str(self.creationtime))
 
-                elif len(self.members) > 1 and not 'r' in self.modes and IRCD.get_setting("chanfix"):
-                    chanfix_types = IRCD.get_setting("chanfix-types")
-                    if not chanfix_types:
-                        chanfix_types = "mask,certfp"
+            if not 'r' in self.modes and IRCD.get_setting("chanfix"):
+                chanfix_types = IRCD.get_setting("chanfix-types")
+                if not chanfix_types:
+                    chanfix_types = "mask,certfp"
 
-                    match = 0
-                    if "certfp" in chanfix_types.split(',') and self.founder[:7] == "certfp:":
-                        fp = client.get_md_value("certfp")
-                        if fp:
-                            fp = "certfp:" + fp
-                            if fp == self.founder:
-                                match = 1
-                    elif "mask" in chanfix_types.split(','):
-                        if IRCD.client_match_mask(client, self.founder):
+                match = 0
+                if "certfp" in chanfix_types.split(',') and self.founder[:7] == "certfp:":
+                    fp = client.get_md_value("certfp")
+                    if fp:
+                        fp = "certfp:" + fp
+                        if fp == self.founder:
                             match = 1
-                    if match == 1:
-                        if default_join_opmode := IRCD.get_setting("default-join-opmode"):
-                            Command.do(IRCD.me, "MODE", self.name, *default_join_opmode.split(), *([client.name] * len(default_join_opmode)), str(self.creationtime))
+                elif "mask" in chanfix_types.split(','):
+                    if IRCD.client_match_mask(client, self.founder):
+                        match = 1
+                if match == 1:
+                    if default_join_opmode := IRCD.get_setting("default-join-opmode"):
+                        Command.do(IRCD.me, "MODE", self.name, *default_join_opmode.split(), *([client.name] * len(default_join_opmode)), str(self.creationtime))
 
         if self.name[0] != '&':
             prefix = self.get_sjoin_prefix_sorted_str(client)
