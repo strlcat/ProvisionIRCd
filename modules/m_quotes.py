@@ -59,7 +59,7 @@ Who is this 'General Failure' and why is he reading my disk?
 hAS aNYONE sEEN MY cAPSLOCK kEY?
 I'm in the computer business, I make Out-Of-Order signs
 Kevorkian Virus: helps your computer shut down whenever it wants to.
-          [OUT OF QUOTES, PLEASE ORDER MORE]
+		  [OUT OF QUOTES, PLEASE ORDER MORE]
 Insert Something Funkeh... err... There! -->
 Cannot delete tmp150---3.tmp: There is not enough free disk space. Delete one or more files to free disk space, and then try again.
 File not found. Should I fake it? (Y/N)
@@ -131,36 +131,36 @@ Famous last words: This is the safe way to do it...
 Famous Last Words: Trust me. I know what I'm doing.
 Clinton, "I didn't say that - er, well - yes, but I didn't mean..."
 CLINTON LEGACY? Even Pharaoh had only ten plagues...
-IBM             I Bought McIntosh
-IBM             I Bring Manuals
-IBM             I've Been Moved
-IBM             Idolized By Management
-IBM             Impenetrable Brain Matter
-IBM             Imperialism By Marketing
-IBM             Incorrigible Boisterous Mammoth
-IBM             Inertia Breeds Mediocrity
-IBM             Ingenuity Becomes Mysterious
-IBM             Ingrained Batch Mentality
-IBM             Innovation By Management
-IBM             Insipid Belligerent Mossbacks
-IBM             Insipidly Bankrolling Millions
-IBM             Inspect Before Multiusing
-IBM             Install Bigger Memory
-IBM             Institution By Machiavelli
-IBM             Insultingly Boring Merchandisers
-IBM             Intellectuals Being Moronized
-IBM             Intelligence Belittling Meaning
-IBM             Intimidated, Buffaloed Management
-IBM             Into Building Money
-IBM             Intolerant of Beards & Moustaches
-IBM             Invest Before Multi-tasking
-IBM             Investigate Baffling Malodor
-IBM             Irresponsible Behave Multinational
-IBM             It Beats Mattel
-IBM             It's a Big Mess
-IBM             It's Better Manually
-IBM             Itty Bitty Machine
-IBM             Institute for Black Magic
+IBM			 I Bought McIntosh
+IBM			 I Bring Manuals
+IBM			 I've Been Moved
+IBM			 Idolized By Management
+IBM			 Impenetrable Brain Matter
+IBM			 Imperialism By Marketing
+IBM			 Incorrigible Boisterous Mammoth
+IBM			 Inertia Breeds Mediocrity
+IBM			 Ingenuity Becomes Mysterious
+IBM			 Ingrained Batch Mentality
+IBM			 Innovation By Management
+IBM			 Insipid Belligerent Mossbacks
+IBM			 Insipidly Bankrolling Millions
+IBM			 Inspect Before Multiusing
+IBM			 Install Bigger Memory
+IBM			 Institution By Machiavelli
+IBM			 Insultingly Boring Merchandisers
+IBM			 Intellectuals Being Moronized
+IBM			 Intelligence Belittling Meaning
+IBM			 Intimidated, Buffaloed Management
+IBM			 Into Building Money
+IBM			 Intolerant of Beards & Moustaches
+IBM			 Invest Before Multi-tasking
+IBM			 Investigate Baffling Malodor
+IBM			 Irresponsible Behave Multinational
+IBM			 It Beats Mattel
+IBM			 It's a Big Mess
+IBM			 It's Better Manually
+IBM			 Itty Bitty Machine
+IBM			 Institute for Black Magic
 100,000 lemmings can't be wrong.
 Murphy's Eighth Law: If everything seems to be going well, you have obviously overlooked something.
 Rules of the game: Do not believe in miracles - rely on them.
@@ -206,9 +206,9 @@ A developer only classifies oneself as such if they consider themselves as such.
 
 
 def show_quote(client):
-    quote = random.choice(quotes.split('\n'))
-    IRCD.server_notice(client, quote)
+	quote = random.choice(quotes.split('\n'))
+	IRCD.server_notice(client, quote)
 
 
 def init(module):
-    Hook.add(Hook.LOCAL_CONNECT, show_quote)
+	Hook.add(Hook.LOCAL_CONNECT, show_quote)
