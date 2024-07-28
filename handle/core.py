@@ -1552,6 +1552,36 @@ class Channel:
 			IRCD.send_to_servers(client, client.mtags, data)
 		self.remove_client(client)
 
+	def do_chanfix_check(self, client: Client):
+		match = False
+		if not IRCD.get_setting("chanfix"):
+			return False
+
+		if 'r' in self.modes:
+			return False
+
+		chanfix_types = IRCD.get_setting("chanfix-types")
+		if not chanfix_types:
+			chanfix_types = "mask,certfp"
+
+		if "certfp" in chanfix_types.split(',') and self.founder[:7] == "certfp:":
+			fp = client.get_md_value("certfp")
+			if fp:
+				fp = "certfp:" + fp
+				if fp == self.founder:
+					match = True
+		elif "mask" in chanfix_types.split(','):
+			if IRCD.client_match_mask(client, self.founder):
+				match = True
+
+		return match
+
+	def do_chanfix(self, client: Client):
+		if client.local:
+			if self.do_chanfix_check(client):
+				if default_join_opmode := IRCD.get_setting("default-join-opmode"):
+					Command.do(IRCD.me, "MODE", self.name, *default_join_opmode.split(), *([client.name] * len(default_join_opmode)), str(self.creationtime))
+
 	def do_join(self, mtags, client: Client):
 		self.membercount += 1
 		if not self.find_member(client):
@@ -1579,24 +1609,8 @@ class Channel:
 					if modes_on_join := IRCD.get_setting("modes-on-join"):
 						Command.do(IRCD.me, "MODE", self.name, *modes_on_join.split(), str(self.creationtime))
 
-			if not 'r' in self.modes and IRCD.get_setting("chanfix"):
-				chanfix_types = IRCD.get_setting("chanfix-types")
-				if not chanfix_types:
-					chanfix_types = "mask,certfp"
-
-				match = 0
-				if "certfp" in chanfix_types.split(',') and self.founder[:7] == "certfp:":
-					fp = client.get_md_value("certfp")
-					if fp:
-						fp = "certfp:" + fp
-						if fp == self.founder:
-							match = 1
-				elif "mask" in chanfix_types.split(','):
-					if IRCD.client_match_mask(client, self.founder):
-						match = 1
-				if match == 1:
-					if default_join_opmode := IRCD.get_setting("default-join-opmode"):
-						Command.do(IRCD.me, "MODE", self.name, *default_join_opmode.split(), *([client.name] * len(default_join_opmode)), str(self.creationtime))
+		if IRCD.get_setting("chanfix") and IRCD.get_setting("chanfix-on-join"):
+			self.do_chanfix(client)
 
 		if self.name[0] != '&':
 			prefix = self.get_sjoin_prefix_sorted_str(client)
