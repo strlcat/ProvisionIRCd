@@ -78,6 +78,37 @@ def cmd_chown(client, recv):
 	channel.founder = IRCD.channel_founder_fingerprint(target)
 	IRCD.server_notice(client, f"CHANFIX: {chname} ownership was transferred to {uname}")
 
+def cmd_disown(client, recv):
+	"""
+	Syntax: DISOWN <channel>
+	Give up channel ownership to void. You must be owner to give up channel.
+	CHANFIX then will never will be able to restore channel privileges
+	for you on that channel. You have either to register it, or ensure
+	ownership of channel you own will be somehow secured. It is up to you.
+	It will not work with registered (+r) channels.
+	"""
+	IRCD.new_message(client)
+	if not IRCD.get_setting("chanfix"):
+		IRCD.server_notice(client, "Sorry, CHANFIX is not available on this server. Ask IRC operators for help")
+		return
+
+	chname = recv[1]
+	channel = IRCD.find_channel(chname)
+	if not channel:
+		client.sendnumeric(Numeric.ERR_NOSUCHCHANNEL, chname)
+		return
+
+	if 'r' in channel.modes:
+		IRCD.server_notice(client, f"CHANFIX is disabled for {chname} because it is registered (+r)")
+		return
+
+	# Ok let's try to relinquish privs of the channel.
+	if not channel.do_chanfix_check(client):
+		IRCD.server_notice(client, f"CHANFIX: {chname} seems not to be yours, sorry.")
+	else:
+		channel.founder = ''
+		IRCD.server_notice(client, f"CHANFIX: now {chname} is abandoned")
+
 def cmd_founder(client, recv):
 	"""
 	Syntax: FOUNDER <channel>
@@ -113,4 +144,5 @@ def cmd_founder(client, recv):
 def init(module):
 	Command.add(module, cmd_chanfix, "CHANFIX", 1, Flag.CMD_USER)
 	Command.add(module, cmd_chown, "CHOWN", 2, Flag.CMD_USER)
+	Command.add(module, cmd_disown, "DISOWN", 1, Flag.CMD_USER)
 	Command.add(module, cmd_founder, "FOUNDER", 1, Flag.CMD_OPER)
