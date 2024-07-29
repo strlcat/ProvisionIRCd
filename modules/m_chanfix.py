@@ -100,9 +100,13 @@ def cmd_founder(client, recv):
 		return
 
 	if 'r' in channel.modes:
-		founder_info = "Not applicable"
+		founder_info = "Not applicable (+r)"
 	else:
 		founder_info = channel.founder
+
+	if not founder_info:
+		founder_info = "Not owned by anyone (?)"
+
 	IRCD.server_notice(client, f"Founder of {chname}: {founder_info}")
 
 
