@@ -37,9 +37,14 @@ speaks too old protocol and requires heavy patching. Sad, but true. (I liked it)
 The server itself is quite capable of running on its own without services, provided there will
 be a network wide IRC operator who could manage user and channel modes.
 (which is possible thanks to rich ircop permissions separation)
+
 For example, a highly scripted eggdrop bot instance functioning like well-known CHANFIX.
 
-There is a plan to implement service
+There is a plan to implement some sort of _very simple_ services inside, for really lazy people like myself.
+(duh, I _hate_ how <b>complex</b> it was in 2007 to setup an UnrealIRCd 3.2 + Anope 1.6 and it is _still_ too complex
+to setup Anope 2.0x in 2024, come on, IRC is dying out, no?)
+
+Actually, part of CHANFIX functionality with completely different semantics is here already.
 
 ## Issue
 
