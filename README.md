@@ -70,3 +70,7 @@ user generated certificate, register nickname and then add that certificate fing
 NickServ so it will always auto-authenticate you next time you will connect to server.
 
 There will be a minimum nickname length restriction of 3 characters, to prevent aliases abuse.
+
+If server is offline for some reason, just wait a week or two - instance sits on a RISC-V dev machine at my home in Prague.
+It means that I am traveling during downtime, and power at my home is completely shutdown to prevent accidents.
+This notice will be removed once I will migrate it to my VPS, but right now I am too lazy to do that.
