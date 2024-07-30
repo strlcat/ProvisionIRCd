@@ -1557,6 +1557,9 @@ class Channel:
 		if not IRCD.get_setting("chanfix"):
 			return False
 
+		if self.name[0] == '+':
+			return False
+
 		if 'r' in self.modes:
 			return False
 
@@ -1609,8 +1612,8 @@ class Channel:
 					if modes_on_join := IRCD.get_setting("modes-on-join"):
 						Command.do(IRCD.me, "MODE", self.name, *modes_on_join.split(), str(self.creationtime))
 
-		if IRCD.get_setting("chanfix") and IRCD.get_setting("chanfix-on-join"):
-			self.do_chanfix(client)
+			if IRCD.get_setting("chanfix") and IRCD.get_setting("chanfix-on-join"):
+				self.do_chanfix(client)
 
 		if self.name[0] != '&':
 			prefix = self.get_sjoin_prefix_sorted_str(client)
