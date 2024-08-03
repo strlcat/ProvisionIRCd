@@ -21,6 +21,7 @@ def init(module):
 	Cmode_X.sjoin_check = sjoin_check_X
 	Cmode_X.level = 7
 	Cmode_X.unset_with_param = 1
+	Cmode_X.type = Channelmode.LISTMODE
 	Cmode_X.param_help = "<extspec> <extparam>"
 	Cmode_X.desc = "Set extended arbitrary syntax channel modes. See /HELP XMODES (not implemented yet)"
 	Channelmode.add(module, Cmode_X)
