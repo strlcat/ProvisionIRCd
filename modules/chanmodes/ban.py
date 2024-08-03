@@ -1,5 +1,5 @@
 """
-provides chmode +w (white list)
+provides chmode +b (ban list)
 """
 
 from handle.core import Numeric, Channelmode, Hook
