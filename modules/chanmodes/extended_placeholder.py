@@ -19,6 +19,7 @@ def init(module):
 	Cmode_X.is_ok = Channelmode.allow_none
 	Cmode_X.conv_param = conv_param_X
 	Cmode_X.sjoin_check = sjoin_check_X
+	Cmode_X.sjoin_prefix = '#'
 	Cmode_X.level = 7
 	Cmode_X.unset_with_param = 1
 	Cmode_X.type = Channelmode.LISTMODE
