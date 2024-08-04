@@ -1492,6 +1492,10 @@ class Channel:
 		if self.check_match(client, 'b', mask):
 			return 1
 
+	def is_muted(self, client):
+		if self.check_match(client, 'B'):
+			return 1
+
 	def is_exempt(self, client):
 		if self.check_match(client, 'e'):
 			return 1
