@@ -25,13 +25,13 @@ def access_on_join(client, channel):
 def init(module):
 	Hook.add(Hook.CHAN_LIST_ENTRY, display_accesslist)
 	Hook.add(Hook.LOCAL_JOIN, access_on_join)
-	Chmode_b = Channelmode()
-	Chmode_b.flag = 'A'
-	Chmode_b.sjoin_prefix = '^'
-	Chmode_b.paramcount = 1
-	Chmode_b.unset_with_param = 1
-	Chmode_b.is_ok = Channelmode.allow_chanowner
-	Chmode_b.type = Channelmode.LISTMODE
-	Chmode_b.param_help = '<vhoa>:<nick!ident@host>'
-	Chmode_b.desc = 'Automatically ops the given hostmask on join'
-	Channelmode.add(module, Chmode_b)
+	Chmode_A = Channelmode()
+	Chmode_A.flag = 'A'
+	Chmode_A.sjoin_prefix = '^'
+	Chmode_A.paramcount = 1
+	Chmode_A.unset_with_param = 1
+	Chmode_A.is_ok = Channelmode.allow_chanowner
+	Chmode_A.type = Channelmode.LISTMODE
+	Chmode_A.param_help = '<vhoa>:<nick!ident@host>'
+	Chmode_A.desc = 'Automatically ops the given hostmask on join'
+	Channelmode.add(module, Chmode_A)
