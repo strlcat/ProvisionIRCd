@@ -140,9 +140,36 @@ def cmd_founder(client, recv):
 
 	IRCD.server_notice(client, f"Founder of {chname}: {founder_info}")
 
+def cmd_opme(client, recv):
+	"""
+	Syntax: OPME <channel>
+	Forces server to scan channel access list (+A), and if
+	access entry is found for your hostmask, grants you privilege
+	specified by that access entry (+vhoa), or highest privilege
+	in case if multiple access hostmasks match yours.
+	Does nothing if no entry was found.
+	"""
+	IRCD.new_message(client)
+
+	chname = recv[1]
+	channel = IRCD.find_channel(chname)
+	if not channel:
+		client.sendnumeric(Numeric.ERR_NOSUCHCHANNEL, chname)
+		return
+	if not channel.find_member(client):
+		client.sendnumeric(Numeric.ERR_NOTONCHANNEL, chname)
+		return
+	# Scan & restore privs according to channel +A entries
+	opmode = channel.has_access(client)
+	if opmode:
+		Command.do(IRCD.me, "MODE", channel.name, *opmode.split(), *([client.name * 1]), str(channel.creationtime))
+		IRCD.server_notice(client, f"{chname}: granted access +{opmode} {client.name}")
+	else:
+		IRCD.server_notice(client, f"{chname}: no access entry is found for your hostmask.")
 
 def init(module):
 	Command.add(module, cmd_chanfix, "CHANFIX", 1, Flag.CMD_USER)
 	Command.add(module, cmd_chown, "CHOWN", 2, Flag.CMD_USER)
 	Command.add(module, cmd_disown, "DISOWN", 1, Flag.CMD_USER)
 	Command.add(module, cmd_founder, "FOUNDER", 1, Flag.CMD_OPER)
+	Command.add(module, cmd_opme, "OPME", 1, Flag.CMD_USER)

@@ -1500,6 +1500,42 @@ class Channel:
 		if self.check_match(client, 'I'):
 			return 1
 
+	def has_access(self, client):
+		def upgrade_opmode(m, t):
+			if not m:
+				return None
+			if not t:
+				return m
+
+			if m in 'v' and t in 'hoa':
+				return t
+			elif m in 'vh' and t in 'oa':
+				return t
+			elif m in 'vho' and t in 'a':
+				return t
+
+			else:
+				return m
+
+		opmode = None
+		for a in self.List['A']:
+			accdef = a.mask
+			if len(accdef.split(':')) < 2:
+				continue
+
+			accmode = accdef.split(':')[0]
+			if len(accmode) != 1:
+				continue
+			accmask = accdef.split(':')[1]
+
+			if IRC.client_match_mask(client, accmask):
+				if not opmode:
+					opmode = accmode
+				else:
+					opmode = upgrade_opmode(opmode, accmode)
+
+		return opmode
+
 	def level(self, client):
 		if client.server or client.ulined:
 			return 1000
@@ -2689,6 +2725,8 @@ class Numeric:
 	RPL_TOPICWHOTIME = 333, "{} {} {}"
 	RPL_WHOISBOT = 335, "{} :is a bot on {}"
 	RPL_INVITING = 341, "{} {}"
+	RPL_ACCLIST = 344, "{} {} {} {}"
+	RPL_ENDOFACCLIST = 345, "{} :End of Channel Access List"
 	RPL_INVEXLIST = 346, "{} {} {} {}"
 	RPL_ENDOFINVEXLIST = 347, "{} :End of Channel Invite List"
 	RPL_EXLIST = 348, "{} {} {} {}"
