@@ -20,8 +20,8 @@ def display_mutelist(client, channel, mode):
 def msg_muted(client, channel, message, sendtype):
 	if (channel.is_muted(client) and not channel.client_has_membermodes(client, "hoaq") and not channel.is_exempt(client)) and not client.has_permission("override:channel:message:mute"):
 		client.sendnumeric(Numeric.ERR_CANNOTSENDTOCHAN, channel.name, "Cannot send to channel (+B)")
-		return 0
-	return 1
+		return Hook.DENY
+	return Hook.ALLOW
 
 def init(module):
 	Hook.add(Hook.CHAN_LIST_ENTRY, display_mutelist)

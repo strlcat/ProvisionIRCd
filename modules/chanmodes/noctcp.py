@@ -7,16 +7,16 @@ from handle.core import Channelmode, Hook, Numeric
 
 def msg_ctcp(client, channel, message, sendtype):
 	if 'C' not in channel.modes:
-		return 1
+		return Hook.ALLOW
 
 	if channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:override:message:ctcp"):
-		return 1
+		return Hook.ALLOW
 
 	if message[0] == '' and message[-1] == '':
 		client.sendnumeric(Numeric.ERR_CANNOTSENDTOCHAN, channel.name, "CTCPs are not permitted in this channel")
-		return 0
+		return Hook.DENY
 
-	return 1
+	return Hook.ALLOW
 
 
 def init(module):
