@@ -13,7 +13,7 @@ def display_mutelist(client, channel, mode):
 	if mode == "B":
 		if channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:see:mutelist"):
 			for entry in reversed(channel.List[mode]):
-				client.sendnumeric(Numeric.RPL_BANLIST, channel.name, entry.mask, entry.set_By, entry.set_time)
+				client.sendnumeric(Numeric.RPL_BANLIST, channel.name, entry.mask, entry.set_by, entry.set_time)
 		client.sendnumeric(Numeric.RPL_ENDOFBANLIST, channel.name)
 		return 1
 
