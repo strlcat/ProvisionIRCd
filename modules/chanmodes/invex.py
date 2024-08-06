@@ -9,10 +9,6 @@ HEADER = {
 }
 
 
-def invexlist_is_ok(client, channel, action, param):
-	return param
-
-
 def display_invexlist(client, channel, mode):
 	if mode == "I":
 		if channel.client_has_membermodes(client, "oaq") or client.has_permission("channel:see:banlist"):
@@ -29,7 +25,7 @@ def init(module):
 	Chmode_I.sjoin_prefix = "'"
 	Chmode_I.paramcount = 1
 	Chmode_I.unset_with_param = 1
-	Chmode_I.is_ok = invexlist_is_ok
+	Chmode_I.is_ok = Channelmode.allow_chanop
 	Chmode_I.level = 3
 	Chmode_I.type = Channelmode.LISTMODE
 	Chmode_I.param_help = "<nick!ident@host>"

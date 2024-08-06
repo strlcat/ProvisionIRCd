@@ -9,10 +9,6 @@ HEADER = {
 }
 
 
-def mutelist_is_ok(client, channel, action, param):
-	return param
-
-
 def display_mutelist(client, channel, mode):
 	if mode == "B":
 		if channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:see:mutelist"):
@@ -35,7 +31,8 @@ def init(module):
 	Chmode_B.sjoin_prefix = '!'
 	Chmode_B.paramcount = 1
 	Chmode_B.unset_with_param = 1
-	Chmode_B.is_ok = mutelist_is_ok
+	Chmode_B.is_ok = Channelmode.allow_halfop
+	Chmode_B.level = 2
 	Chmode_B.type = Channelmode.LISTMODE
 	Chmode_B.param_help = '<nick!ident@host>'
 	Chmode_B.desc = 'Mutes the given hostmask (like +m, but individual)'

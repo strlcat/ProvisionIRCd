@@ -340,16 +340,6 @@ def cmd_channelmode(client, recv):
 			if not client.server and client.local:
 				continue
 
-		if mode in IRCD.get_list_modes_str():
-			if len(params) <= paramcount:
-				continue
-			param = params[paramcount]
-			param = IRCD.strip_format(param)
-			paramcount += 1
-			if returned_param := handle_mode_list(client, channel, action, mode, param):
-				prevaction = add_to_buff(modebuf, parambuf, action, prevaction, mode, returned_param)
-			continue
-
 		if client.user:
 			is_servbot = cmode.is_ok == Channelmode.allow_servbots
 			allowed = cmode.is_ok(client, channel, action, mode, param, cmode.CHK_ACCESS) or not client.local
@@ -364,6 +354,16 @@ def cmd_channelmode(client, recv):
 			for callback, result in Hook.call(Hook.PRE_LOCAL_CHANNEL_MODE, args=(client, channel, modebuf, parambuf, action, mode, param)):
 				if result == Hook.DENY:
 					continue
+
+		if mode in IRCD.get_list_modes_str():
+			if len(params) <= paramcount:
+				continue
+			param = params[paramcount]
+			param = IRCD.strip_format(param)
+			paramcount += 1
+			if returned_param := handle_mode_list(client, channel, action, mode, param):
+				prevaction = add_to_buff(modebuf, parambuf, action, prevaction, mode, returned_param)
+			continue
 
 		oldcmodes = channel.modes
 		if mode not in param_modes + param_modes_unset:

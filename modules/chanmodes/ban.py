@@ -9,10 +9,6 @@ HEADER = {
 }
 
 
-def banlist_is_ok(client, channel, action, param):
-	return param
-
-
 def display_banlist(client, channel, mode):
 	if mode == "b":
 		if channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:see:banlist"):
@@ -36,7 +32,8 @@ def init(module):
 	Chmode_b.sjoin_prefix = '&'
 	Chmode_b.paramcount = 1
 	Chmode_b.unset_with_param = 1
-	Chmode_b.is_ok = banlist_is_ok
+	Chmode_b.is_ok = Channelmode.allow_halfop
+	Chmode_b.level = 2
 	Chmode_b.type = Channelmode.LISTMODE
 	Chmode_b.param_help = '<nick!ident@host>'
 	Chmode_b.desc = 'Bans the given hostmask from joining the channel'

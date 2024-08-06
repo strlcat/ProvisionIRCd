@@ -9,10 +9,6 @@ HEADER = {
 }
 
 
-def excecptlist_is_ok(client, channel, action, param):
-	return param
-
-
 def display_exceptlist(client, channel, mode):
 	if mode == "e":
 		if channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:see:banlist"):
@@ -29,7 +25,8 @@ def init(module):
 	Chmode_e.sjoin_prefix = '"'
 	Chmode_e.paramcount = 1
 	Chmode_e.unset_with_param = 1
-	Chmode_e.is_ok = excecptlist_is_ok
+	Chmode_e.is_ok = Channelmode.allow_halfop
+	Chmode_e.level = 2
 	Chmode_e.type = Channelmode.LISTMODE
 	Chmode_e.param_help = '<nick!ident@host>'
 	Chmode_e.desc = 'Exempts the mask from being banned'

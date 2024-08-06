@@ -2,7 +2,7 @@
 provides chmode +A (access/autoop list)
 """
 
-from handle.core import IRCD, Command, Numeric, Channelmode, Hook
+from handle.core import IRCD, Command, Numeric, Channelmode, Hook, Isupport
 
 HEADER = {
 	"name": "channelaccess"
@@ -23,7 +23,7 @@ def access_on_join(client, channel):
 		Command.do(IRCD.me, "MODE", channel.name, *opmode.split(), *([client.name * 1]), str(channel.creationtime))
 
 def init(module):
-	Hook.add(Hook.CHAN_LIST_ENTRY, display_accesslist)
+	Hook.add(Hook.CHAN_LIST_ENTRY, display_acclist)
 	Hook.add(Hook.LOCAL_JOIN, access_on_join)
 	Chmode_A = Channelmode()
 	Chmode_A.flag = 'A'
@@ -31,7 +31,9 @@ def init(module):
 	Chmode_A.paramcount = 1
 	Chmode_A.unset_with_param = 1
 	Chmode_A.is_ok = Channelmode.allow_chanowner
+	Chmode_A.level = 5
 	Chmode_A.type = Channelmode.LISTMODE
 	Chmode_A.param_help = '<vhoa>:<nick!ident@host>'
 	Chmode_A.desc = 'Automatically ops the given hostmask on join'
 	Channelmode.add(module, Chmode_A)
+	Isupport.add("ACCLIST")

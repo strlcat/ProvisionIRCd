@@ -1532,7 +1532,7 @@ class Channel:
 				continue
 			accmask = accdef.split(':')[1]
 
-			if IRC.client_match_mask(client, accmask):
+			if IRCD.client_match_mask(client, accmask):
 				if not opmode:
 					opmode = accmode
 				else:
