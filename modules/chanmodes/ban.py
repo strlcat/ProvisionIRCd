@@ -17,16 +17,21 @@ def display_banlist(client, channel, mode):
 		client.sendnumeric(Numeric.RPL_ENDOFBANLIST, channel.name)
 		return 1
 
-
 def ban_can_join(client, channel, key):
 	if (channel.is_banned(client) and not channel.is_exempt(client)) and not client.has_permission("override:channel:join:ban"):
 		return Numeric.ERR_BANNEDFROMCHAN
 	return 0
 
+def msg_banned(client, channel, message, sendtype):
+	if (channel.is_banned(client) and not channel.client_has_membermodes(client, "hoaq") and not channel.is_exempt(client)) and not client.has_permission("override:channel:message:mute"):
+		client.sendnumeric(Numeric.ERR_CANNOTSENDTOCHAN, channel.name, "Cannot send to channel (+b)")
+		return Hook.DENY
+	return Hook.ALLOW
 
 def init(module):
 	Hook.add(Hook.CHAN_LIST_ENTRY, display_banlist)
 	Hook.add(Hook.CAN_JOIN, ban_can_join)
+	Hook.add(Hook.CAN_SEND_TO_CHANNEL, msg_banned)
 	Chmode_b = Channelmode()
 	Chmode_b.flag = 'b'
 	Chmode_b.sjoin_prefix = '&'
