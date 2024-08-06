@@ -29,7 +29,7 @@ def init(module):
 	Usermode.add(module, 'r', 1, 0, Usermode.allow_servbots, "Identifies the nick as being logged in")
 	Usermode.add(module, 's', 1, 1, Usermode.allow_opers, "Can receive server notices")
 	Usermode.add(module, "x", 1, 0, umode_x_isok, "Hides real host with cloaked host")
-	Usermode.add(module, 'X', 1, 1, Usermode.allow_none, "Extended usermodes are in effect")
+	Usermode.add(module, 'X', 0, 0, Usermode.allow_none, "Extended usermodes are in effect (reserved for future use)")
 	Usermode.add(module, 'z', 1, 0, Usermode.allow_none, "User is using a secure connection")
 	Usermode.add(module, 'H', 1, 1, Usermode.allow_opers, "Hide IRCop status")
 	Usermode.add(module, 'S', 1, 1, umode_S_isok, "Marks the client as a network service [Settable by service bots]")
