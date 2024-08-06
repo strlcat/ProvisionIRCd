@@ -2,7 +2,7 @@
 provides chmode +B (mute list)
 """
 
-from handle.core import Numeric, Channelmode, Hook
+from handle.core import Numeric, Channelmode, Hook, Isupport
 
 HEADER = {
 	"name": "channelmutes"
@@ -37,3 +37,4 @@ def init(module):
 	Chmode_B.param_help = '<nick!ident@host>'
 	Chmode_B.desc = 'Mutes the given hostmask (like +m, but individual)'
 	Channelmode.add(module, Chmode_B)
+	Isupport.add("MUTELIST")
