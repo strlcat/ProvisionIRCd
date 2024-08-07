@@ -7,6 +7,7 @@ from handle.core import IRCD, Command, Flag, Numeric, Usermode, Channelmode, Sno
 
 def cmd_ircdhelp(client, recv):
 	if len(recv) == 1:
+		client.sendnumeric(Numeric.RPL_HELPTLR, '-')
 		client.sendnumeric(Numeric.RPL_HELPTLR, 'This section shows you some information about this')
 		client.sendnumeric(Numeric.RPL_HELPTLR, 'IRCd and her commands. For a more detailed description')
 		client.sendnumeric(Numeric.RPL_HELPTLR, 'on a specific subject, use following commands:')
@@ -20,14 +21,17 @@ def cmd_ircdhelp(client, recv):
 		return
 
 	if recv[1].lower() == 'umodes':
+		client.sendnumeric(Numeric.RPL_HELPTLR, '-')
 		umodes_sorted = sorted([umode for umode in Usermode.table], key=lambda u: u.flag, reverse=False)
 		for m in [m for m in umodes_sorted if m.desc]:
 			special_perm = f" [{m.get_level_string()}]" if m.get_level_string() else ''
 			client.sendnumeric(Numeric.RPL_HELPTLR, f"{m.flag} = {m.desc}{special_perm}")
-		client.sendnumeric(Numeric.RPL_HELPTLR, ' -')
+		client.sendnumeric(Numeric.RPL_HELPTLR, '-')
 		return
 
 	elif recv[1].lower() == 'chmodes':
+		client.sendnumeric(Numeric.RPL_HELPTLR, '-')
+
 		help_modes = []
 		member_modes = sorted([m for m in Channelmode.table if m.prefix and m.rank and m.type == Channelmode.MEMBER], key=lambda c: c.rank, reverse=True)
 		help_modes.extend(member_modes)
@@ -66,6 +70,7 @@ def cmd_ircdhelp(client, recv):
 		return
 
 	if recv[1].lower() == "snomasks":
+		client.sendnumeric(Numeric.RPL_HELPTLR, '-')
 		snomasks = sorted([s for s in Snomask.table], key=lambda s: s.flag, reverse=True)
 		for sno in snomasks:
 			client.sendnumeric(Numeric.RPL_HELPTLR, f" {sno.flag} = {sno.desc}")
@@ -73,6 +78,7 @@ def cmd_ircdhelp(client, recv):
 		return
 
 	if recv[1].lower() in ["usercmds", "opercmds"]:
+		client.sendnumeric(Numeric.RPL_HELPTLR, '-')
 		if recv[1].lower() == "usercmds":
 			cmd_list = [cmd for cmd in Command.table if Flag.CMD_SERVER not in cmd.flags and Flag.CMD_OPER not in cmd.flags]
 		else:
@@ -92,27 +98,30 @@ def cmd_ircdhelp(client, recv):
 		if line_queue:
 			display = ''.join([t.ljust(width) for t in line_queue])
 			client.sendnumeric(Numeric.RPL_HELPTLR, display)
-		client.sendnumeric(Numeric.RPL_HELPTLR, ' -')
+		client.sendnumeric(Numeric.RPL_HELPTLR, '-')
 		return
 
 	else:
 		for cmd in [cmd for cmd in Command.table if cmd.trigger.lower() == recv[1].lower()]:
 			if cmd.func.__doc__:
+				client.sendnumeric(Numeric.RPL_HELPTLR, '-')
 				for line in cmd.func.__doc__.split('\n'):
 					if not line.strip():
 						continue
 					client.sendnumeric(Numeric.RPL_HELPTLR, line.strip())
-				client.sendnumeric(Numeric.RPL_HELPTLR, ' -')
+				client.sendnumeric(Numeric.RPL_HELPTLR, '-')
 				return
 
 		for mod in [mod for mod in IRCD.configuration.modules if hasattr(mod, "info")]:
+			client.sendnumeric(Numeric.RPL_HELPTLR, '-')
 			for line in mod.helpop:
 				if not line.strip():
 					continue
 				client.sendnumeric(Numeric.RPL_HELPTLR, line.strip())
-			client.sendnumeric(Numeric.RPL_HELPTLR, ' -')
+			client.sendnumeric(Numeric.RPL_HELPTLR, '-')
 			return
 
+	client.sendnumeric(Numeric.RPL_HELPTLR, '-')
 	client.sendnumeric(Numeric.RPL_HELPTLR, f"No help available for {recv[1]}.")
 	client.sendnumeric(Numeric.RPL_HELPTLR, '-')
 
