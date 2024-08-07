@@ -1530,6 +1530,8 @@ class Channel:
 			accmode = accdef.split(':')[0]
 			if len(accmode) != 1:
 				continue
+			if accmode not in 'vhoa':
+				continue
 			accmask = accdef.split(':')[1]
 
 			if IRCD.client_match_mask(client, accmask):
