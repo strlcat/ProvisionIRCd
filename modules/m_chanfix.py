@@ -1,5 +1,5 @@
 """
-commands /chanfix, /chown and /founder
+commands /chanfix, /chown, /disown, /founder and /opme
 Restore operator (or whatever default join empty privilege) on channel
 """
 
