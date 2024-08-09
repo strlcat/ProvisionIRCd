@@ -23,7 +23,7 @@ def ban_can_join(client, channel, key):
 	return 0
 
 def msg_banned(client, channel, message, sendtype):
-	if (channel.is_banned(client) and not channel.client_has_membermodes(client, "hoaq") and not channel.is_exempt(client)) and not client.has_permission("override:channel:message:mute"):
+	if (channel.is_banned(client) and not channel.client_has_membermodes(client, "hoaq") and not channel.is_exempt(client)) and not client.has_permission("override:channel:message:ban"):
 		client.sendnumeric(Numeric.ERR_CANNOTSENDTOCHAN, channel.name, "Cannot send to channel (+b)")
 		return Hook.DENY
 	return Hook.ALLOW

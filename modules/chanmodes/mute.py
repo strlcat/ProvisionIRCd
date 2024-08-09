@@ -11,14 +11,14 @@ HEADER = {
 
 def display_mutelist(client, channel, mode):
 	if mode == "B":
-		if channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:see:mutelist"):
+		if channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:see:banlist"):
 			for entry in reversed(channel.List[mode]):
 				client.sendnumeric(Numeric.RPL_BANLIST, channel.name, entry.mask, entry.set_by, entry.set_time)
 		client.sendnumeric(Numeric.RPL_ENDOFBANLIST, channel.name)
 		return 1
 
 def msg_muted(client, channel, message, sendtype):
-	if (channel.is_muted(client) and not channel.client_has_membermodes(client, "hoaq") and not channel.is_exempt(client)) and not client.has_permission("override:channel:message:mute"):
+	if (channel.is_muted(client) and not channel.client_has_membermodes(client, "hoaq") and not channel.is_exempt(client)) and not client.has_permission("override:channel:message:ban"):
 		client.sendnumeric(Numeric.ERR_CANNOTSENDTOCHAN, channel.name, "Cannot send to channel (+B)")
 		return Hook.DENY
 	return Hook.ALLOW
