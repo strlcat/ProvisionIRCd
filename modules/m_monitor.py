@@ -48,9 +48,8 @@ def cmd_monitor(client, recv):
 					continue
 				if len(Monitor.monlist[client]) >= MAXMONITOR:
 					return client.sendnumeric(Numeric.RPL_MONLISTFULL)
-				for c in target:
-					if c.lower() not in IRCD.NICKCHARS:
-						skip_target = 1
+				if IRCD.is_valid_nickname(target):
+					skip_target = 1
 				if skip_target:
 					continue
 				Monitor.monlist[client].append(target)

@@ -42,7 +42,6 @@ def cmd_chanfix(client, recv):
 		channel.do_chanfix(client)
 		IRCD.server_notice(client, f"CHANFIX: restored your {chname}, consider registering it")
 
-# FIXME broadcast SCHOWN
 def cmd_chown(client, recv):
 	"""
 	Syntax: CHOWN <channel> <target>
@@ -83,9 +82,9 @@ def cmd_chown(client, recv):
 
 	# Ok to chown, let's do it
 	channel.founder = IRCD.channel_founder_fingerprint(target)
+	broadcast_schown(client, channel.name, channel.founder)
 	IRCD.server_notice(client, f"CHANFIX: {chname} ownership was transferred to {uname}")
 
-# FIXME broadcast SCHOWN
 def cmd_disown(client, recv):
 	"""
 	Syntax: DISOWN <channel>
@@ -118,6 +117,7 @@ def cmd_disown(client, recv):
 		IRCD.server_notice(client, f"CHANFIX: {chname} seems not to be yours, sorry.")
 	else:
 		channel.founder = ''
+		broadcast_schown(client, channel.name, channel.founder)
 		IRCD.server_notice(client, f"CHANFIX: now {chname} is abandoned")
 
 def cmd_founder(client, recv):
@@ -184,21 +184,25 @@ def cmd_opme(client, recv):
 	else:
 		IRCD.server_notice(client, f"{chname}: no access entry is found for your hostmask.")
 
-# def cmd_schown(client, recv):
-# 	chname = recv[1]
-# 	hostmask = recv[2]
-# 	channel = IRCD.find_channel(chname)
-# 	if not channel:
-# 		return
-#
-# 	if 'r' in channel.modes:
-# 		channel.founder = ''
-# 		return
-#
-# 	channel.founder = hostmask
+def broadcast_schown(client, channame, hostmask):
+	data = f":{client.uplink.id} SCHOWN {channame} {hostmask}"
+	IRCD.send_to_servers(client, [], data)
 
-# def hook_schown(client, channel):
-	# FIXME broadcast SCHOWN
+def cmd_schown(client, recv):
+	chname = recv[1]
+	hostmask = recv[2]
+	channel = IRCD.find_channel(chname)
+	if not channel:
+		return
+
+	if 'r' in channel.modes:
+		channel.founder = ''
+		return
+
+	channel.founder = hostmask
+
+def hook_schown(client, channel):
+	broadcast_schown(client, channel.name, channel.founder)
 
 def init(module):
 	Command.add(module, cmd_chanfix, "CHANFIX", 1, Flag.CMD_USER)
@@ -206,5 +210,5 @@ def init(module):
 	Command.add(module, cmd_disown, "DISOWN", 1, Flag.CMD_USER)
 	Command.add(module, cmd_founder, "FOUNDER", 1, Flag.CMD_OPER)
 	Command.add(module, cmd_opme, "OPME", 1, Flag.CMD_USER)
-#	Command.add(module, cmd_schown, "SCHOWN", 2, Flag.CMD_SERVER)
-#	Hook.add(Hook.CHANNEL_CREATE, hook_schown)
+	Command.add(module, cmd_schown, "SCHOWN", 2, Flag.CMD_SERVER)
+	Hook.add(Hook.CHANNEL_CREATE, hook_schown)

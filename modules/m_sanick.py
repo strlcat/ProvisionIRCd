@@ -34,9 +34,8 @@ def cmd_sanick(client, recv):
 		return IRCD.server_notice(client, f"*** Nickname {nick_client.name} is already in use")
 
 	newnick = recv[2][:IRCD.NICKLEN]
-	for c in newnick:
-		if c.lower() not in IRCD.NICKCHARS:
-			return client.sendnumeric(Numeric.ERR_ERRONEUSNICKNAME, newnick, c)
+	if c := IRCD.invalid_nickname_char(newnick):
+		return client.sendnumeric(Numeric.ERR_ERRONEUSNICKNAME, newnick, c)
 
 	if not newnick:
 		return

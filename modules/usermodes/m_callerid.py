@@ -136,10 +136,9 @@ def cmd_accept(client, recv):
 		if entry[0] == '-':
 			action = '-'
 			nickname = entry[1:]
-		for c in entry.lower():
-			if c.lower() not in IRCD.NICKCHARS or nickname[0].isdigit() and client.local:
-				continue_loop = 1
-				break
+		if not IRCD.is_valid_nickname(entry) and client.local:
+			continue_loop = 1
+			break
 		if continue_loop:
 			continue
 

@@ -196,18 +196,9 @@ def cmd_line(client, recv):
 						return IRCD.server_notice(client, f"Invalid certfp. Must be in format [A-Fa-f0-9]{{64}}")
 
 				if ident == "~account:":
-					if host[0].isdigit():
-						errmsg = f"Invalid account name: {host} -- cannot start with number"
+					if c := IRCD.invalid_nickname_char(host):
+						errmsg = f"Invalid account name: {host} -- invalid character: {c}"
 						return IRCD.server_notice(client, errmsg)
-					if host != '*':
-						invalid = []
-						for c in host:
-							if c.lower() not in IRCD.NICKCHARS:
-								if c not in invalid:
-									invalid.append(c)
-						if invalid:
-							errmsg = f"Invalid account name: {host} -- invalid characters: {','.join(invalid)}"
-							return IRCD.server_notice(client, errmsg)
 
 				set_by = client.fullrealhost
 				set_time = int(time.time())

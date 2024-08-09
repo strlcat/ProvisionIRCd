@@ -515,17 +515,8 @@ def config_test_oper(block):
 						continue
 
 			if mask_what == "account":
-				if mask_value[0].isdigit():
-					errmsg = f"Invalid account name: {mask_value} -- cannot start with number"
-					conf_error(errmsg, item=oper_mask_item)
-					continue
-				invalid = []
-				for c in mask_value:
-					if c.lower() not in IRCD.NICKCHARS:
-						if c not in invalid:
-							invalid.append(c)
-				if invalid:
-					errmsg = f"Invalid account name: {mask_value} -- invalid characters: {','.join(invalid)}"
+				if c := IRCD.invalid_nickname_char(mask_value):
+					errmsg = f"Invalid account name: {mask_value} -- invalid character: {c}"
 					conf_error(errmsg, item=oper_mask_item)
 					continue
 
@@ -672,21 +663,10 @@ def config_test_except(block):
 					continue
 
 			elif mask_what == "account":
-				if mask_value[0].isdigit():
-					errmsg = f"Invalid account name: {mask_value} -- cannot start with number"
+				if c := IRCD.invalid_nickname_char(mask_value):
+					errmsg = f"Invalid account name: {mask_value} -- invalid character: {c}"
 					conf_error(errmsg, item=mask_item)
 					continue
-
-				if mask_value != '*':
-					invalid = []
-					for c in mask_value:
-						if c.lower() not in IRCD.NICKCHARS:
-							if c not in invalid:
-								invalid.append(c)
-					if invalid:
-						errmsg = f"Invalid account name: {mask_value} -- invalid characters: {','.join(invalid)}"
-						conf_error(errmsg, item=mask_item)
-						continue
 
 			elif mask_what == "ip":
 				valid_check = mask_value.replace('*', '0')

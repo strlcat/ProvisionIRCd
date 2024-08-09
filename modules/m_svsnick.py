@@ -17,9 +17,8 @@ def cmd_svsnick(client, recv):
 		return
 
 	newnick = recv[2][:IRCD.NICKLEN]
-	for c in newnick:
-		if c.lower() not in IRCD.NICKCHARS:
-			return
+	if not IRCD.is_valid_nickname(newnick):
+		return
 
 	if not newnick:
 		return

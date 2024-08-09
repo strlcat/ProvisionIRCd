@@ -762,6 +762,10 @@ class Client:
 			self.user.cloakhost = IRCD.get_cloak(self)
 		self.sendnumeric(Numeric.RPL_HOSTHIDDEN, self.user.cloakhost)
 
+		# Autojoin channels.
+		if join_on_connect := IRCD.get_setting("auto-join-on-connect"):
+			Command.do(self, "JOIN", join_on_connect)
+
 		IRCD.run_hook(Hook.LOCAL_CONNECT, self)
 		self.flood_safe_off()
 
@@ -1810,10 +1814,8 @@ class IRCD:
 	uid_iter = None
 
 	NICKLEN: int = 0
-	NICKCHARS: str = "abcdefghijklmnopqrstuvwxyz0123456789`^-_[]{}|\\"
 	CHANPREFIXES = "#+&"
 	CHANLEN = 32
-	CHANCHARS = "abcdefghijklmnopqrstuvwxyz0123456789`#$^*()-=_[]{}|;':\"<>"
 	HOSTCHARS = "abcdefghijklmnopqrstuvwxyz0123456789.:-"
 
 	@staticmethod
@@ -1990,14 +1992,34 @@ class IRCD:
 				client.register_user()
 
 	@staticmethod
+	def invalid_nickname_char(name: str) -> chr:
+		prefix_sorted = IRCD.get_member_prefix_str_sorted()  # '~&@%+'
+		if name[0].isdigit():
+			return name[0]
+		for c in name:
+			if c in prefix_sorted:
+				return c
+			if ord(c) < 32:
+				return c
+			if c in '*?!:;=#./$()"\',<>':
+				return c
+
+	@staticmethod
+	def is_valid_nickname(name: str) -> bool:
+		c = IRCD.invalid_nickname_char(name)
+		if not c:
+			return True
+		return False
+
+	@staticmethod
 	def is_valid_channelname(name: str) -> int:
 		if name[0] not in IRCD.CHANPREFIXES:
 			return 0
-
 		for char in name[1:]:
-			if char.lower() not in IRCD.CHANCHARS:
+			if char in ' ,:':
 				return 0
-
+			if ord(char) < 32:
+				return 0
 		return 1
 
 	@staticmethod

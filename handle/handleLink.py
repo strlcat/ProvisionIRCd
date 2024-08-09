@@ -95,7 +95,7 @@ def start_link_negotiation(newserver):
 	for isupport in Isupport.table:
 		info.append(isupport.string)
 	newserver.send([], f"PROTOCTL EAUTH={IRCD.me.name} SID={IRCD.me.id} {' '.join(info)}")
-	newserver.send([], f"PROTOCTL NOQUIT EAUTH SID CLK SJOIN SJOIN2 UMODE2 VL SJ3 SJSBY NICKIP ESVID NEXTBANS EXTSWHOIS TS={int(time.time())} BOOTED={IRCD.boottime}")
+	newserver.send([], f"PROTOCTL NOQUIT EAUTH SID CLK SJOIN SJOIN2 UMODE2 VL SJ3 SJSBY NICKIP ESVID NEXTBANS EXTSWHOIS SCHOWN TS={int(time.time())} BOOTED={IRCD.boottime}")
 	newserver.send([], "PROTOCTL NICKCHARS= CHANNELCHARS=utf8")
 	newserver.send([], f"SERVER {IRCD.me.name} 1 :P300B-*-{IRCD.me.id} {IRCD.me.info}")
 

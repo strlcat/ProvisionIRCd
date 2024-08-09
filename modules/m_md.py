@@ -4,19 +4,16 @@ Exchange mod data between servers.
 """
 
 from handle.core import IRCD, Command, Flag, MessageTag
-
 from handle.logger import logging
 
-
-class S2sMd(MessageTag):
+class s2smd(MessageTag):
 	name = "s2s-md"
 
 	def __init__(self, value):
-		super().__init__(name=S2sMd.name, value=value)
+		super().__init__(name=s2smd.name, value=value)
 
 	def is_visible_to(self, to_client):
 		return super().is_visible_to(to_client) and to_client.server
-
 
 def cmd_md(client, recv):
 	if recv[1] == "client":
@@ -29,7 +26,6 @@ def cmd_md(client, recv):
 		else:
 			md_client.del_md(recv[3])
 
-
 def init(module):
 	Command.add(module, cmd_md, "MD", 3, Flag.CMD_SERVER)
-	MessageTag.add(S2sMd)
+	MessageTag.add(s2smd)
