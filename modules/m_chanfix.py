@@ -14,6 +14,9 @@ def cmd_chanfix(client, recv):
 	to restore owner status on it. If channel is
 	registered (+r), CHANFIX is disabled on it.
 	"""
+	if not client.local:
+		return
+
 	IRCD.new_message(client)
 	if not IRCD.get_setting("chanfix"):
 		IRCD.server_notice(client, "Sorry, CHANFIX is not available on this server. Ask IRC operators for help")
@@ -49,6 +52,9 @@ def cmd_chown(client, recv):
 	It will not work with registered (+r) channels.
 	Query services about gaining access on registered channel.
 	"""
+	if not client.local:
+		return
+
 	IRCD.new_message(client)
 	if not IRCD.get_setting("chanfix"):
 		IRCD.server_notice(client, "Sorry, CHANFIX is not available on this server. Ask IRC operators for help")
@@ -87,6 +93,9 @@ def cmd_disown(client, recv):
 	ownership of channel you own will be somehow secured. It is up to you.
 	It will not work with registered (+r) channels.
 	"""
+	if not client.local:
+		return
+
 	IRCD.new_message(client)
 	if not IRCD.get_setting("chanfix"):
 		IRCD.server_notice(client, "Sorry, CHANFIX is not available on this server. Ask IRC operators for help")
@@ -115,6 +124,9 @@ def cmd_founder(client, recv):
 	Retrieves full mask or certfp of channel creator, if available.
 	Registered channels (+r) will return "Not applicable".
 	"""
+	if not client.local:
+		return
+
 	IRCD.new_message(client)
 	if not IRCD.get_setting("chanfix"):
 		IRCD.server_notice(client, "CHANFIX is disabled.")
@@ -149,6 +161,9 @@ def cmd_opme(client, recv):
 	in case if multiple access hostmasks match yours.
 	Does nothing if no entry was found.
 	"""
+	if not client.local:
+		return
+
 	IRCD.new_message(client)
 
 	chname = recv[1]
