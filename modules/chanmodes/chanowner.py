@@ -6,18 +6,12 @@ import logging
 
 from handle.core import Channelmode
 
-
 def validate_member(client, channel, action, mode, param, CHK_TYPE):
 	if CHK_TYPE == Channelmode.CHK_ACCESS:
-		# Well this looks ugly, but let's fix that later
-		if action == "+" and (False or not client.local):
-			return 1
-		elif action == "-":
-			# Always allow unset.
+		if action in "-+" and not client.local:
 			return 1
 		return 0
 	return 0
-
 
 def init(module):
 	Cmode_q = Channelmode()

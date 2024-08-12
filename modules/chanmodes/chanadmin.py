@@ -8,17 +8,12 @@ from handle.core import Channelmode
 
 
 def validate_member(client, channel, action, mode, param, CHK_TYPE):
-
 	if CHK_TYPE == Channelmode.CHK_ACCESS:
-		if action == "+" and (channel.client_has_membermodes(client, "q") or not client.local):
-			return 1
-		elif action == "-":
-			# Always allow unset.
+		if action in "-+" and (channel.client_has_membermodes(client, "q") or not client.local):
 			return 1
 		logging.debug(f"[{client.name}] Insufficient access to set {action}{mode} on channel {channel.name}")
 		return 0
 	return 0
-
 
 def init(module):
 	Cmode_a = Channelmode()
