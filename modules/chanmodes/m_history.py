@@ -6,14 +6,12 @@ from time import time
 from datetime import datetime
 
 from handle.logger import logging
-from handle.core import IRCD, Channelmode, Hook, Batch, MessageTag, Numeric, Command
+from handle.core import IRCD, Channelmode, Hook, Batch, MessageTag, Numeric, Command, ChanPrivReq
 from handle.validate_conf import conf_error
-
 
 class Configuration:
 	max_lines_registered = 0
 	max_lines_unregistered = 0
-
 
 class ChatHistory:
 	backlog = {}
@@ -55,7 +53,6 @@ class ChatHistory:
 		except ValueError:
 			return 0.0
 
-
 class HistoryFilter:
 	def __init__(self, timestamp_1=None, timestamp_2=None, msgid_1=None, msgid_2=None, limit=0, cmd=None):
 		self.timestamp_1 = timestamp_1
@@ -64,7 +61,6 @@ class HistoryFilter:
 		self.msgid_2 = msgid_2
 		self.limit = limit
 		self.cmd = cmd
-
 
 def history_conv_param(param):
 	limit = int(param.split(':')[0])
@@ -76,12 +72,11 @@ def history_conv_param(param):
 	return_param = f"{limit}:{expire}"
 	return return_param
 
-
 def history_validate_param(client, channel, action, mode, param, CHK_TYPE):
 	if CHK_TYPE == Channelmode.CHK_ACCESS:
 		if channel.client_has_membermodes(client, "aq"):
-			return 1
-		return 0
+			return ChanPrivReq.ACCESSOK
+		return ChanPrivReq.NOTADMIN
 
 	if CHK_TYPE == Channelmode.CHK_PARAM:
 		if len(param.split(':')) < 2:
@@ -91,22 +86,18 @@ def history_validate_param(client, channel, action, mode, param, CHK_TYPE):
 			return 0
 		return 1
 
-
 def send_empty_batch(client, channel):
 	if client.has_capability("batch"):
 		batch = Batch(started_by=IRCD.me)
 		client.send([], data=f":{IRCD.me.name} BATCH +{batch.label} chathistory {channel.name}")
 		client.send([], data=f":{IRCD.me.name} BATCH -{batch.label}")
 
-
 def clear_history_channel_destroy(client, channel):
 	if channel in ChatHistory.backlog:
 		del ChatHistory.backlog[channel]
 
-
 def create_history_channel_create(client, channel):
 	ChatHistory.backlog[channel] = []
-
 
 def add_to_historybuf(client, channel, message, sendtype):
 	limit = ChatHistory.max_unreg if 'r' not in channel.modes else ChatHistory.max_reg
@@ -118,18 +109,15 @@ def add_to_historybuf(client, channel, message, sendtype):
 	history_obj = ChatHistory(sender=client.fullmask, mtags=client.mtags, svid=client.user.account, utc_time=utc_time, sendtype=sendtype, data=message)
 	ChatHistory.add_to_buff(channel, history_obj)
 
-
 def add_to_historybuf_privmsg(client, channel, message):
 	if 'H' not in channel.modes:
 		return
 	add_to_historybuf(client, channel, message, sendtype="PRIVMSG")
 
-
 def add_to_historybuf_notice(client, channel, message):
 	if 'H' not in channel.modes:
 		return
 	add_to_historybuf(client, channel, message, sendtype="NOTICE")
-
 
 def show_history_on_join(client, channel):
 	if 'H' not in channel.modes or not client.has_capability("server-time"):
@@ -143,7 +131,6 @@ def show_history_on_join(client, channel):
 	history_filter.limit = 10
 	results = get_chathistory(channel, history_filter)
 	send_history(client, channel, results)
-
 
 def send_history(client, channel, results: list) -> None:
 	if not client.has_capability("server-time"):
@@ -167,7 +154,6 @@ def send_history(client, channel, results: list) -> None:
 
 	if batch:
 		client.send([], f":{IRCD.me.name} BATCH -{batch.label}")
-
 
 def get_chathistory(channel, history_filter: HistoryFilter) -> list:
 	if channel not in ChatHistory.backlog:
@@ -249,14 +235,12 @@ def get_chathistory(channel, history_filter: HistoryFilter) -> list:
 						results.append(history_obj)
 	return results
 
-
 def chmode_H_mode(client, channel, modebuf, parambuf):
 	if 'H' in modebuf:
 		if 'H' not in channel.modes:
 			del ChatHistory.backlog[channel]
 		else:
 			ChatHistory.backlog[channel] = []
-
 
 def cmd_history(client, recv):
 	"""
@@ -276,7 +260,6 @@ def cmd_history(client, recv):
 	history_filter = HistoryFilter(cmd=ChatHistory.LATEST, limit=10)
 	results = get_chathistory(channel, history_filter)
 	send_history(client, channel, results)
-
 
 def check_chathistory_conf():
 	if not (block := IRCD.configuration.get_block("chathistory")):
@@ -307,10 +290,8 @@ def check_chathistory_conf():
 	ChatHistory.max_reg = max_reg
 	ChatHistory.max_unreg = max_unreg
 
-
 def post_load(module):
 	check_chathistory_conf()
-
 
 def check_expired_backlog():
 	for channel in list(ChatHistory.backlog):
@@ -324,7 +305,6 @@ def check_expired_backlog():
 		for history_entry in list(ChatHistory.backlog[channel]):
 			if utc_time - int(history_entry.utc_time) >= (expire * 60):
 				ChatHistory.backlog[channel].remove(history_entry)
-
 
 def init(module):
 	Chmode_H = Channelmode()

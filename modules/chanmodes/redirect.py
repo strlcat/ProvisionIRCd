@@ -2,14 +2,13 @@
 channel mode +L
 """
 
-from handle.core import IRCD, Channelmode, Numeric, Hook, Command
-
+from handle.core import IRCD, Channelmode, Numeric, Hook, Command, ChanPrivReq
 
 def validate_redirect(client, channel, action, mode, param, CHK_TYPE):
 	if CHK_TYPE == Channelmode.CHK_ACCESS:
 		if channel.client_has_membermodes(client, "aq"):
-			return 1
-		return 0
+			return ChanPrivReq.ACCESSOK
+		return ChanPrivReq.NOTADMIN
 
 	if CHK_TYPE == Channelmode.CHK_PARAM:
 		if not IRCD.is_valid_channelname(param):
@@ -30,10 +29,8 @@ def validate_redirect(client, channel, action, mode, param, CHK_TYPE):
 		return 1
 	return 0
 
-
 def conv_param_redirect(param):
 	return param
-
 
 def sjoin_check_redirect(ourredirect, theirredirect):
 	if ourredirect == theirredirect:
@@ -49,7 +46,6 @@ def sjoin_check_redirect(ourredirect, theirredirect):
 
 	if our_score > their_score:
 		return 1
-
 
 def redirect_to_link(client, channel, error):
 	if 'L' not in channel.modes:
@@ -77,7 +73,6 @@ def redirect_to_link(client, channel, error):
 			IRCD.server_notice(client, f"Channel {channel.name} is for IRC operators only so you have been redirected to {link_chan.name}")
 		case _:
 			IRCD.server_notice(client, f"Unable to join {channel.name}. You have been redirected to {link_chan.name}")
-
 
 def init(module):
 	Cmode_L = Channelmode()

@@ -2,14 +2,14 @@
 channel mode +k
 """
 
-from handle.core import Numeric, Channelmode, Hook
+from handle.core import Numeric, Channelmode, Hook, ChanPrivReq
 
 
 def key_is_ok(client, channel, action, mode, param, CHK_TYPE):
 	if CHK_TYPE == Channelmode.CHK_ACCESS:
 		if channel.client_has_membermodes(client, "aq"):
-			return 1
-		return 0
+			return ChanPrivReq.ACCESSOK
+		return ChanPrivReq.NOTADMIN
 
 	if CHK_TYPE == Channelmode.CHK_PARAM:
 		for char in param:

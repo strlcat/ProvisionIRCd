@@ -26,7 +26,7 @@ def init(module):
 	Usermode.add(module, 'i', 1, 0, Usermode.allow_all, "User does not show up in outside /who")
 	Usermode.add(module, 'o', 1, 1, Usermode.allow_opers, "Marks the user as an IRC Operator")
 	Usermode.add(module, 'q', 1, 1, Usermode.allow_opers, "Protected on all channels")
-	Usermode.add(module, 'r', 1, 0, Usermode.allow_servbots, "Identifies the nick as being logged in")
+	Usermode.add(module, 'r', 1, 0, Usermode.allow_services, "Identifies the nick as being logged in")
 	Usermode.add(module, 's', 1, 1, Usermode.allow_opers, "Can receive server notices")
 	Usermode.add(module, "x", 1, 0, umode_x_isok, "Hides real host with cloaked host")
 	Usermode.add(module, 'X', 0, 0, Usermode.allow_none, "Extended usermodes are in effect (reserved for future use)")

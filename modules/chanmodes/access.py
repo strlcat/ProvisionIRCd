@@ -8,7 +8,6 @@ HEADER = {
 	"name": "channelaccess"
 }
 
-
 def display_acclist(client, channel, mode):
 	if mode == "A":
 		if channel.client_has_membermodes(client, "aq") or client.has_permission("channel:see:accesslist"):

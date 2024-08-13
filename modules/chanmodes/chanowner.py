@@ -4,13 +4,15 @@ chanowner (+q)
 
 import logging
 
-from handle.core import Channelmode
+from handle.core import Channelmode, ChanPrivReq
 
 def validate_member(client, channel, action, mode, param, CHK_TYPE):
 	if CHK_TYPE == Channelmode.CHK_ACCESS:
 		if action in "-+" and not client.local:
-			return 1
-		return 0
+			return ChanPrivReq.ACCESSOK
+		elif action == '-':
+			return ChanPrivReq.NOTOWNER
+		return ChanPrivReq.ONLYOWNER
 	return 0
 
 def init(module):

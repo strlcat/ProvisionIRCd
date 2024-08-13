@@ -1118,7 +1118,7 @@ class Usermode:
 		return 1 if 'o' in client.user.modes else 0
 
 	@staticmethod
-	def allow_servbots(client):
+	def allow_services(client):
 		if Usermode.allow_none(client):
 			return 1
 		return 1 if 'o' in client.user.modes and 'S' in client.user.modes else 0
@@ -1137,7 +1137,7 @@ class Usermode:
 		match self.can_set:
 			case Usermode.allow_opers:
 				return "IRCops only"
-			case Usermode.allow_servbots:
+			case Usermode.allow_services:
 				return "Settable by service bots"
 			case Usermode.allow_none:
 				return "Settable by servers"
@@ -1222,33 +1222,31 @@ class Channelmode:
 
 	@staticmethod
 	def allow_halfop(client, channel, *args):
-		return channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:override:mode")
+		return ChanPrivReq.ACCESSOK if channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:override:mode") else ChanPrivReq.NOTOPER
 
 	@staticmethod
 	def allow_chanop(client, channel, *args):
-		return channel.client_has_membermodes(client, "oaq") or client.has_permission("channel:override:mode")
+		return ChanPrivReq.ACCESSOK if channel.client_has_membermodes(client, "oaq") or client.has_permission("channel:override:mode") else ChanPrivReq.NOTOPER
 
 	@staticmethod
 	def allow_chanadmin(client, channel, *args):
-		return channel.client_has_membermodes(client, "aq") or client.has_permission("channel:override:mode")
+		return ChanPrivReq.ACCESSOK if channel.client_has_membermodes(client, "aq") or client.has_permission("channel:override:mode") else ChanPrivReq.NOTADMIN
 
 	@staticmethod
 	def allow_chanowner(client, channel, *args):
-		return channel.client_has_membermodes(client, "q") or client.has_permission("channel:override:mode")
+		return ChanPrivReq.ACCESSOK if channel.client_has_membermodes(client, "q") or client.has_permission("channel:override:mode") else ChanPrivReq.NOTOWNER
 
 	@staticmethod
 	def allow_opers(client, channel, *args):
-		return 'o' in client.user.modes
+		return ChanPrivReq.ACCESSOK if 'o' in client.user.modes else ChanPrivReq.NOTIRCOP
 
 	@staticmethod
 	def allow_none(client, channel, *args):
-		return client.server or not client.local
+		return ChanPrivReq.ACCESSOK if client.server or not client.local else ChanPrivReq.DONTSENDERROR
 
 	@staticmethod
-	def allow_servbots(client, channel, *args):
-		if Channelmode.allow_none(client, channel, *args):
-			return True
-		return 'o' in client.user.modes and 'S' in client.user.modes
+	def allow_services(client, channel, *args):
+		return ChanPrivReq.ACCESSOK if 'o' in client.user.modes and 'S' in client.user.modes else ChanPrivReq.DONTSENDERROR
 
 	def level_help_string(self):
 		match self.is_ok:
@@ -1262,8 +1260,8 @@ class Channelmode:
 				return "Founder only"
 			case Channelmode.allow_opers:
 				return "IRCops only"
-			case Channelmode.allow_servbots:
-				return "Settable by service bots"
+			case Channelmode.allow_services:
+				return "Settable by services"
 			case Channelmode.allow_none:
 				return "Settable by servers"
 
@@ -1272,7 +1270,7 @@ class Channelmode:
 						  4: '+a',
 						  5: 'Founder only',
 						  6: 'IRCops only',
-						  7: 'Settable by service bots',
+						  7: 'Settable by services',
 						  8: 'Settable by servers'}
 						 [self.level]])
 		return level
@@ -1296,6 +1294,16 @@ class Snomask:
 		snomask.is_global = is_global
 		snomask.desc = desc
 		Snomask.table.append(snomask)
+
+
+class ChanPrivReq:
+	ACCESSOK = 1
+	NOTOPER = 0
+	NOTADMIN = -1
+	NOTOWNER = -2
+	ONLYOWNER = -3
+	NOTIRCOP = -4
+	DONTSENDERROR = -100
 
 
 @dataclass(eq=False)
@@ -2848,6 +2856,9 @@ class Numeric:
 	ERR_SERVERONLY = 487, ":{} is a server-only command"
 	ERR_SECUREONLY = 489, "{} :Cannot join channel (not using a secure connection)"
 	ERR_NOOPERHOST = 491, ":No O:lines for your host"
+	ERR_CHANHASOWNER = 497, "{} :Only one channel owner can be on channel"
+	ERR_CHANADMPRIVSNEEDED = 498, "{} :You're not a channel administrator"
+	ERR_CHANOWNPRIVSNEEDED = 499, "{} :You're not a channel owner"
 
 	ERR_UMODEUNKNOWNFLAG = 501, "{} :Unknown MODE flag"
 	ERR_USERSDONTMATCH = 502, ":Not allowed to change mode of other users"

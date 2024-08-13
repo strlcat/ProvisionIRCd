@@ -4,15 +4,14 @@ chanadmin (+a)
 
 import logging
 
-from handle.core import Channelmode
-
+from handle.core import Channelmode, ChanPrivReq
 
 def validate_member(client, channel, action, mode, param, CHK_TYPE):
 	if CHK_TYPE == Channelmode.CHK_ACCESS:
 		if action in "-+" and (channel.client_has_membermodes(client, "q") or not client.local):
-			return 1
+			return ChanPrivReq.ACCESSOK
 		logging.debug(f"[{client.name}] Insufficient access to set {action}{mode} on channel {channel.name}")
-		return 0
+		return ChanPrivReq.NOTOWNER
 	return 0
 
 def init(module):

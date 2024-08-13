@@ -2,7 +2,7 @@
 /mode command
 """
 
-from handle.core import Flag, Numeric, Channelmode, Isupport, Command, IRCD, Extban, Hook
+from handle.core import Flag, Numeric, Channelmode, Isupport, Command, IRCD, Extban, Hook, ChanPrivReq
 from handle.functions import logging, make_mask
 
 MAXMODES = 20
@@ -135,7 +135,6 @@ def cmd_usermode(client, recv):
 	if unknown:
 		client.sendnumeric(Numeric.ERR_UMODEUNKNOWNFLAG, ''.join(unknown))
 
-
 def do_channel_member_mode(client, channel, action, mode, param):
 	# logging.debug(f"[member] Client sets mode: {action}{mode} {param} on {channel.name}")
 	if not (target_client := IRCD.find_user(param)):
@@ -154,7 +153,6 @@ def do_channel_member_mode(client, channel, action, mode, param):
 		return 1
 	return 0
 
-
 def add_to_buff(modebuf, parambuf, action, prevaction, mode, param):
 	# logging.debug(f"Adding {action}{mode} to modebuf")
 	if action != prevaction:
@@ -164,7 +162,6 @@ def add_to_buff(modebuf, parambuf, action, prevaction, mode, param):
 	if param:
 		parambuf.append(str(param))
 	return prevaction
-
 
 def handle_mode_list(client, channel, action, mode, param):
 	"""
@@ -193,7 +190,6 @@ def handle_mode_list(client, channel, action, mode, param):
 			return entry_mask
 		return param_mask
 
-
 def display_channel_list_entries(client, channel, mode):
 	list_modes = IRCD.get_list_modes_str()
 	for char in mode:
@@ -209,7 +205,6 @@ def display_channel_list_entries(client, channel, mode):
 				return 1
 
 	return 0
-
 
 def send_modelines(client, channel, modebuf, parambuf, send_ts=0):
 	def send_one_line():
@@ -263,7 +258,6 @@ def send_modelines(client, channel, modebuf, parambuf, send_ts=0):
 
 	hook = Hook.LOCAL_CHANNEL_MODE if client == IRCD.me or client.local else Hook.REMOTE_CHANNEL_MODE
 	IRCD.run_hook(hook, client, channel, modebuf, parambuf)
-
 
 def cmd_channelmode(client, recv):
 	channel = IRCD.find_channel(recv[1])
@@ -341,13 +335,23 @@ def cmd_channelmode(client, recv):
 				continue
 
 		if client.user:
-			is_servbot = cmode.is_ok == Channelmode.allow_servbots
-			allowed = cmode.is_ok(client, channel, action, mode, param, cmode.CHK_ACCESS) or not client.local
-			if not allowed and client.has_permission("channel:override:mode") and not is_servbot:
+			is_service_mode = cmode.is_ok == Channelmode.allow_services
+			allowed_code = cmode.is_ok(client, channel, action, mode, param, cmode.CHK_ACCESS)
+			allowed = ChanPrivReq.ACCESSOK if not client.local else allowed_code
+			if allowed <= ChanPrivReq.NOTOPER and client.has_permission("channel:override:mode") and not is_service_mode:
 				override = 1
-			elif not allowed:
-				if allowed == 0 and not is_servbot:
-					client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name)
+			elif allowed <= ChanPrivReq.NOTOPER:
+				if not is_service_mode:
+					if allowed == ChanPrivReq.NOTADMIN:
+						client.sendnumeric(Numeric.ERR_CHANADMPRIVSNEEDED, channel.name)
+					elif allowed == ChanPrivReq.NOTOWNER:
+						client.sendnumeric(Numeric.ERR_CHANOWNPRIVSNEEDED, channel.name)
+					elif allowed == ChanPrivReq.ONLYOWNER:
+						client.sendnumeric(Numeric.ERR_CHANHASOWNER, channel.name)
+					elif allowed == ChanPrivReq.NOTIRCOP:
+						client.sendnumeric(Numeric.ERR_NOPRIVILEGES)
+					elif allowed != ChanPrivReq.DONTSENDERROR:
+						client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name)
 				continue
 
 		if client.user and client.local and not client.has_permission("channel:override:mode"):
@@ -451,7 +455,6 @@ def cmd_channelmode(client, recv):
 	if unknown and client.user:
 		client.sendnumeric(Numeric.ERR_UNKNOWNMODE, ''.join(unknown))
 
-
 def cmd_mode(client, recv):
 	target = recv[1]
 	if IRCD.find_channel(target):
@@ -459,14 +462,12 @@ def cmd_mode(client, recv):
 	elif IRCD.find_user(target):
 		cmd_usermode(client, recv)
 
-
 def cmd_samode(client, recv):
 	if not client.has_permission("sacmds:samode"):
 		return client.sendnumeric(Numeric.ERR_NOPRIVILEGES)
 	if not IRCD.find_channel(recv[1]):
 		return client.sendnumeric(Numeric.ERR_NOSUCHCHANNEL, recv[1])
 	Command.do(IRCD.me, "MODE", *recv[1:])
-
 
 def init(module):
 	Command.add(module, cmd_mode, "MODE", 1, Flag.CMD_USER)

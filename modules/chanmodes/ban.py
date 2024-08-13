@@ -8,7 +8,6 @@ HEADER = {
 	"name": "channelbans"
 }
 
-
 def display_banlist(client, channel, mode):
 	if mode == "b":
 		if channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:see:banlist"):
