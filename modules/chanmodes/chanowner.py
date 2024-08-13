@@ -4,15 +4,23 @@ chanowner (+q)
 
 import logging
 
-from handle.core import Channelmode, ChanPrivReq
+from handle.core import Channelmode, ChanPrivReq, IRCD
 
 def validate_member(client, channel, action, mode, param, CHK_TYPE):
 	if CHK_TYPE == Channelmode.CHK_ACCESS:
+		# Access will be performed actually by CHK_MEMBER later
+		return ChanPrivReq.ACCESSOK
+	elif CHK_TYPE == Channelmode.CHK_MEMBER:
 		if action in "-+" and not client.local:
 			return ChanPrivReq.ACCESSOK
-		elif action == '-':
-			return ChanPrivReq.NOTOWNER
-		return ChanPrivReq.ONLYOWNER
+		# Only one owner can be on channel
+		if action == "+" and (channel.client_has_membermodes(client, "q") or not client.local):
+			return ChanPrivReq.ONLYOWNER
+		if target := IRCD.find_user(param):
+			# Cannot do -q on anyone but myself
+			if action == '-' and target.name == client.name and channel.client_has_membermodes(client, "q"):
+				return ChanPrivReq.ACCESSOK
+		return ChanPrivReq.NOTOWNER
 	return 0
 
 def init(module):

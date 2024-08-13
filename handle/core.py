@@ -990,6 +990,7 @@ class Server:
 	authed: int = 0
 	squit: int = 0
 	link = None
+	local: LocalClient = None
 
 	def flood_safe_off(self):
 		pass
@@ -1138,7 +1139,7 @@ class Usermode:
 			case Usermode.allow_opers:
 				return "IRCops only"
 			case Usermode.allow_services:
-				return "Settable by service bots"
+				return "Settable by services"
 			case Usermode.allow_none:
 				return "Settable by servers"
 			case _:
@@ -1176,6 +1177,7 @@ class Channelmode:
 	LISTMODE: ClassVar[int] = 2
 	CHK_PARAM: ClassVar[int] = 3
 	CHK_ACCESS: ClassVar[int] = 4
+	CHK_MEMBER: ClassVar[int] = 5
 
 	flag: str = ''
 	prefix: str = ''
@@ -2856,6 +2858,7 @@ class Numeric:
 	ERR_SERVERONLY = 487, ":{} is a server-only command"
 	ERR_SECUREONLY = 489, "{} :Cannot join channel (not using a secure connection)"
 	ERR_NOOPERHOST = 491, ":No O:lines for your host"
+	ERR_SERVICESAGENT = 493, "{} :{} is a services agent"
 	ERR_CHANHASOWNER = 497, "{} :Only one channel owner can be on channel"
 	ERR_CHANADMPRIVSNEEDED = 498, "{} :You're not a channel administrator"
 	ERR_CHANOWNPRIVSNEEDED = 499, "{} :You're not a channel owner"

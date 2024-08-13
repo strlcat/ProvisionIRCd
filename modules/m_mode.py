@@ -135,12 +135,25 @@ def cmd_usermode(client, recv):
 	if unknown:
 		client.sendnumeric(Numeric.ERR_UMODEUNKNOWNFLAG, ''.join(unknown))
 
-def do_channel_member_mode(client, channel, action, mode, param):
+def do_channel_member_mode(client, channel, action, cmode, mode, param):
 	# logging.debug(f"[member] Client sets mode: {action}{mode} {param} on {channel.name}")
 	if not (target_client := IRCD.find_user(param)):
-		return client.sendnumeric(Numeric.ERR_NOSUCHNICK, param)
+		client.sendnumeric(Numeric.ERR_NOSUCHNICK, param)
+		return 0
 	if target_client not in channel.clients():
-		return client.sendnumeric(Numeric.ERR_USERNOTINCHANNEL, param, channel.name)
+		client.sendnumeric(Numeric.ERR_USERNOTINCHANNEL, param, channel.name)
+		return 0
+
+	if 'S' in target_client.user.modes or 'q' in target_client.user.modes and client.name != target_client.name and not client.has_permission("channel:override:mode"):
+		client.sendnumeric(Numeric.ERR_SERVICESAGENT, channel.name, param)
+		return 0
+
+	allowed_code = cmode.is_ok(client, channel, action, mode, param, cmode.CHK_MEMBER)
+	allowed = ChanPrivReq.ACCESSOK if not client.local else allowed_code
+	if allowed < ChanPrivReq.ACCESSOK and not client.has_permission("channel:override:mode"):
+		report_access_denied(client, channel, allowed)
+		return 0
+
 	if action == '+':
 		if channel.client_has_membermodes(target_client, mode):
 			return 0
@@ -259,6 +272,18 @@ def send_modelines(client, channel, modebuf, parambuf, send_ts=0):
 	hook = Hook.LOCAL_CHANNEL_MODE if client == IRCD.me or client.local else Hook.REMOTE_CHANNEL_MODE
 	IRCD.run_hook(hook, client, channel, modebuf, parambuf)
 
+def report_access_denied(client, channel, allowed):
+	if allowed == ChanPrivReq.NOTADMIN:
+		client.sendnumeric(Numeric.ERR_CHANADMPRIVSNEEDED, channel.name)
+	elif allowed == ChanPrivReq.NOTOWNER:
+		client.sendnumeric(Numeric.ERR_CHANOWNPRIVSNEEDED, channel.name)
+	elif allowed == ChanPrivReq.ONLYOWNER:
+		client.sendnumeric(Numeric.ERR_CHANHASOWNER, channel.name)
+	elif allowed == ChanPrivReq.NOTIRCOP:
+		client.sendnumeric(Numeric.ERR_NOPRIVILEGES)
+	elif allowed != ChanPrivReq.DONTSENDERROR:
+		client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name)
+
 def cmd_channelmode(client, recv):
 	channel = IRCD.find_channel(recv[1])
 	if len(recv) == 2:
@@ -338,20 +363,11 @@ def cmd_channelmode(client, recv):
 			is_service_mode = cmode.is_ok == Channelmode.allow_services
 			allowed_code = cmode.is_ok(client, channel, action, mode, param, cmode.CHK_ACCESS)
 			allowed = ChanPrivReq.ACCESSOK if not client.local else allowed_code
-			if allowed <= ChanPrivReq.NOTOPER and client.has_permission("channel:override:mode") and not is_service_mode:
+			if allowed < ChanPrivReq.ACCESSOK and client.has_permission("channel:override:mode") and not is_service_mode:
 				override = 1
-			elif allowed <= ChanPrivReq.NOTOPER:
+			elif allowed < ChanPrivReq.ACCESSOK:
 				if not is_service_mode:
-					if allowed == ChanPrivReq.NOTADMIN:
-						client.sendnumeric(Numeric.ERR_CHANADMPRIVSNEEDED, channel.name)
-					elif allowed == ChanPrivReq.NOTOWNER:
-						client.sendnumeric(Numeric.ERR_CHANOWNPRIVSNEEDED, channel.name)
-					elif allowed == ChanPrivReq.ONLYOWNER:
-						client.sendnumeric(Numeric.ERR_CHANHASOWNER, channel.name)
-					elif allowed == ChanPrivReq.NOTIRCOP:
-						client.sendnumeric(Numeric.ERR_NOPRIVILEGES)
-					elif allowed != ChanPrivReq.DONTSENDERROR:
-						client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name)
+					report_access_denied(client, channel, allowed)
 				continue
 
 		if client.user and client.local and not client.has_permission("channel:override:mode"):
@@ -386,7 +402,9 @@ def cmd_channelmode(client, recv):
 				param = IRCD.strip_format(param)
 				paramcount += 1
 
-				if result := cmode.is_ok(client, channel, action, mode, param, cmode.CHK_PARAM) or not client.local:
+				result_code = cmode.is_ok(client, channel, action, mode, param, cmode.CHK_PARAM)
+				result = ChanPrivReq.ACCESSOK if not client.local else result_code
+				if result == ChanPrivReq.ACCESSOK:
 					logging.debug(f"Allowed to {action}{mode} {param}: {result} by {cmode.is_ok}")
 					if not (param := str(cmode.conv_param(param))) and not client.local:
 						# Param not allowed.
@@ -413,12 +431,9 @@ def cmd_channelmode(client, recv):
 			param = IRCD.strip_format(param)
 			paramcount += 1
 			if cmode.type == cmode.MEMBER:
-				if do_channel_member_mode(client, channel, action, mode, param):
+				if do_channel_member_mode(client, channel, action, cmode, mode, param):
 					nick = IRCD.find_user(param).name
 					prevaction = add_to_buff(modebuf, parambuf, action, prevaction, mode, param=nick)
-				continue
-
-			if not cmode.is_ok(client, channel, action, mode, param, cmode.CHK_PARAM) and client.local:
 				continue
 
 			if client.local:

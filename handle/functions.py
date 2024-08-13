@@ -139,3 +139,32 @@ def cidr_match(first, second):
 	match_cidr = address_inside_subnet(addr, cidr)
 
 	return match_nickuser and match_cidr
+
+def compare_chanops_str(x, y):
+	levels = {'q': 5, 'a': 4, 'o': 3, 'h': 2, 'v': 1}
+	ux = 0
+	uy = 0
+	for c in x:
+		if c not in 'qaohv':
+			continue
+		l = levels[c]
+		if l > ux:
+			ux = l
+	for c in y:
+		if c not in 'qaohv':
+			continue
+		l = levels[c]
+		if l > uy:
+			uy = l
+
+	if ux > uy:
+		return 1
+	elif ux < uy:
+		return -1
+	else:
+		return 0
+
+def compare_chanops(channel, x, y):
+	ux = channel.get_modes_of_client_str(x)
+	uy = channel.get_modes_of_client_str(y)
+	return compare_chanops_str(ux, uy)

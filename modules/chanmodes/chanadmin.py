@@ -4,13 +4,20 @@ chanadmin (+a)
 
 import logging
 
-from handle.core import Channelmode, ChanPrivReq
+from handle.core import Channelmode, ChanPrivReq, IRCD
+from handle.functions import compare_chanops
 
 def validate_member(client, channel, action, mode, param, CHK_TYPE):
 	if CHK_TYPE == Channelmode.CHK_ACCESS:
-		if action in "-+" and (channel.client_has_membermodes(client, "q") or not client.local):
-			return ChanPrivReq.ACCESSOK
-		logging.debug(f"[{client.name}] Insufficient access to set {action}{mode} on channel {channel.name}")
+		# Access will be performed actually by CHK_MEMBER later
+		return ChanPrivReq.ACCESSOK
+	elif CHK_TYPE == Channelmode.CHK_MEMBER:
+		if target := IRCD.find_user(param):
+			if action in "-+" and ((channel.client_has_membermodes(client, "q") and compare_chanops(channel, client, target) == 1) or not client.local):
+				return ChanPrivReq.ACCESSOK
+			# Cannot do -a on anyone but myself
+			if action == '-' and target.name == client.name and channel.client_has_membermodes(client, "a"):
+				return ChanPrivReq.ACCESSOK
 		return ChanPrivReq.NOTOWNER
 	return 0
 

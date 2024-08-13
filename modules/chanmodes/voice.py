@@ -4,12 +4,17 @@ voice
 
 import logging
 
-from handle.core import Channelmode, ChanPrivReq
+from handle.core import Channelmode, ChanPrivReq, IRCD
+from handle.functions import compare_chanops
 
 def validate_member(client, channel, action, mode, param, CHK_TYPE):
 	if CHK_TYPE == Channelmode.CHK_ACCESS:
-		if action in "-+" and (channel.client_has_membermodes(client, "hoaq") or not client.local):
-			return ChanPrivReq.ACCESSOK
+		# Access will be performed actually by CHK_MEMBER later
+		return ChanPrivReq.ACCESSOK
+	elif CHK_TYPE == Channelmode.CHK_MEMBER:
+		if target := IRCD.find_user(param):
+			if action in "-+" and ((channel.client_has_membermodes(client, "hoaq") and compare_chanops(channel, client, target) >= 0) or not client.local):
+				return ChanPrivReq.ACCESSOK
 		return ChanPrivReq.NOTOPER
 	return 0
 

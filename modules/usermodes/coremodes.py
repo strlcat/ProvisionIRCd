@@ -32,7 +32,7 @@ def init(module):
 	Usermode.add(module, 'X', 0, 0, Usermode.allow_none, "Extended usermodes are in effect (reserved for future use)")
 	Usermode.add(module, 'z', 1, 0, Usermode.allow_none, "User is using a secure connection")
 	Usermode.add(module, 'H', 1, 1, Usermode.allow_opers, "Hide IRCop status")
-	Usermode.add(module, 'S', 1, 1, umode_S_isok, "Marks the client as a network service [Settable by service bots]")
+	Usermode.add(module, 'S', 1, 1, umode_S_isok, "Marks the client as a network service [Settable by services]")
 
 	Snomask.add(module, 'c', 0, "Can read local connect/disconnect notices")
 	Snomask.add(module, 'f', 1, "See excess flood alerts")
