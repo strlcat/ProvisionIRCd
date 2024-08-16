@@ -315,8 +315,8 @@ def cmd_channelmode(client, recv):
 	override = 0
 	# This is ugly and shall not be there but belong to
 	# readonly.py module, but for now this is it.
-	if 'U' in channel.modes:
-		accflag = channel.get_param('U')
+	if 'M' in channel.modes:
+		accflag = channel.get_param('M')
 		if not channel.client_has_membermodes(client, get_higher_opers_than(accflag)):
 			if client.local and not client.has_permission("channel:override:mode"):
 				return client.sendnumeric(Numeric.ERR_CHANOWNPRIVSNEEDED, channel.name)
