@@ -144,15 +144,21 @@ def do_channel_member_mode(client, channel, action, cmode, mode, param):
 		client.sendnumeric(Numeric.ERR_USERNOTINCHANNEL, param, channel.name)
 		return 0
 
-	if 'S' in target_client.user.modes or 'q' in target_client.user.modes and client.name != target_client.name and not client.has_permission("channel:override:mode"):
-		client.sendnumeric(Numeric.ERR_SERVICESAGENT, channel.name, param)
-		return 0
+	override = 0
+	if 'S' in target_client.user.modes and client.name != target_client.name:
+		if not client.server:
+			if client.has_permission("channel:override:mode"):
+				override = 1
+			else:
+				client.sendnumeric(Numeric.ERR_SERVICESAGENT, channel.name, param)
+				return 0
 
-	allowed_code = cmode.is_ok(client, channel, action, mode, param, cmode.CHK_MEMBER)
-	allowed = ChanPrivReq.ACCESSOK if not client.local else allowed_code
-	if allowed < ChanPrivReq.ACCESSOK and not client.has_permission("channel:override:mode"):
-		report_access_denied(client, channel, allowed)
-		return 0
+	if not override:
+		allowed_code = cmode.is_ok(client, channel, action, mode, param, cmode.CHK_MEMBER)
+		allowed = ChanPrivReq.ACCESSOK if not client.local else allowed_code
+		if allowed < ChanPrivReq.ACCESSOK and not client.has_permission("channel:override:mode"):
+			report_access_denied(client, channel, allowed)
+			return 0
 
 	if action == '+':
 		if channel.client_has_membermodes(target_client, mode):
