@@ -54,7 +54,7 @@ def cmd_kick(client, recv):
 
 	if not client.server:
 		if not channel.client_has_membermodes(client, "hoaq") and not client.has_permission("channel:override:kick:no-ops"):
-			return client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name)
+			return client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name, "You're not a channel operator")
 
 		elif not channel.client_has_membermodes(client, "hoaq"):
 			oper_override = 1

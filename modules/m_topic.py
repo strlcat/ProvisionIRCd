@@ -65,7 +65,7 @@ def cmd_topic(client, recv):
 		if 't' in channel.modes and client.local:
 			if not channel.client_has_membermodes(client, "hoaq"):
 				if not client.has_permission("channel:override:topic:no-ops"):
-					return client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name)
+					return client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name, "You're not a channel operator")
 				else:
 					oper_override = 1
 

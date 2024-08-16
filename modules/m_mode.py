@@ -279,16 +279,18 @@ def send_modelines(client, channel, modebuf, parambuf, send_ts=0):
 	IRCD.run_hook(hook, client, channel, modebuf, parambuf)
 
 def report_access_denied(client, channel, allowed):
+	reason = "You're not a channel operator"
 	if allowed == ChanPrivReq.NOTADMIN:
-		client.sendnumeric(Numeric.ERR_CHANADMPRIVSNEEDED, channel.name)
+		reason = "You're not a channel administrator"
 	elif allowed == ChanPrivReq.NOTOWNER:
-		client.sendnumeric(Numeric.ERR_CHANOWNPRIVSNEEDED, channel.name)
+		reason = "You're not a channel owner"
 	elif allowed == ChanPrivReq.ONLYOWNER:
-		client.sendnumeric(Numeric.ERR_CHANHASOWNER, channel.name)
+		reason = "There can be only one channel owner at a time"
 	elif allowed == ChanPrivReq.NOTIRCOP:
-		client.sendnumeric(Numeric.ERR_NOPRIVILEGES)
-	elif allowed != ChanPrivReq.DONTSENDERROR:
-		client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name)
+		reason = "This mode is settable only by IRCOps"
+
+	if allowed != ChanPrivReq.DONTSENDERROR:
+		client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name, reason)
 
 # Ugly, d'oh.
 def get_higher_opers_than(o):
@@ -319,13 +321,13 @@ def cmd_channelmode(client, recv):
 		accflag = channel.get_param('M')
 		if not channel.client_has_membermodes(client, get_higher_opers_than(accflag)):
 			if client.local and not client.has_permission("channel:override:mode"):
-				return client.sendnumeric(Numeric.ERR_CHANOWNPRIVSNEEDED, channel.name)
+				return client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name, "You're not a channel owner")
 			else:
 				override = 1
 
 	if client.user and not channel.client_has_membermodes(client, "hoaq"):
 		if client.local and not client.has_permission("channel:override:mode"):
-			return client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name)
+			return client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name, "You're not a channel operator")
 		else:
 			override = 1
 
