@@ -290,6 +290,19 @@ def report_access_denied(client, channel, allowed):
 	elif allowed != ChanPrivReq.DONTSENDERROR:
 		client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name)
 
+# Ugly, d'oh.
+def get_higher_opers_than(o):
+	if o == 'h':
+		return "qaoh"
+	elif o == 'o':
+		return "qao"
+	elif o == 'a':
+		return "qa"
+	elif o == 'q':
+		return "q"
+	else:
+		return o
+
 def cmd_channelmode(client, recv):
 	channel = IRCD.find_channel(recv[1])
 	if len(recv) == 2:
@@ -300,11 +313,15 @@ def cmd_channelmode(client, recv):
 		return
 
 	override = 0
-	if 'U' in channel.modes and not channel.client_has_membermodes(client, "q"):
-		if client.local and not client.has_permission("channel:override:mode"):
-			return client.sendnumeric(Numeric.ERR_CHANOWNPRIVSNEEDED, channel.name)
-		else:
-			override = 1
+	# This is ugly and shall not be there but belong to
+	# readonly.py module, but for now this is it.
+	if 'U' in channel.modes:
+		accflag = channel.get_param('U')
+		if not channel.client_has_membermodes(client, get_higher_opers_than(accflag)):
+			if client.local and not client.has_permission("channel:override:mode"):
+				return client.sendnumeric(Numeric.ERR_CHANOWNPRIVSNEEDED, channel.name)
+			else:
+				override = 1
 
 	if client.user and not channel.client_has_membermodes(client, "hoaq"):
 		if client.local and not client.has_permission("channel:override:mode"):
