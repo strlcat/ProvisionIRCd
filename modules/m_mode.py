@@ -300,6 +300,12 @@ def cmd_channelmode(client, recv):
 		return
 
 	override = 0
+	if 'U' in channel.modes and not channel.client_has_membermodes(client, "q"):
+		if client.local and not client.has_permission("channel:override:mode"):
+			return client.sendnumeric(Numeric.ERR_CHANOWNPRIVSNEEDED, channel.name)
+		else:
+			override = 1
+
 	if client.user and not channel.client_has_membermodes(client, "hoaq"):
 		if client.local and not client.has_permission("channel:override:mode"):
 			return client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name)
