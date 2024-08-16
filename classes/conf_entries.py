@@ -150,6 +150,9 @@ class Operclass:
 				permissions.append(perm_list)
 
 		for perm_list in permissions:
+			if perm_list[0] == "everything":
+				return 1
+
 			path = check_path.split(':')
 			while perm_list:
 				current = path[0]
