@@ -13,7 +13,7 @@ def validate_member(client, channel, action, mode, param, CHK_TYPE):
 		return ChanPrivReq.ACCESSOK
 	elif CHK_TYPE == Channelmode.CHK_MEMBER:
 		if target := IRCD.find_user(param):
-			if action in "-+" and ((channel.client_has_membermodes(client, "q") and compare_chanops(channel, client, target) == 1) or not client.local):
+			if action in "-+" and ((channel.client_has_membermodes(client, "q") and compare_chanops(channel, client, target) >= 0) or not client.local):
 				return ChanPrivReq.ACCESSOK
 			# Cannot do -a on anyone but myself
 			if action == '-' and target.name == client.name and channel.client_has_membermodes(client, "a"):
@@ -30,7 +30,7 @@ def init(module):
 	Cmode_a.unset_with_param = 1
 	Cmode_a.type = Channelmode.MEMBER
 	Cmode_a.rank = 300  # Used to determine the position in PREFIX Isupport
-	Cmode_a.level = 4
+	Cmode_a.level = 5
 	Cmode_a.is_ok = validate_member
 	Cmode_a.desc = "Give/take channel admin status"
 	Channelmode.add(module, Cmode_a)
