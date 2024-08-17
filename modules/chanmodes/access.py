@@ -12,12 +12,12 @@ def display_acclist(client, channel, mode):
 	if mode == "A":
 		if channel.client_has_membermodes(client, "aq") or client.has_permission("channel:see:accesslist"):
 			for entry in reversed(channel.List[mode]):
-				client.sendnumeric(Numeric.RPL_ACCLIST, channel.name, entry.mask, entry.set_by, entry.set_time)
-		client.sendnumeric(Numeric.RPL_ENDOFACCLIST, channel.name)
+				client.sendnumeric(Numeric.RPL_ANYLIST, channel.name, entry.mask, entry.set_by, entry.set_time)
+		client.sendnumeric(Numeric.RPL_ENDOFANYLIST, channel.name, "Access")
 		return 1
 
 def access_on_join(client, channel):
-	opmode = channel.has_access(client)
+	opmode = channel.has_access(client, 'A', "vhoa")
 	if opmode:
 		Command.do(IRCD.me, "MODE", channel.name, *opmode.split(), *([client.name * 1]), str(channel.creationtime))
 

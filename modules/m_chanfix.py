@@ -177,7 +177,7 @@ def cmd_opme(client, recv):
 		client.sendnumeric(Numeric.ERR_NOTONCHANNEL, chname)
 		return
 	# Scan & restore privs according to channel +A entries
-	opmode = channel.has_access(client)
+	opmode = channel.has_access(client, 'A', "vhoa")
 	if opmode:
 		Command.do(IRCD.me, "MODE", channel.name, *opmode.split(), *([client.name * 1]), str(channel.creationtime))
 		IRCD.server_notice(client, f"{chname}: granted access +{opmode} {client.name}")

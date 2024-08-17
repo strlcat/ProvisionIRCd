@@ -991,6 +991,7 @@ class Server:
 	squit: int = 0
 	link = None
 	local: LocalClient = None
+	ulined: int = 0
 
 	def flood_safe_off(self):
 		pass
@@ -1518,7 +1519,7 @@ class Channel:
 		if self.check_match(client, 'I'):
 			return 1
 
-	def has_access(self, client):
+	def has_access(self, client, mode, validops):
 		def upgrade_opmode(m, t):
 			if not m:
 				return None
@@ -1536,7 +1537,14 @@ class Channel:
 				return m
 
 		opmode = None
-		for a in self.List['A']:
+
+		if len(mode) > 1:
+			return opmode
+		for c in validops:
+			if c not in 'vhoaq':
+				return opmode
+
+		for a in self.List[mode]:
 			accdef = a.mask
 			if len(accdef.split('@')[0].split(':')) < 2:
 				continue
@@ -1544,7 +1552,7 @@ class Channel:
 			accmode = accdef.split('@')[0].split(':')[0]
 			if len(accmode) != 1:
 				continue
-			if accmode not in 'vhoa':
+			if accmode not in validops:
 				continue
 			accmask = accdef.split('@')[0].split(':')[1] + '@' + accdef.split('@')[1]
 
@@ -2082,6 +2090,8 @@ class IRCD:
 
 	@staticmethod
 	def client_match_mask(client, mask):
+		if client.server and not client.user:
+			return 1
 		if is_match(mask, f'{client.name}!{client.user.username}@{client.user.realhost}'):
 			return 1
 		if is_match(mask, f'{client.name}!{client.user.username}@{client.ip}'):
@@ -2763,8 +2773,8 @@ class Numeric:
 	RPL_TOPICWHOTIME = 333, "{} {} {}"
 	RPL_WHOISBOT = 335, "{} :is a bot on {}"
 	RPL_INVITING = 341, "{} {}"
-	RPL_ACCLIST = 344, "{} {} {} {}"
-	RPL_ENDOFACCLIST = 345, "{} :End of Channel Access List"
+	RPL_ANYLIST = 344, "{} {} {} {}"
+	RPL_ENDOFANYLIST = 345, "{} :End of Channel {} List"
 	RPL_INVEXLIST = 346, "{} {} {} {}"
 	RPL_ENDOFINVEXLIST = 347, "{} :End of Channel Invite List"
 	RPL_EXLIST = 348, "{} {} {} {}"
