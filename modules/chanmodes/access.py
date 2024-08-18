@@ -17,7 +17,7 @@ def display_acclist(client, channel, mode):
 		return 1
 
 def access_on_join(client, channel):
-	opmode = channel.has_access(client, 'A', "vhoa")
+	opmode = channel.has_access(client, 'A', "vhoa", 1)
 	if opmode:
 		Command.do(IRCD.me, "MODE", channel.name, *opmode.split(), *([client.name * 1]), str(channel.creationtime))
 

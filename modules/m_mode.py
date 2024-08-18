@@ -318,7 +318,7 @@ def cmd_channelmode(client, recv):
 	# This is ugly and shall not be there but belong to
 	# readonly.py module, but for now this is it.
 	if len(channel.List['M']) > 0:
-		opmode = channel.has_access(client, 'M', "hoaq")
+		opmode = channel.has_access(client, 'M', "hoaq", -1)
 		if opmode:
 			if not channel.client_has_membermodes(client, get_higher_opers_than(opmode)):
 				if client.local and not client.has_permission("channel:override:mode"):

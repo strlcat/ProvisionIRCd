@@ -5,6 +5,7 @@
 import time
 
 from handle.core import Isupport, IRCD, Command, Numeric, Hook
+from handle.functions import get_higher_opers_than
 from handle.logger import logging
 
 TOPICLEN = 350
@@ -61,6 +62,20 @@ def cmd_topic(client, recv):
 
 		elif client not in channel.clients():
 			oper_override = 1
+
+
+		# This is ugly and shall not be there but belong to
+		# readonly.py module, but for now this is it.
+		if len(channel.List['T']) > 0:
+			opmode = channel.has_access(client, 'T', "vhoaq", -1)
+			if opmode:
+				if not channel.client_has_membermodes(client, get_higher_opers_than(opmode)):
+					if client.local and not client.has_permission("channel:override:topic:no-ops"):
+						return client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name, "You're not a channel owner")
+					else:
+						oper_override = 1
+			else:
+				return client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name, "You're not a channel owner")
 
 		if 't' in channel.modes and client.local:
 			if not channel.client_has_membermodes(client, "hoaq"):

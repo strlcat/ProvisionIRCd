@@ -1519,7 +1519,7 @@ class Channel:
 		if self.check_match(client, 'I'):
 			return 1
 
-	def has_access(self, client, mode, validops):
+	def has_access(self, client, mode, validops, updown=0):
 		def upgrade_opmode(m, t):
 			if not m:
 				return None
@@ -1531,6 +1531,22 @@ class Channel:
 			elif m in 'vh' and t in 'oa':
 				return t
 			elif m in 'vho' and t in 'a':
+				return t
+
+			else:
+				return m
+
+		def downgrade_opmode(m, t):
+			if not m:
+				return None
+			if not t:
+				return m
+
+			if m in 'hoa' and t in 'v':
+				return t
+			elif m in 'oa' and t in 'vh':
+				return t
+			elif m in 'a' and t in 'vho':
 				return t
 
 			else:
@@ -1560,8 +1576,10 @@ class Channel:
 				if not opmode:
 					opmode = accmode
 				else:
-					opmode = upgrade_opmode(opmode, accmode)
-
+					if updown == 1:
+						opmode = upgrade_opmode(opmode, accmode)
+					elif updown == -1:
+						opmode = downgrade_opmode(opmode, accmode)
 		return opmode
 
 	def level(self, client):

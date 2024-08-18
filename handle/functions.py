@@ -168,3 +168,16 @@ def compare_chanops(channel, x, y):
 	ux = channel.get_modes_of_client_str(x)
 	uy = channel.get_modes_of_client_str(y)
 	return compare_chanops_str(ux, uy)
+
+# Ugly, d'oh. These are for comparisons in client_has_membermodes etc.
+def get_higher_opers_than(o):
+	if o == 'h':
+		return "qaoh"
+	elif o == 'o':
+		return "qao"
+	elif o == 'a':
+		return "qa"
+	elif o == 'q':
+		return "q"
+	else:
+		return o
