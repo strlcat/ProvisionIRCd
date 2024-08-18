@@ -54,8 +54,8 @@ def cmd_kick(client, recv):
 
 	# This is ugly and shall not be there but belong to
 	# readonly.py module, but for now this is it.
-	if len(channel.List['Q']) > 0:
-		opmode = channel.has_access(client, 'Q', "hoaq", -1)
+	if len(channel.List['K']) > 0:
+		opmode = channel.has_access(client, 'K', "hoaq", -1)
 		if opmode:
 			if not channel.client_has_membermodes(client, get_higher_opers_than(opmode)):
 				if client.local and not client.has_permission("channel:override:kick:no-ops"):
@@ -76,12 +76,6 @@ def cmd_kick(client, recv):
 		return client.sendnumeric(Numeric.ERR_ATTACKDENY, channel.name, target_client.name)
 
 	elif channel.level(target_client) > channel.level(client) or 'q' in target_client.user.modes:
-		oper_override = 1
-
-	if 'Q' in channel.modes and channel.level(client) < 4 and not client.has_permission("channel:override:kick:no-kick"):
-		return client.sendnumeric(Numeric.ERR_CANNOTDOCOMMAND, channel.name, "KICKs are not permitted in this channel")
-
-	elif 'Q' in channel.modes and not channel.client_has_membermodes(client, "aq"):
 		oper_override = 1
 
 	if not client_can_kick_target(client, target_client, channel, reason):
