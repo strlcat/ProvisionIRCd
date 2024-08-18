@@ -9,8 +9,12 @@ def cmd_ircops(client, recv):
 	"""
 	Displays all online IRC Operators.
 	"""
-	client.sendnumeric(Numeric.RPL_IRCOPS, 'Nick				  Status			 Server')
-	client.sendnumeric(Numeric.RPL_IRCOPS, '------------------------------------------')
+	nickhdr = "Nick"
+	stathdr = "Status"
+	servhdr = "Server"
+	allhdr = f"{nickhdr:22} {stathdr} {servhdr.rjust(31)}"
+	client.sendnumeric(Numeric.RPL_IRCOPS, "" + allhdr + "")
+	client.sendnumeric(Numeric.RPL_IRCOPS, '-' * len(allhdr))
 	aways, opers = 0, 0
 	for oper_client in [c for c in IRCD.global_users() if 'o' in c.user.modes and ('H' not in c.user.modes or 'o' in client.user.modes) and 'S' not in c.user.modes]:
 		opers += 1
