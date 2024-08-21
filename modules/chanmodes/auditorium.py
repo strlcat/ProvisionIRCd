@@ -7,9 +7,14 @@ from handle.core import Channelmode, Hook
 
 def is_member_visible(user, target, channel):
 	if 'u' in channel.modes:
-	   if not channel.client_has_membermodes(target, "hoaq") and not (channel.client_has_membermodes(user, "oaq") or user.has_permission("channel:see:names")):
-		   return Hook.DENY
-	return Hook.CONTINUE
+		if user.name == target.name:
+			return Hook.ALLOW
+		if channel.client_has_membermodes(user, "oaq") or user.has_permission("client:see:names"):
+			return Hook.ALLOW
+		elif channel.client_has_membermodes(target, "oaq"):
+			return Hook.ALLOW
+		return Hook.DENY
+	return 0
 
 def init(module):
 	Hook.add(Hook.VISIBLE_ON_CHANNEL, is_member_visible)
