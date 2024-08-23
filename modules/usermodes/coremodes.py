@@ -11,7 +11,7 @@ def umode_x_isok(client):
 		return 1
 	if 'o' in client.user.modes:
 		return 1
-	client.sendnumeric(Numeric.RPL_CANNOTHIDEHOST)
+	client.sendnumeric(Numeric.ERR_CANNOTHIDEHOST)
 	return 0
 
 def umode_S_isok(client):
