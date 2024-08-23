@@ -4,7 +4,6 @@ channel mode +k
 
 from handle.core import Numeric, Channelmode, Hook, ChanPrivReq
 
-
 def key_is_ok(client, channel, action, mode, param, CHK_TYPE):
 	if CHK_TYPE == Channelmode.CHK_ACCESS:
 		if channel.client_has_membermodes(client, "aq"):
@@ -19,7 +18,6 @@ def key_is_ok(client, channel, action, mode, param, CHK_TYPE):
 		return 1
 	return 0
 
-
 def can_join_key(client, channel, key):
 	if client.has_permission("channel:override:join:key"):
 		return 0
@@ -27,10 +25,8 @@ def can_join_key(client, channel, key):
 		return Numeric.ERR_BADCHANNELKEY
 	return 0
 
-
 def key_conv_param(param):
-	return param[:12]
-
+	return param[:24]
 
 def sjoin_check_key(ourkey, theirkey):
 	if ourkey == theirkey:
@@ -48,7 +44,6 @@ def sjoin_check_key(ourkey, theirkey):
 		return 1
 
 	return -1
-
 
 def init(module):
 	Cmode_k = Channelmode()
