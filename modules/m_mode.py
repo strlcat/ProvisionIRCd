@@ -316,16 +316,17 @@ def cmd_channelmode(client, recv):
 	override = 0
 	# This is ugly and shall not be there but belong to
 	# readonly.py module, but for now this is it.
-	if len(channel.List['M']) > 0:
-		opmode = channel.has_access(client, 'M', "hoaq", -1)
-		if opmode:
-			if not channel.client_has_membermodes(client, get_higher_opers_than(opmode)):
-				if client.local and not client.has_permission("channel:override:mode"):
+	if client.user and len(channel.List['M']) > 0:
+		if client.local and not client.has_permission("channel:override:mode"):
+			opmode = channel.has_access(client, 'M', "hoaq", -1)
+			if opmode:
+				if not channel.client_has_membermodes(client, get_higher_opers_than(opmode)):
 					return client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name, "You're not a channel owner")
-				else:
-					override = 1
+			else:
+				if not channel.client_has_membermodes(client, "q"):
+					return client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name, "You're not a channel owner")
 		else:
-			return client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name, "You're not a channel owner")
+			override = 1
 
 	if client.user and not channel.client_has_membermodes(client, "hoaq"):
 		if client.local and not client.has_permission("channel:override:mode"):
