@@ -966,6 +966,7 @@ class User:
 	realhost: str = ''
 	cloakhost: str = ''
 	c_cloakhost: str = ''
+	do_chanfix: bool = True
 	snomask: str = ''
 	swhois: list = field(default_factory=list)  # Swhois dataclasses
 	away: str = ''
@@ -1696,7 +1697,7 @@ class Channel:
 					if modes_on_join := IRCD.get_setting("modes-on-join"):
 						Command.do(IRCD.me, "MODE", self.name, *modes_on_join.split(), str(self.creationtime))
 
-			if IRCD.get_setting("chanfix") and IRCD.get_setting("chanfix-on-join"):
+			if IRCD.get_setting("chanfix") and IRCD.get_setting("chanfix-on-join") and client.user.do_chanfix:
 				self.do_chanfix(client)
 
 		if self.name[0] != '&':

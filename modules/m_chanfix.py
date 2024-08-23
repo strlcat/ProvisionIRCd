@@ -8,11 +8,13 @@ from handle.core import Flag, Numeric, Command, IRCD, Hook
 
 def cmd_chanfix(client, recv):
 	"""
-	Syntax: CHANFIX <channel>
+	Syntax: CHANFIX <0|1|channel>
 	Restores lost owner status on given channel.
 	You must be a creator of the channel in order
 	to restore owner status on it. If channel is
 	registered (+r), CHANFIX is disabled on it.
+	If you specify 0 as an argument, CHANFIX will
+	be disabled for you. Reenable it with 1.
 	"""
 	if not client.local:
 		return
@@ -23,6 +25,17 @@ def cmd_chanfix(client, recv):
 		return
 
 	chname = recv[1]
+
+	if len(chname) == 1 and chname in "01" and IRCD.get_setting("chanfix-on-join"):
+		if chname == "0":
+			client.user.do_chanfix = False
+			IRCD.server_notice(client, f"CHANFIX was disabled for you on join")
+			return
+		elif chname == "1":
+			client.user.do_chanfix = True
+			IRCD.server_notice(client, f"CHANFIX is enabled for you on join")
+			return
+
 	channel = IRCD.find_channel(chname)
 	if not channel:
 		client.sendnumeric(Numeric.ERR_NOSUCHCHANNEL, chname)
