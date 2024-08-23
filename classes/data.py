@@ -5,7 +5,7 @@ class OperData:
 	def save_host(client):
 		if client not in OperData.clients:
 			OperData.clients[client] = {}
-		OperData.clients[client]["host"] = client.user.cloakhost
+		OperData.clients[client]["host"] = client.user.c_cloakhost
 
 	@staticmethod
 	def save_original_class(client):

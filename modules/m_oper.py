@@ -15,7 +15,6 @@ except ImportError:
 	bcrypt = None
 from handle.functions import is_match
 
-
 def restore_host(client):
 	if host := OperData.get_host(client):
 		if 'x' not in client.user.modes:
@@ -24,11 +23,9 @@ def restore_host(client):
 		data = f":{client.id} SETHOST :{client.user.cloakhost}"
 		IRCD.send_to_servers(client, [], data)
 
-
 def restore_class(client):
 	if original_class := OperData.get_original_class(client):
 		client.set_class_obj(original_class)
-
 
 def do_oper_up(client, oper):
 	if client.user.oper or not client.local:
@@ -70,6 +67,8 @@ def do_oper_up(client, oper):
 				data = f":{client.id} SETHOST :{client.user.cloakhost}"
 				logging.debug(f"Syncing SETHOST to servers: {data}")
 				IRCD.send_to_servers(client, [], data)
+				if 'x' not in client.user.modes:
+					client.add_user_modes(['x'])
 
 	msg = f"*** {client.name} ({client.user.username}@{client.user.realhost}) [block: {client.user.operlogin}, operclass: {client.user.operclass.name}] is now an IRC Operator (+{client.user.opermodes})"
 	IRCD.log(client, "info", "oper", "OPER_UP", msg)
@@ -90,13 +89,11 @@ def do_oper_up(client, oper):
 	data = f":{client.name} UMODE +o"
 	IRCD.send_to_local_common_chans(client, [], "oper-notify", data)
 
-
 def oper_fail(client, opername, reason):
 	client.local.flood_penalty += 350000
 	client.sendnumeric(Numeric.ERR_NOOPERHOST)
 	msg = f"Failed oper attempt by {client.name} [{opername}] ({client.user.username}@{client.user.realhost}): {reason}"
 	IRCD.log(client, "warn", "oper", "OPER_FAILED", msg)
-
 
 def cmd_oper(client, recv):
 	if client.user.operlogin:
@@ -152,7 +149,6 @@ def cmd_oper(client, recv):
 
 	do_oper_up(client, oper)
 
-
 def watch_deoper(client, target, current_modes, new_modes, param):
 	if 'o' in current_modes and 'o' not in new_modes and target.local:
 		# Only show -o for oper-notify
@@ -168,7 +164,6 @@ def watch_deoper(client, target, current_modes, new_modes, param):
 				target.del_swhois(swhois.line)
 
 		target.del_md("operlogin")
-
 
 def oper_new_connection(client):
 	if client.user.oper:
@@ -187,7 +182,6 @@ def oper_new_connection(client):
 			do_oper_up(client, oper)
 			break
 
-
 def oper_account_login(client):
 	if client.user.account == "*" or client.user.oper or not client.registered or not client.local:
 		return
@@ -198,17 +192,14 @@ def oper_account_login(client):
 			do_oper_up(client, oper)
 			break
 
-
 def oper_join(client, channel):
 	if 'o' in client.user.modes and client.user.operlogin:
 		data = f":{client.fullmask} UMODE +o"
 		IRCD.send_to_local_common_chans(client, [], client_cap="oper-notify", data=data)
 
-
 def operdata_clean(client, reason):
 	if client in OperData.clients:
 		del OperData.clients[client]
-
 
 def init(module):
 	Command.add(module, cmd_oper, "OPER", 1, Flag.CMD_USER)

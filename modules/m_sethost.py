@@ -15,6 +15,8 @@ def cmd_sethost(client, recv):
 	host = host.removeprefix('.').removesuffix('.').strip()
 	if host and host != client.user.cloakhost:
 		client.setinfo(host, t="host")
+		if 'x' not in client.user.modes:
+			client.add_user_modes(['x'])
 
 	data = f":{client.id} {' '.join(recv)}"
 	IRCD.send_to_servers(client, [], data)
