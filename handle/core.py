@@ -2869,6 +2869,7 @@ class Numeric:
 	ERR_NONICKCHANGE = 447, ":{} Nick changes are not allowed on this channel"
 	ERR_FORBIDDENCHANNEL = 448, "{} {}"
 	ERR_NOTREGISTERED = 451, "You have not registered"
+	ERR_CANNOTHIDEHOST = 452, "Leave all channels first to hide or restore your cloak hostname"
 	ERR_ACCEPTEXIST = 457, "{} :does already exist on your ACCEPT list."
 	ERR_ACCEPTNOT = 458, "{} :is not found on your ACCEPT list."
 	ERR_NEEDMOREPARAMS = 461, ":{} Not enough parameters"

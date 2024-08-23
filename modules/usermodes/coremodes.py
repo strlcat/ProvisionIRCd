@@ -1,10 +1,7 @@
 """
 core user modes
 """
-
-from handle.core import IRCD, Usermode, Snomask
-from handle.logger import logging as log
-
+from handle.core import IRCD, Usermode, Snomask, Numeric
 
 def umode_x_isok(client):
 	if Usermode.allow_none(client):
@@ -12,7 +9,10 @@ def umode_x_isok(client):
 	chanlist = client.channels
 	if len(chanlist) == 0:
 		return 1
-	return 1 if 'o' in client.user.modes else 0
+	if 'o' in client.user.modes:
+		return 1
+	client.sendnumeric(Numeric.RPL_CANNOTHIDEHOST)
+	return 0
 
 def umode_S_isok(client):
 	if Usermode.allow_none(client):
