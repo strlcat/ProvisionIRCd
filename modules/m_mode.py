@@ -100,8 +100,7 @@ def cmd_usermode(client, recv):
 			IRCD.send_to_servers(client, [], data)
 
 		if 'x' in set(target.user.modes).difference(oldumodes):
-			cloak = IRCD.get_cloak(target)
-			target.setinfo(info=cloak, t="host")
+			target.setinfo(info=target.user.c_cloakhost, t="host")
 			data = f":{target.id} SETHOST :{target.user.cloakhost}"
 			IRCD.send_to_servers(client, [], data)
 

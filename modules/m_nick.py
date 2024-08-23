@@ -164,8 +164,10 @@ def create_user_from_uid(client, info: list):
 		new_client.ip = ip
 	new_client.info = ' '.join(info[12:]).removeprefix(':')
 	if cloakhost == '*':
+		new_client.user.c_cloakhost = new_client.user.realhost
 		new_client.user.cloakhost = new_client.user.realhost
 	else:
+		new_client.user.c_cloakhost = cloakhost
 		new_client.user.cloakhost = cloakhost
 	if new_client.ip == '*':
 		new_client.ip = client.ip

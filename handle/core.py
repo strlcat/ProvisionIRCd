@@ -603,6 +603,7 @@ class Client:
 			IRCD.server_notice(self, f"*** Host resolution disabled, using IP address instead")
 			self.user.realhost = self.ip
 
+		self.user.c_cloakhost = IRCD.get_cloak(self)
 		self.user.cloakhost = self.user.realhost
 
 	def add_user_modes(self, modes):
@@ -759,7 +760,7 @@ class Client:
 				self.add_user_modes(modes)
 
 		if 'x' in self.user.modes:
-			self.user.cloakhost = IRCD.get_cloak(self)
+			self.user.cloakhost = self.user.c_cloakhost
 		self.sendnumeric(Numeric.RPL_HOSTHIDDEN, self.user.cloakhost)
 
 		# Autojoin channels.
@@ -964,6 +965,7 @@ class User:
 	username: str = ''
 	realhost: str = ''
 	cloakhost: str = ''
+	c_cloakhost: str = ''
 	snomask: str = ''
 	swhois: list = field(default_factory=list)  # Swhois dataclasses
 	away: str = ''
