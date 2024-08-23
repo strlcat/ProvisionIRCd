@@ -26,7 +26,7 @@ def init(module):
 	Chmode_M.is_ok = Channelmode.allow_chanowner
 	Chmode_M.level = 5
 	Chmode_M.type = Channelmode.LISTMODE
-	Chmode_M.param_help = '<hoaq>:<nick!ident@host>'
+	Chmode_M.param_help = '<hoaq>#<nick!ident@host>'
 	Chmode_M.desc = 'Restricts channel mode changes to specified operator levels'
 	Channelmode.add(module, Chmode_M)
 	Isupport.add("MLKLIST")

@@ -1565,15 +1565,15 @@ class Channel:
 
 		for a in self.List[mode]:
 			accdef = a.mask
-			if len(accdef.split('@')[0].split(':')) < 2:
+			if len(accdef.split('@')[0].replace('#', ':').split(':')) < 2:
 				continue
 
-			accmode = accdef.split('@')[0].split(':')[0]
+			accmode = accdef.split('@')[0].replace('#', ':').split(':')[0]
 			if len(accmode) != 1:
 				continue
 			if accmode not in validops:
 				continue
-			accmask = accdef.split('@')[0].split(':')[1] + '@' + accdef.split('@')[1]
+			accmask = accdef.split('@')[0].replace('#', ':').split(':')[1] + '@' + accdef.split('@')[1]
 
 			if IRCD.client_match_mask(client, accmask):
 				if not opmode:

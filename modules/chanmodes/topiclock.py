@@ -26,7 +26,7 @@ def init(module):
 	Chmode_T.is_ok = Channelmode.allow_chanowner
 	Chmode_T.level = 5
 	Chmode_T.type = Channelmode.LISTMODE
-	Chmode_T.param_help = '<vhoaq>:<nick!ident@host>'
+	Chmode_T.param_help = '<vhoaq>#<nick!ident@host>'
 	Chmode_T.desc = 'Restricts channel mode changes to specified operator levels'
 	Channelmode.add(module, Chmode_T)
 	Isupport.add("TLKLIST")
