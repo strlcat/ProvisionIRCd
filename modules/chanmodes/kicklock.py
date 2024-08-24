@@ -26,7 +26,7 @@ def init(module):
 	Chmode_K.is_ok = Channelmode.allow_chanowner
 	Chmode_K.level = 5
 	Chmode_K.type = Channelmode.LISTMODE
-	Chmode_K.param_help = '<hoaq>#<nick!ident@host>'
+	Chmode_K.param_help = '<hoaq>:<nick!ident@host>'
 	Chmode_K.desc = 'Restricts /KICK to specified operator levels'
 	Channelmode.add(module, Chmode_K)
 	Isupport.add("KIKLLIST")

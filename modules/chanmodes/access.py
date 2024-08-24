@@ -32,7 +32,7 @@ def init(module):
 	Chmode_A.is_ok = Channelmode.allow_chanowner
 	Chmode_A.level = 5
 	Chmode_A.type = Channelmode.LISTMODE
-	Chmode_A.param_help = '<vhoa>#<nick!ident@host>'
+	Chmode_A.param_help = '<vhoa>:<nick!ident@host>'
 	Chmode_A.desc = 'Automatically ops the given hostmask on join'
 	Channelmode.add(module, Chmode_A)
 	Isupport.add("ACCLIST")
