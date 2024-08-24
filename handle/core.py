@@ -1529,11 +1529,13 @@ class Channel:
 			if not t:
 				return m
 
-			if m in 'v' and t in 'hoa':
+			if m in 'v' and t in 'hoaq':
 				return t
-			elif m in 'vh' and t in 'oa':
+			elif m in 'vh' and t in 'oaq':
 				return t
-			elif m in 'vho' and t in 'a':
+			elif m in 'vho' and t in 'aq':
+				return t
+			elif m in 'vhoa' and t in 'q':
 				return t
 
 			else:
@@ -1545,11 +1547,13 @@ class Channel:
 			if not t:
 				return m
 
-			if m in 'hoa' and t in 'v':
+			if m in 'hoaq' and t in 'v':
 				return t
-			elif m in 'oa' and t in 'vh':
+			elif m in 'oaq' and t in 'vh':
 				return t
-			elif m in 'a' and t in 'vho':
+			elif m in 'aq' and t in 'vho':
+				return t
+			elif m in 'q' and t in 'vhoa':
 				return t
 
 			else:
