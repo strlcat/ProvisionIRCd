@@ -2,11 +2,22 @@
 provides chmode +b (ban list)
 """
 
-from handle.core import Numeric, Channelmode, Hook
+from handle.core import Numeric, Channelmode, Hook, ChanPrivReq
+from handle.functions import get_higher_opers_than
 
 HEADER = {
 	"name": "channelbans"
 }
+
+def ok_to_ban(client, channel, action, mode, param, CHK_TYPE):
+	if len(channel.List['K']) > 0:
+		opmode = channel.has_access(client, 'K', "hoaq", -1)
+		if opmode:
+			if not channel.client_has_membermodes(client, get_higher_opers_than(opmode)):
+				return ChanPrivReq.NOTOWNER
+		else:
+			return ChanPrivReq.NOTOWNER
+	return Channelmode.allow_halfop(client, channel, action, mode, param, CHK_TYPE)
 
 def display_banlist(client, channel, mode):
 	if mode == "b":
@@ -36,7 +47,7 @@ def init(module):
 	Chmode_b.sjoin_prefix = '&'
 	Chmode_b.paramcount = 1
 	Chmode_b.unset_with_param = 1
-	Chmode_b.is_ok = Channelmode.allow_halfop
+	Chmode_b.is_ok = ok_to_ban
 	Chmode_b.level = 2
 	Chmode_b.type = Channelmode.LISTMODE
 	Chmode_b.param_help = '<nick!ident@host>'

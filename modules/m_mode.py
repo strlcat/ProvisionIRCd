@@ -3,7 +3,7 @@
 """
 
 from handle.core import Flag, Numeric, Channelmode, Isupport, Command, IRCD, Extban, Hook, ChanPrivReq
-from handle.functions import logging, make_mask
+from handle.functions import logging, make_mask, get_higher_opers_than
 
 MAXMODES = 20
 
@@ -290,19 +290,6 @@ def report_access_denied(client, channel, allowed):
 
 	if allowed != ChanPrivReq.DONTSENDERROR:
 		client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name, reason)
-
-# Ugly, d'oh.
-def get_higher_opers_than(o):
-	if o == 'h':
-		return "qaoh"
-	elif o == 'o':
-		return "qao"
-	elif o == 'a':
-		return "qa"
-	elif o == 'q':
-		return "q"
-	else:
-		return o
 
 def cmd_channelmode(client, recv):
 	channel = IRCD.find_channel(recv[1])
