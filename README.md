@@ -20,7 +20,7 @@ When you are done editting the configuration files, you can start ProvisionIRCd 
 
 This ircd is feature rich, as an attempt to extend and modernize an old fashioned IRC protocol.
 
-- Limited modularity, some modules are just stubs over code inside core, plan to improve this
+- Full UTF-8 nickname and channel names support
 - IRCv3 features
 - Full TLS support
 - IPv6 dualstack support [WIP separate v4 & v6 sockets]
@@ -42,16 +42,18 @@ This ircd is feature rich, as an attempt to extend and modernize an old fashione
 
 ## Services
 
-Barely if just want to run this IRCd without bothering with services:
+Barely if just you want to run this IRCd without bothering with services:
 
-Comment out file with service aliases, such as, **aliases.conf**. Because thise are responsible for proxying traffic between you
-and servicem a failure do do so will usually emit somethintg frustrtating like ":Services are currently down. Please try again later.",
-giving you (false) impression that they will be soon returning.
+Comment out file with service aliases, such as, **aliases.conf**. Because thise are responsible for proxying messages between you
+and services, a failure do do so will usually emit something frustrtating like ":Services are currently down. Please try again later.",
+giving you (false) impression that they shall be here and they will be soon returning.
 
-This IRCd provides two self-healng services for people lost their channel operators:
+This IRCd provides two self-healing services for people who lost their channel operator roles:
 
 1. **/CHANFIX** is the first and very precise about checking, and restoring operator status.
    It acts _immediately_, so you have not to wait, unless the real HW behind server is doing something very important.
+
+2. **/OPME** works if you have channel access list entry, but it is limited to highest +a channel operator role.
 
 ## Issue
 
