@@ -5,6 +5,9 @@ A modern IRCd written in Python 3.10. Support for lower versions has officially 
 Massive code overhaul, so there might still be some issues. List of found ones can be found
 in TODO.md file, with "BUG:" prefixed lines. Some are outstanding ones...
 
+This is fork from **Y4kuzi** developed by **Andrey Rys**.
+The original is located at: <a href="https://github.com/Y4kuzi/ProvisionIRCd/">ProvisionIRCd</a>
+
 ## Installation
 
 Install the required packages:
@@ -15,42 +18,49 @@ When you are done editting the configuration files, you can start ProvisionIRCd 
 
 ## Features
 
-- Very modular, all modules can be reloaded on the fly (not always recommended)
+This ircd is feature rich, as an attempt to extend and modernize an old fashioned IRC protocol.
+
+- Limited modularity, some modules are just stubs over code inside core, plan to improve this
 - IRCv3 features
 - Full TLS support
-- IPv6 dualstack support
+- IPv6 dualstack support [WIP separate v4 & v6 sockets]
 - Full implicit CIDR support (including IPv6), including in channel bans etc.
-- Extended channel and server bans
-- Linking capabilities
+- Extended channel and server bans, akin to UnrealIRCD ones
+- Linking capabilities [THIS FORK IS NOT TESTED BUT IT SHALL WORK]
 - Flexible oper permissions system
-- Unique channel owner status (there can be only one)
+- Unique channel owner status (there can be only one, if not overriden by services)
 - Configurable default channel operator status (you can even disable implicit operator status at all)
-- Channel founder fixing if founder disconnected or got lost somehow etc.
+- Channel access (+A) list allowing to return ops to people who lost them, automatically or manually
+- Channel mute (+B) list, allowing to mute people instead of banning them outright (although +b also mutes automatically)
+- Channel modelock (+M) list, allowing to limit channel configuration without fear giving out operator access
+- Channel kicklock (+K) list, allowing to limit kickban actions to restricted circle of people without fear giving out operator access to others
+- Channel topiclock (+T) list, giving possibility to manage list of people who can set topics
+- Minimum _embedded_ services: CHANFIX and OPME (not working as EFnet ones, these are _very simpler_ to understand),
+  which permits running server completely on its own, without services required, which may allow running IRCD without
+  any external services at all
+- Services-less friendly, a super operator bot such as scripted eggdrop instance can work as a service [WIP]
 
 ## Services
 
-To use Anope with ProvisionIRCd, load the <b>unreal4</b> protocol module in Anope services.conf.
-It is well tested and fully compatible, causing no any problems with linking.
-Note that only C++ Anope 2.0+ is known to work there because old pure C Anope
-speaks too old protocol and requires heavy patching. Sad, but true. (I liked it)
+Barely if just want to run this IRCd without bothering with services:
 
-The server itself is quite capable of running on its own without services, provided there will
-be a network wide IRC operator who could manage user and channel modes.
-(which is possible thanks to rich ircop permissions separation)
+Comment out file with service aliases, such as, **aliases.conf**. Because thise are responsible for proxying traffic between you
+and servicem a failure do do so will usually emit somethintg frustrtating like ":Services are currently down. Please try again later.",
+giving you (false) impression that they will be soon returning.
 
-For example, a highly scripted eggdrop bot instance functioning like well-known CHANFIX.
+This IRCd provides two self-healng services for people lost their channel operators:
 
-There is a plan to implement some sort of _very simple_ services inside, for really lazy people like myself.
-(duh, I _hate_ how <b>complex</b> it was in 2007 to setup an UnrealIRCd 3.2 + Anope 1.6 and it is _still_ too complex
-to setup Anope 2.0x in 2024, come on, IRC is dying out, no?)
-
-Actually, part of CHANFIX functionality with completely different semantics is here already.
+1. **/CHANFIX** is the first and very precise about checking, and restoring operator status.
+   It acts _immediately_, so you have not to wait, unless the real HW behind server is doing something very important.
 
 ## Issue
 
-If you find a bug or have a feature request, you can <a href="https://github.com/Y4kuzi/ProvisionIRCd/issues/new">submit an issue</a>
-<br>
-or you can contact me on IRC @ irc.provisionweb.org when I'm not afk.
+If you find a bug or have a feature request, you can <a href="https://github.com/strlcat/ProvisionIRCd/issues/new">submit an issue</a>
+<br> to this fork
+or you can contact me on IRC rys @ irc.strl.cat when I'm not afk.
+
+This work is just an expression of ideas. No functionality herein implemented is guaranteed to be bug free.
+Certainly, multiple server linking was not tested at all. Submit a bug report if you think something is broken.
 
 ## Rys fork notes
 
