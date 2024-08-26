@@ -27,6 +27,7 @@ def cmd_usermode(client, recv):
 
 	if len(recv) < 3:
 		if target != client and 'o' not in client.user.modes:
+			client.sendnumeric(Numeric.ERR_USERSDONTMATCH, "see")
 			return
 		return client.sendnumeric(Numeric.RPL_UMODEIS, target.user.modes)
 
@@ -56,7 +57,7 @@ def cmd_usermode(client, recv):
 		if target != client:
 			if client.user and not client.has_permission("client:set:usermode") and client.local:
 				# Not authorized to change target user modes.
-				client.sendnumeric(Numeric.ERR_USERSDONTMATCH)
+				client.sendnumeric(Numeric.ERR_USERSDONTMATCH, "change")
 				continue
 
 		if not umode.can_set(client) and client.local:

@@ -2147,14 +2147,13 @@ class IRCD:
 		# The reason I'm still using this UID method instead of the superior one below,
 		# is because I want to fix an issue where ghost UIDs are still present somewhere, for some reason.
 		# I would first like to find out why that is.
-		""" 456,976 possibilities. """
-		uid_iter = itertools.product(string.ascii_uppercase, repeat=4)
+		uid_iter = itertools.product(string.ascii_uppercase, repeat=6)
 		for i in uid_iter:
 			uid = IRCD.me.id + ''.join(i)
 			if not IRCD.find_user(uid):
 				return uid
-		client.exit(f"UID exhaustion")
-		logging.warning(f"No more available UIDs! This should never happen unless you have over 456,976 local users.")
+		client.exit(f"PANIC: UID exhaustion")
+		logging.warning(f"No more available UIDs! This should never happen!")
 
 	@staticmethod
 	def initialise_uid_generator():
@@ -2897,7 +2896,7 @@ class Numeric:
 	ERR_SERVICESAGENT = 493, "{} :{} is a services agent"
 
 	ERR_UMODEUNKNOWNFLAG = 501, "{} :Unknown MODE flag"
-	ERR_USERSDONTMATCH = 502, ":Not allowed to change mode of other users"
+	ERR_USERSDONTMATCH = 502, ":Not allowed to {} modes of other users"
 	ERR_TOOMANYWATCH = 512, "{} :Maximum size for WATCH-list is 128 entries"
 	ERR_NOINVITE = 518, ":Invite is disabled on channel {} (+V)"
 	ERR_OPERONLY = 520, "{} :Cannot join channel (IRCOps only)"

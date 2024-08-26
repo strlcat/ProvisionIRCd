@@ -9,7 +9,6 @@ from handle.logger import logging
 
 MAXTARGETS = 8
 
-
 def can_send_to_user(client, user, msg, sendtype):
 	if not client.user or not client.local:
 		return 1
@@ -63,11 +62,19 @@ def send_channel_message(client, channel, message: str, sendtype: str, prefix: s
 
 	broadcast_users = [c for c in channel.clients(prefix=prefix) if c != client and 'd' not in c.user.modes and c.local]
 	data_prefix = f":{client.fullmask} {sendtype} {channel.name} :"
+	if 'U' in channel.modes and not channel.client_has_membermodes(client, "oaq"):
+		data_prefix_anonymized = f":anonymous!anonymous@{IRCD.me.name} {sendtype} {channel.name} :"
+	else:
+		data_prefix_anonymized = data_prefix
+	# TODO have 510 as a constant somewhere, even if it is a hard to change agreement.
 	step = 510 - len(data_prefix)
 
 	for line in [message[i:i + step] for i in range(0, len(message), step)]:
-		broadcast_data = data_prefix + line
 		for to_client in broadcast_users:
+			if 'U' in channel.modes and not channel.client_has_membermodes(to_client, "oaq") and not to_client.has_permission("channel:see:names"):
+				broadcast_data = data_prefix_anonymized + line
+			else:
+				broadcast_data = data_prefix + line
 			to_client.send(client.mtags, broadcast_data)
 
 	data = f":{client.id} {sendtype} {channel.name} :{message}"

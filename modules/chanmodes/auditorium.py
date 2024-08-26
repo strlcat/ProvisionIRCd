@@ -9,7 +9,7 @@ def is_member_visible(user, target, channel):
 	if 'u' in channel.modes:
 		if user.name == target.name:
 			return Hook.ALLOW
-		if channel.client_has_membermodes(user, "oaq") or user.has_permission("client:see:names"):
+		if channel.client_has_membermodes(user, "oaq") or user.has_permission("channel:see:names"):
 			return Hook.ALLOW
 		elif channel.client_has_membermodes(target, "oaq"):
 			return Hook.ALLOW
