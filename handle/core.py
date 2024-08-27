@@ -2745,6 +2745,7 @@ class Numeric:
 	RPL_STATSLINKINFO = 211, "{} {} {} {} {} {} {} {} :{}"
 	RPL_ENDOFSTATS = 219, "{} :End of /STATS report"
 	RPL_UMODEIS = 221, "{}"
+	RPL_SQLINE_NICK = 222, "Nick {} is forbidden to use."
 	RPL_STATSGLINE = 223, "{} {} {} {} {} :{}"
 	RPL_STATSSPAMF = 229, "{} {} {} {} {} {} {} {} :{}"
 	RPL_STATSEXCEPTTKL = 230, "{} {} {} {} :{}"
@@ -3711,9 +3712,9 @@ class Tkl:
 		client.exit("User has been banned from using this server")
 
 	@staticmethod
-	def find_tkl_by_mask(tkltype, mask):
-		for tkl in [tkl for tkl in Tkl.table if tkl.type == tkltype]:
-			if is_match(tkl.mask.lower(), mask.lower()):
+	def find_tkl_by_nick(nick):
+		for tkl in [tkl for tkl in Tkl.table if tkl.type == 'Q']:
+			if is_match(tkl.host.lower(), nick.lower()):
 				return tkl
 
 	@staticmethod

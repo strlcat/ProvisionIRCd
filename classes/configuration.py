@@ -18,6 +18,7 @@ from handle.validate_conf import (
 	config_test_link,
 	config_test_oper,
 	config_test_alias,
+	config_test_qlines,
 	config_test_except,
 	config_test_ulines
 )
@@ -35,6 +36,7 @@ config_commands = {
 	"oper": config_test_oper,
 	"alias": config_test_alias,
 	"except": config_test_except,
+	"qlines": config_test_qlines,
 	"ulines": config_test_ulines
 
 }

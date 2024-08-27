@@ -696,6 +696,12 @@ def config_test_except(block):
 			e.comment = comment
 
 
+def config_test_qlines(block):
+	for entry in block.entries:
+		qline = entry.get_single_value()
+		IRCD.set_setting_list("qlines", qline)
+
+
 def config_test_ulines(block):
 	for entry in block.entries:
 		server = entry.get_single_value()

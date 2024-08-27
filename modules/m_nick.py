@@ -3,8 +3,9 @@
 """
 
 import time
+import re
 
-from handle.core import Flag, Numeric, Isupport, Command, IRCD, Client, Hook
+from handle.core import Flag, Numeric, Isupport, Command, IRCD, Client, Hook, Tkl
 from classes.errors import Error
 from handle.client import make_client, make_user
 from handle.functions import base64_to_ip
@@ -78,6 +79,11 @@ def cmd_nick_local(client, recv):
 
 	if in_use and newnick.lower() != client.name.lower():
 		return client.sendnumeric(Numeric.ERR_NICKNAMEINUSE, newnick)
+
+	if qlines := IRCD.get_setting("qlines"):
+		for qline in qlines:
+			if re.match(qline, newnick, re.IGNORECASE) and not client.has_permission("immune:server-ban:qline"):
+				return client.sendnumeric(Numeric.RPL_SQLINE_NICK, newnick)
 
 	if client.name == '*':
 		client.name = newnick
