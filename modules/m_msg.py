@@ -63,7 +63,10 @@ def send_channel_message(client, channel, message: str, sendtype: str, prefix: s
 	broadcast_users = [c for c in channel.clients(prefix=prefix) if c != client and 'd' not in c.user.modes and c.local]
 	data_prefix = f":{client.fullmask} {sendtype} {channel.name} :"
 	if 'U' in channel.modes and not channel.client_has_membermodes(client, "oaq"):
-		data_prefix_anonymized = f":anonymous!anonymous@{IRCD.me.name} {sendtype} {channel.name} :"
+		anonnick = IRCD.get_setting("anonymous-nickname")
+		if not anonnick:
+			anonnick = "anonymous"
+		data_prefix_anonymized = f":{anonnick}!{anonnick}@{IRCD.me.name} {sendtype} {channel.name} :"
 	else:
 		data_prefix_anonymized = data_prefix
 	# TODO have 510 as a constant somewhere, even if it is a hard to change agreement.

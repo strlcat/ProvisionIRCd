@@ -80,9 +80,16 @@ def cmd_nick_local(client, recv):
 	if in_use and newnick.lower() != client.name.lower():
 		return client.sendnumeric(Numeric.ERR_NICKNAMEINUSE, newnick)
 
+	anonnick = IRCD.get_setting("anonymous-nickname")
+	if not anonnick:
+		anonnick = "anonymous"
+	if anonnick.lower() == newnick.lower():
+		return client.sendnumeric(Numeric.RPL_SQLINE_NICK, newnick)
+
 	if qlines := IRCD.get_setting("qlines"):
 		for qline in qlines:
 			if re.match(qline, newnick, re.IGNORECASE) and not client.has_permission("immune:server-ban:qline"):
+				# TODO add Tkl Q
 				return client.sendnumeric(Numeric.RPL_SQLINE_NICK, newnick)
 
 	if client.name == '*':
