@@ -89,7 +89,7 @@ def cmd_nick_local(client, recv):
 	if qlines := IRCD.get_setting("qlines"):
 		for qline in qlines:
 			if re.match(qline, newnick, re.IGNORECASE) and not client.has_permission("immune:server-ban:qline"):
-				# TODO add Tkl Q
+				Tkl.add(IRCD.me, "Q", ident="*", host=newnick.lower(), bantypes='*', set_by=IRCD.me.name, expire=0, set_time=int(time.time()), reason="qline config match")
 				return client.sendnumeric(Numeric.RPL_SQLINE_NICK, newnick)
 
 	if client.name == '*':
