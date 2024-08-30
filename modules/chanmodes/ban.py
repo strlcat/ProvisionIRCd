@@ -11,7 +11,7 @@ HEADER = {
 
 def ok_to_ban(client, channel, action, mode, param, CHK_TYPE):
 	if len(channel.List['K']) > 0:
-		opmode = channel.has_access(client, 'K', "hoaq", -1)
+		opmode, _ = channel.has_access(client, 'K', "hoaq", -1)
 		if opmode:
 			if not channel.client_has_membermodes(client, get_higher_opers_than(opmode)):
 				return ChanPrivReq.NOTOWNER

@@ -190,7 +190,7 @@ def cmd_whois(client, recv):
 	if 'S' not in target.user.modes and not target.ulined:
 		client.sendnumeric(Numeric.RPL_WHOISIDLE, target.name, int(time.time()) - target.idle_since, target.creationtime)
 
-	if 'S' in target.user.modes:
+	if 'S' in target.user.modes and not 'H' in target.user.modes:
 		client.sendnumeric(Numeric.RPL_WHOISOPERATOR, target.name, "a Network Service", '')
 
 	client.sendnumeric(Numeric.RPL_ENDOFWHOIS, target.name)

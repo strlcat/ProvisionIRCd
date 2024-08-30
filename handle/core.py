@@ -1560,6 +1560,7 @@ class Channel:
 				return m
 
 		opmode = None
+		modeslock = None
 
 		if len(mode) > 1:
 			return opmode
@@ -1569,7 +1570,8 @@ class Channel:
 
 		for a in self.List[mode]:
 			accdef = a.mask
-			if len(accdef.split('@')[0].replace('#', ':').split(':')) < 2:
+			n = len(accdef.split('@')[0].replace('#', ':').split(':'))
+			if n < 2:
 				continue
 
 			accmode = accdef.split('@')[0].replace('#', ':').split(':')[0]
@@ -1577,7 +1579,13 @@ class Channel:
 				continue
 			if accmode not in validops:
 				continue
-			accmask = accdef.split('@')[0].replace('#', ':').split(':')[1] + '@' + accdef.split('@')[1]
+			if n == 2:
+				accmask = accdef.split('@')[0].replace('#', ':').split(':')[1] + '@' + accdef.split('@')[1]
+			elif n == 3 and mode == 'M':
+				modeslock = accdef.split('@')[0].replace('#', ':').split(':')[1]
+				accmask = accdef.split('@')[0].replace('#', ':').split(':')[2] + '@' + accdef.split('@')[1]
+			else:
+				continue
 
 			if IRCD.client_match_mask(client, accmask):
 				if not opmode:
@@ -1587,7 +1595,7 @@ class Channel:
 						opmode = upgrade_opmode(opmode, accmode)
 					elif updown == -1:
 						opmode = downgrade_opmode(opmode, accmode)
-		return opmode
+		return opmode, modeslock
 
 	def level(self, client):
 		if client.server or client.ulined:

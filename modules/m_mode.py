@@ -292,6 +292,18 @@ def report_access_denied(client, channel, allowed):
 	if allowed != ChanPrivReq.DONTSENDERROR:
 		client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name, reason)
 
+def matched_mode_count(modelist, modes):
+	x = 0
+	y = 0
+	for cm in modelist:
+		if cm in '+-':
+			continue
+		x += 1
+		for nm in modes:
+			if cm == nm:
+				y += 1
+	return x, y
+
 def cmd_channelmode(client, recv):
 	channel = IRCD.find_channel(recv[1])
 	if len(recv) == 2:
@@ -301,18 +313,23 @@ def cmd_channelmode(client, recv):
 	if len(recv) == 3 and display_channel_list_entries(client, channel, recv[2]):
 		return
 
-	override = 0
 	# This is ugly and shall not be there but belong to
 	# readonly.py module, but for now this is it.
+	override = 0
 	if client.user and len(channel.List['M']) > 0:
 		if client.local and not channel.client_has_membermodes(client, "q"):
-			opmode = channel.has_access(client, 'M', "hoaq", -1)
+			opmode, modeslock = channel.has_access(client, 'M', "hoaq", -1)
 			if opmode:
 				if not channel.client_has_membermodes(client, get_higher_opers_than(opmode)):
 					if client.has_permission("channel:override:mode"):
 						override = 1
 					else:
 						return client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name, "You're not a channel owner")
+				else:
+					if modeslock:
+						allmc, matmc = matched_mode_count(recv[2], modeslock)
+						if allmc > 0 and allmc > matmc:
+							return client.sendnumeric(Numeric.ERR_CHANOPRIVSNEEDED, channel.name, "You're not a channel owner")
 			else:
 				if client.has_permission("channel:override:mode"):
 					override = 1
@@ -373,7 +390,7 @@ def cmd_channelmode(client, recv):
 
 	for mode in modes:
 		param = None
-		if mode in "+-":
+		if mode in '+-':
 			action = mode
 			continue
 		if not (cmode := IRCD.get_channelmode_by_flag(mode)):
