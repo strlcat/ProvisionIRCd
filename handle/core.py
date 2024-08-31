@@ -2895,6 +2895,7 @@ class Numeric:
 	ERR_BADCHANNELKEY = 475, "{} :Cannot join channel (+k)"
 	ERR_NEEDREGGEDNICK = 477, "{} :Cannot join cannel: you need a registered nickname"
 	ERR_BANLISTFULL = 478, "{} {} :Channel {} list is full"
+	ERR_CANNOTKNOCK = 480, ":Cannot knock on {} ({})"
 	ERR_NOPRIVILEGES = 481, ":Permission denied - You do not have the correct IRC Operator privileges"
 	ERR_CHANOPRIVSNEEDED = 482, "{} :{}"
 	ERR_ATTACKDENY = 484, "{} :Cannot kick protected user {}"
