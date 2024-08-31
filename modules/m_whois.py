@@ -134,6 +134,9 @@ def cmd_whois(client, recv):
 		if 'c' not in target.user.modes or ('o' in client.user.modes or target == client):
 			channels = []
 			for channel in target.user.channels:
+				if 'U' in channel.modes or 'u' in channel.modes and not client.has_permission("channel:see:whois"):
+					continue
+
 				visible = 1
 				if not channel.user_can_see_member(client, user):
 					if client.has_permission("channel:see:whois"):
@@ -144,7 +147,7 @@ def cmd_whois(client, recv):
 				prefix = ''
 				if visible == 2:
 					prefix += '?'
-				if 's' in channel.modes or 'p' in channel.modes:
+				if 's' in channel.modes:
 					if target != client and not channel.find_member(client) and not client.has_permission("channel:see:whois"):
 						continue
 					if '!' not in prefix and '?' not in prefix:
