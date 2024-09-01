@@ -2805,6 +2805,7 @@ class Numeric:
 	RPL_TOPIC = 332, "{} :{}"
 	RPL_TOPICWHOTIME = 333, "{} {} {}"
 	RPL_WHOISBOT = 335, "{} :is a bot on {}"
+	RPL_USERIP = 340, ":{}"
 	RPL_INVITING = 341, "{} {}"
 	RPL_ANYLIST = 344, "{} {} {} {}"
 	RPL_ENDOFANYLIST = 345, "{} :End of Channel {} List"
