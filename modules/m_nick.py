@@ -56,14 +56,6 @@ def cmd_nick_local(client, recv):
 
 	newnick = newnick[:NICKLEN]
 
-	if nickminlen := IRCD.get_setting("nickminlen"):
-		nickminlen = int(nickminlen)
-		if not client.has_permission("immune:nick-minlength"):
-			if len(newnick) < nickminlen:
-				reqnick = newnick
-				newnick = newnick.center(nickminlen, '_')
-				IRCD.server_notice(client, f"Requested nickname \2{reqnick}\2 is too short (less than {nickminlen} characters), it will be changed to \2{newnick}\2")
-
 	if c := IRCD.invalid_nickname_char(newnick):
 		return client.sendnumeric(Numeric.ERR_ERRONEUSNICKNAME, newnick, c)
 
@@ -84,12 +76,14 @@ def cmd_nick_local(client, recv):
 	if not anonnick:
 		anonnick = "anonymous"
 	if anonnick.lower() == newnick.lower():
+		client.local.flood_penalty += 25_000
 		return client.sendnumeric(Numeric.RPL_SQLINE_NICK, newnick)
 
 	if qlines := IRCD.get_setting("qlines"):
 		for qline in qlines:
 			if re.match(qline, newnick, re.IGNORECASE) and not client.has_permission("immune:server-ban:qline"):
 				Tkl.add(IRCD.me, "Q", ident="*", host=newnick.lower(), bantypes='*', set_by=IRCD.me.name, expire=0, set_time=int(time.time()), reason=f"qline config match (triggered by {client.name})")
+				client.local.flood_penalty += 25_000
 				return client.sendnumeric(Numeric.RPL_SQLINE_NICK, newnick)
 
 	if client.name == '*':
