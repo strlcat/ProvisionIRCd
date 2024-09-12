@@ -260,7 +260,6 @@ class Shun:
 
 def sqline_check_pre_nick(client, newnick):
 	if tkl := Tkl.find_tkl_by_nick(newnick) and not client.has_permission("immune:server-ban:qline"):
-		client.sendnumeric(Numeric.RPL_SQLINE_NICK, newnick)
 		msg = f'*** Q:Line Rejection -- Forbidden nick {newnick} from client {client.ip} {"" if client.name == "*" else f"[Current nick: {client.name}]"}'
 		IRCD.send_snomask(client, 'Q', msg)
 		return Hook.DENY
@@ -269,7 +268,6 @@ def sqline_check_pre_nick(client, newnick):
 
 def sqline_check_handshake(client):
 	if (tkl := Tkl.is_match(client, "Q")) and not client.has_permission("immune:server-ban:qline"):
-		client.sendnumeric(Numeric.RPL_SQLINE_NICK, client.name)
 		msg = f'*** Q:Line Rejection -- Forbidden nick {client.name} from client {client.ip} {"" if client.name == "*" else f"[Current nick: {client.name}]"}'
 		IRCD.send_snomask(client, 'Q', msg)
 		client.name = ''

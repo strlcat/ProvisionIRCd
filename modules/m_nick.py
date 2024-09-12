@@ -86,6 +86,10 @@ def cmd_nick_local(client, recv):
 				client.local.flood_penalty += 25_000
 				return client.sendnumeric(Numeric.RPL_SQLINE_NICK, newnick)
 
+	for result, callback in Hook.call(Hook.PRE_LOCAL_NICKCHANGE, args=(client, newnick)):
+		if result == Hook.DENY:
+			return client.sendnumeric(Numeric.RPL_SQLINE_NICK, newnick)
+
 	if client.name == '*':
 		client.name = newnick
 		if client.handshake_finished():
@@ -101,11 +105,6 @@ def cmd_nick_local(client, recv):
 		for broadcast_client in channel.clients():
 			if broadcast_client not in users and broadcast_client != client:
 				users.append(broadcast_client)
-
-	for result, callback in Hook.call(Hook.PRE_LOCAL_NICKCHANGE, args=(client, newnick)):
-		# logging.debug(f"Result of callback {callback}: {result}")
-		if result == Hook.DENY:
-			return
 
 	if client.registered:
 		if client not in Nick.flood:
