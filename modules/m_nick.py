@@ -88,7 +88,7 @@ def cmd_nick_local(client, recv):
 
 	for result, callback in Hook.call(Hook.PRE_LOCAL_NICKCHANGE, args=(client, newnick)):
 		if result == Hook.DENY:
-			return client.sendnumeric(Numeric.RPL_SQLINE_NICK, newnick)
+			return
 
 	if client.name == '*':
 		client.name = newnick
