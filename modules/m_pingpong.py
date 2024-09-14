@@ -18,6 +18,8 @@ def cmd_ping(client, recv):
 		data = f":{ping_to.id} PONG {ping_to.name} {ping_from.name}"
 		client.send([], data)
 		return
+	if len(recv) < 2:
+		return
 	response = recv[1].removeprefix(':')
 	client.send([], f":{IRCD.me.name} PONG {IRCD.me.name} :{response}")
 
