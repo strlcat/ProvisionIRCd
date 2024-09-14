@@ -60,9 +60,7 @@ def cmd_nick_local(client, recv):
 		nickminlen = int(nickminlen)
 		if not client.has_permission("immune:nick-minlength"):
 			if len(newnick) < nickminlen:
-				reqnick = newnick
-				newnick = newnick.center(nickminlen, '_')
-				IRCD.server_notice(client, f"Requested nickname \2{reqnick}\2 is too short (less than {nickminlen} characters), it will be changed to \2{newnick}\2")
+				return client.sendnumeric(Numeric.RPL_SQLINE_NICK, newnick)
 
 	if c := IRCD.invalid_nickname_char(newnick):
 		return client.sendnumeric(Numeric.ERR_ERRONEUSNICKNAME, newnick, c)
