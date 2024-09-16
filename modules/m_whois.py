@@ -190,6 +190,10 @@ def cmd_whois(client, recv):
 	for line in lines:
 		client.sendnumeric(*line)
 
+	# FIXME for some reason this does not work as a hook!!
+	if 'v' in target.user.modes and target.user.webirc:
+		client.sendnumeric(Numeric.RPL_WHOISSPECIAL, target.name, "is connected using WebIRC")
+
 	if 'S' not in target.user.modes and not target.ulined:
 		client.sendnumeric(Numeric.RPL_WHOISIDLE, target.name, int(time.time()) - target.idle_since, target.creationtime)
 

@@ -967,6 +967,7 @@ class User:
 	cloakhost: str = ''
 	c_cloakhost: str = ''
 	do_chanfix: bool = True
+	webirc: bool = False
 	snomask: str = ''
 	swhois: list = field(default_factory=list)  # Swhois dataclasses
 	away: str = ''
