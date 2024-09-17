@@ -2,7 +2,7 @@
 /names command
 """
 
-from handle.core import Numeric, Command, IRCD, Capability, Hook
+from handle.core import Numeric, Command, IRCD, Capability, Hook, Isupport
 from handle.logger import logging
 
 
@@ -23,6 +23,8 @@ def cmd_names(client, recv):
 			continue
 
 		prefix = channel.get_prefix_sorted_str(names_client)
+		if len(prefix) > 0:
+			prefix = str(prefix[0])
 		string = ''
 		if client.has_capability("userhost-in-names"):
 			string = f"!{names_client.user.username}@{names_client.user.cloakhost}"
