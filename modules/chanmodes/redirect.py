@@ -50,6 +50,8 @@ def sjoin_check_redirect(ourredirect, theirredirect):
 def redirect_to_link(client, channel, error):
 	if 'L' not in channel.modes:
 		return
+	if 'F' in client.user.modes:
+		return
 	link_chan = channel.get_param('L')
 	if not (link_chan := IRCD.find_channel(link_chan)):
 		return
