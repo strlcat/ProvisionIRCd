@@ -115,6 +115,13 @@ def is_match(first, second):
 		return is_match(first[1:], second) or is_match(first, second[1:])
 	return False
 
+def validate_cidr_addr(subnet):
+	try:
+		ipaddress.ip_network(subnet)
+		return True
+	except:
+		return False
+
 def address_inside_subnet(addr, subnet):
 	try:
 		return ipaddress.ip_address(addr) in ipaddress.ip_network(subnet)

@@ -6,7 +6,7 @@ import ipaddress
 from handle.core import IRCD, Command, Flag, Usermode, Hook
 from handle.validate_conf import conf_error
 from handle.core import logging
-from handle.functions import address_inside_subnetlist
+from handle.functions import address_inside_subnetlist, validate_cidr_addr
 
 
 class WebIRCConf:
@@ -27,14 +27,12 @@ def post_load(module):
 			password = entry_value
 		if entry_name == "options":
 			WebIRCConf.options.append(entry_value)
-		if entry_name == "ip_whitelist":
-			for ip in entry.get_path("ip_whitelist"):
+		if entry_name == "ip-whitelist":
+			for ip in entry.get_path("ip-whitelist"):
 				if ip in WebIRCConf.ip_whitelist:
 					continue
-				try:
-					ipaddress.ip_address(ip)
-				except ValueError:
-					conf_error(f"Invalid IP address '{ip}' in whitelisted_ip", item=entry)
+				if not validate_cidr_addr(ip):
+					conf_error(f"Invalid IP address '{ip}' in ip-whitelist of webirc module", item=entry)
 					continue
 				WebIRCConf.ip_whitelist.append(ip)
 

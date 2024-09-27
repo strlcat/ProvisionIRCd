@@ -968,6 +968,7 @@ class User:
 	c_cloakhost: str = ''
 	do_chanfix: bool = True
 	webirc: bool = False
+	ngxproxytls: bool = False
 	snomask: str = ''
 	swhois: list = field(default_factory=list)  # Swhois dataclasses
 	away: str = ''
