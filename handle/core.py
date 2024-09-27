@@ -1664,16 +1664,21 @@ class Channel:
 
 		chanfix_types = IRCD.get_setting("chanfix-types")
 		if not chanfix_types:
-			chanfix_types = "mask,certfp"
+			chanfix_types = "certfp,account,hostmask"
 
 		if "certfp" in chanfix_types.split(',') and self.founder[:7] == "certfp:":
-			fp = client.get_md_value("certfp")
-			if fp:
-				fp = "certfp:" + fp
-				if fp == self.founder:
+			certfp = client.get_md_value("certfp")
+			if certfp:
+				certm = "certfp:" + certfp
+				if certm == self.founder:
 					match = True
-		elif "mask" in chanfix_types.split(','):
-			if IRCD.client_match_mask(client, self.founder):
+		elif "account" in chanfix_types.split(',') and self.founder[:8] == "account:":
+			if client.user.account != "*":
+				acc = "account:" + client.user.account
+				if acc == self.founder:
+					match = True
+		elif "hostmask" in chanfix_types.split(',') and self.founder[:9] == "hostmask:":
+			if IRCD.client_match_mask(client, self.founder[9:]):
 				match = True
 
 		return match
@@ -2417,10 +2422,12 @@ class IRCD:
 		creator_mask = ''
 		if client.server:
 			return creator_mask
-		if fp := client.get_md_value("certfp"):
-			creator_mask = f"certfp:{fp}"
+		if certfp := client.get_md_value("certfp"):
+			creator_mask = f"certfp:{certfp}"
+		elif client.user.account != "*":
+			creator_mask = f"account:{client.user.account}"
 		else:
-			creator_mask = client.fullrealhost
+			creator_mask = f"hostmask:{client.fullrealhost}"
 		return creator_mask
 
 	@staticmethod
