@@ -64,6 +64,9 @@ def cmd_chown(client, recv):
 	of that channel.
 	It will not work with registered (+r) channels.
 	Query services about gaining access on registered channel.
+	If channel is abandoned, you can gain ownership over it
+	by /CHOWNing to yourself, but it will work only on
+	unregistered channels.
 	"""
 	if not client.local:
 		return
@@ -89,14 +92,17 @@ def cmd_chown(client, recv):
 		client.sendnumeric(Numeric.ERR_NOSUCHNICK, uname)
 		return
 
-	if not channel.do_chanfix_check(client) and not client.has_permission("channel:override:chown"):
-		IRCD.server_notice(client, f"CHANFIX: {chname} seems not to be yours, sorry.")
-		return
+	if channel.do_chanfix_check(client) or client.has_permission("channel:override:chown") or len(channel.founder) == 0:
+		if len(channel.founder) == 0 and client.name.lower() != target.name.lower():
+			IRCD.server_notice(client, f"CHANFIX: {chname} is abandoned, but try to chown it to yourself first.")
+			return
 
-	# Ok to chown, let's do it
-	channel.founder = IRCD.channel_founder_fingerprint(target)
-	broadcast_schown(client, channel.name, channel.founder)
-	IRCD.server_notice(client, f"CHANFIX: {chname} ownership was transferred to {uname}")
+		# Ok to chown, let's do it
+		channel.founder = IRCD.channel_founder_fingerprint(target)
+		broadcast_schown(client, channel.name, channel.founder)
+		IRCD.server_notice(client, f"CHANFIX: {chname} ownership was transferred to {uname}")
+	else:
+		IRCD.server_notice(client, f"CHANFIX: {chname} seems not to be yours, sorry.")
 
 def cmd_disown(client, recv):
 	"""
