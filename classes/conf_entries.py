@@ -54,7 +54,12 @@ class Listen:
 		try:
 			if not self.listening:
 				ip = "" if self.ip == '*' else self.ip
-				self.sock = socket.create_server((ip, int(self.port)), family=socket.AF_INET6, reuse_port=True, dualstack_ipv6=True)
+				if ip[0] == '/' or ip[0] == '@':
+					if ip[0] == '@':
+						ip.replace('@', '\0')
+					self.sock = socket.create_server(ip, family=socket.AF_UNIX)
+				else:
+					self.sock = socket.create_server((ip, int(self.port)), family=socket.AF_INET6, reuse_port=True, dualstack_ipv6=True)
 				self.listening = 1
 				IRCD.configuration.our_ports.append(int(self.port))
 				if output:
