@@ -316,6 +316,10 @@ def config_test_listen(block):
 			if host[0] == '/' or host[0] == '@':
 				if host[0] == '@':
 					host.replace('@', '\0')
+				try:
+					os.unlink(host)
+				except:
+					pass
 				s = socket.create_server(host, family=socket.AF_UNIX)
 			else:
 				s = socket.create_server((host, int(port)), family=socket.AF_INET6, reuse_port=True, dualstack_ipv6=True)

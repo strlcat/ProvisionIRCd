@@ -58,6 +58,10 @@ class Listen:
 				if ip[0] == '/' or ip[0] == '@':
 					if ip[0] == '@':
 						ip.replace('@', '\0')
+					try:
+						os.unlink(ip)
+					except:
+						pass
 					um = os.umask(0)
 					self.sock = socket.create_server(ip, family=socket.AF_UNIX)
 					os.umask(um)
