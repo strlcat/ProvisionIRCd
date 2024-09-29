@@ -61,3 +61,4 @@ def cmd_webirc(client, recv):
 	client.user.c_cloakhost = IRCD.get_cloak(client)
 	client.user.cloakhost = client.user.realhost
 	client.user.webirc = True
+	logging.debug(f"Client {client.ip} connected using WebIRC with UID: {client.id}")

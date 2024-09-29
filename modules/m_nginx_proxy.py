@@ -63,6 +63,7 @@ def cmd_ngxproxy(client, recv):
 		return
 	client.user.realhost = recv[2]
 	client.ip = recv[2]
+	client.port = recv[4]
 	extport = recv[5]
 	if extport in NginxPROXYConf.external_tls_ports:
 		client.user.ngxproxytls = True
@@ -78,3 +79,4 @@ def cmd_ngxproxy(client, recv):
 			IRCD.server_notice(client, f"*** Couldn't resolve your hostname, using IP address instead")
 	client.user.c_cloakhost = IRCD.get_cloak(client)
 	client.user.cloakhost = client.user.realhost
+	logging.debug(f"Client [{client.ip}]:{client.port} connected using nginx PROXY [{recv[3]}]:{recv[5]} with UID: {client.id}")
