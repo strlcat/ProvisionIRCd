@@ -1,4 +1,3 @@
-import os
 import threading
 import time
 import socket
@@ -55,18 +54,7 @@ class Listen:
 		try:
 			if not self.listening:
 				ip = "" if self.ip == '*' else self.ip
-				if ip[0] == '/' or ip[0] == '@':
-					if ip[0] == '@':
-						ip.replace('@', '\0')
-					try:
-						os.unlink(ip)
-					except:
-						pass
-					um = os.umask(0)
-					self.sock = socket.create_server(ip, family=socket.AF_UNIX)
-					os.umask(um)
-				else:
-					self.sock = socket.create_server((ip, int(self.port)), family=socket.AF_INET6, reuse_port=True, dualstack_ipv6=True)
+				self.sock = socket.create_server((ip, int(self.port)), family=socket.AF_INET6, reuse_port=True, dualstack_ipv6=True)
 				self.listening = 1
 				IRCD.configuration.our_ports.append(int(self.port))
 				if output:

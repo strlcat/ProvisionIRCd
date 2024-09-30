@@ -313,16 +313,7 @@ def config_test_listen(block):
 	def is_port_in_use(host, port):
 		s = None
 		try:
-			if host[0] == '/' or host[0] == '@':
-				if host[0] == '@':
-					host.replace('@', '\0')
-				try:
-					os.unlink(host)
-				except:
-					pass
-				s = socket.create_server(host, family=socket.AF_UNIX)
-			else:
-				s = socket.create_server((host, int(port)), family=socket.AF_INET6, reuse_port=True, dualstack_ipv6=True)
+			s = socket.create_server((host, int(port)), family=socket.AF_INET6, reuse_port=True, dualstack_ipv6=True)
 			return 0  # If the bind succeeds, the port is not in use.
 		except:
 			return 1

@@ -50,7 +50,7 @@ def webirc_add_umode(client):
 def init(module):
 	Usermode.add(module, 'v', 1, 0, Usermode.allow_none, "User is connected through WebIRC")
 	Command.add(module, cmd_webirc, "WEBIRC", 4, Flag.CMD_UNKNOWN)
-	Hook.add(Hook.LOCAL_CONNECT, webirc_add_umode)
+	Hook.add(Hook.LOCAL_CONNECT, webirc_add_umode, 200)
 
 
 def cmd_webirc(client, recv):

@@ -51,7 +51,7 @@ def init(module):
 	# PROXY TCP4 127.1.2.3 127.0.0.1 42640 6667
 	# PROXY TCP6 2001:470:db8:7a4e::6667 2002:9a9a:a9a9::9a9a:a9a9 42640 6697
 	Command.add(module, cmd_ngxproxy, "PROXY", 5, Flag.CMD_UNKNOWN)
-	Hook.add(Hook.LOCAL_CONNECT, ngxproxytls_add_umode)
+	Hook.add(Hook.LOCAL_CONNECT, ngxproxytls_add_umode, 300)
 
 
 def cmd_ngxproxy(client, recv):

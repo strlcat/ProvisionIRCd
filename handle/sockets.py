@@ -1,6 +1,5 @@
 from time import time
 import socket
-import random
 
 import select
 from OpenSSL import SSL
@@ -104,12 +103,7 @@ def accept_socket(sock, listen_obj):
 	client.last_ping_sent = time() * 1000
 	client.local.last_msg_received = int(time())
 	client.local.incoming = 1
-	# TODO maybe add special case for pure AF_INET too?
-	if conn.family == socket.AF_UNIX:
-		client.ip = "127.0.0.1"
-		client.port = random.randrange(32768, 65535)
-	else:
-		client.ip, client.port, _, _ = addr
+	client.ip, client.port, _, _ = addr
 	if client.ip[:7] == "::ffff:":
 		client.ip = client.ip.replace("::ffff:", "")  # client connected through ipv6 compatible mode -- strip away cruft
 	client.ip = fixup_ip6(client.ip)  # make address look safe, e.g. "::1" is invalid but "0::1" is

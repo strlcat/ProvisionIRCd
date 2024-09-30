@@ -5,3 +5,4 @@
 * BUG: Massive amount of exceptions in /WHO parsing code, needs investigation
 * Provide documentation for every command available
 * TLS as module, not a hard dependency
+* DNSBL checks for IPv6

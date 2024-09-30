@@ -105,7 +105,7 @@ def blacklist_check(client):
 		Blacklist.lookups[client] = []
 
 	if client.ip not in Blacklist.process:
-		client.sendnumeric(Numeric.RPL_TEXT, "* Please wait while your connection is being checked against DNSBL.")
+		logging.debug(f"Checking client {client.ip} against DNSBL with UID: {client.id}")
 		IRCD.delay_client(client, 1, "blacklist")
 		Blacklist.process.append(client.ip)
 		for dnsbl in Dnsbl.table:
@@ -123,10 +123,14 @@ def blacklist_cleanup(client, *args):
 		del Blacklist.lookups[client]
 
 
+def blacklist_check_and_cleanup(client, *args):
+	blacklist_check(client)
+	blacklist_cleanup(client)
+
+
 def init(module):
-	Hook.add(Hook.NEW_CONNECTION, blacklist_check, 999)
 	Hook.add(Hook.LOCAL_QUIT, blacklist_cleanup)
-	Hook.add(Hook.LOCAL_CONNECT, blacklist_cleanup)
+	Hook.add(Hook.LOCAL_CONNECT, blacklist_check_and_cleanup, 100)
 	Hook.add(Hook.LOOP, blacklist_expire)
 	Snomask.add(module, 'd', 1, "View DNSBL hits")
 
