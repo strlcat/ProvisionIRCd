@@ -71,7 +71,7 @@ def dnsbl_check_client(client, dnsbl):
 			client.sendnumeric(Numeric.RPL_TEXT, reason)
 			client.exit(reason)
 			Tkl.add(client=IRCD.me,
-					flag="Z",
+					flag="G",
 					ident="*",
 					host=client.ip,
 					bantypes='*',  # Not applicable, used for /eline.
