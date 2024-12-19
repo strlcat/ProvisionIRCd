@@ -12,7 +12,6 @@ import random
 import string
 import time
 import socket
-import OpenSSL
 from enum import Enum
 from random import randrange
 from threading import Thread
@@ -157,8 +156,6 @@ class Client:
 			ext_info += f" [account: {self.user.account}]"
 		if operlogin := self.get_md_value("operlogin"):
 			ext_info += f" [operlogin: {operlogin}]"
-		if cipher := self.get_md_value("tls-cipher"):
-			ext_info += f" [secure: {cipher}]"
 		if country := self.get_md_value("country"):
 			ext_info += f" [country: {country}]"
 		return ext_info
@@ -478,12 +475,6 @@ class Client:
 			except KeyError:
 				# Most likely already unregistered @ POLLNVAL event.
 				pass
-		if isinstance(self.local.socket, OpenSSL.SSL.Connection):
-			try:
-				self.local.socket.shutdown()
-			except OpenSSL.SSL.Error:
-				self.local.socket.close()
-		else:
 			try:
 				self.local.socket.shutdown(socket.SHUT_WR)
 			except:
@@ -651,12 +642,6 @@ class Client:
 					logging.debug("Trying next allow block...")
 					continue
 
-				# Check if allow-block as options.
-				if allow.options:
-					if "tls" in allow.options and not self.local.tls:
-						logging.debug(f"Allow-block requires TLS, client is plain. Trying next allow-block...")
-						continue
-
 				# Check for "block" entries.
 				if allow.block:
 					for entry in allow.block:
@@ -717,12 +702,6 @@ class Client:
 		if self.exitted:
 			return
 
-		if self.local.tls and hasattr(self.local.socket, "get_cipher_name"):
-			if cipher_name := self.local.socket.get_cipher_name():
-				cipher_version = self.local.socket.get_cipher_version()
-				IRCD.server_notice(self, f"*** You are connected to {IRCD.me.name} with {cipher_version}-{cipher_name}")
-				self.add_md("tls-cipher", f"{cipher_version}-{cipher_name}")
-
 		self.sync(cause="welcome_user()")
 
 		IRCD.local_user_count += 1
@@ -753,8 +732,6 @@ class Client:
 		if conn_modes := IRCD.get_setting("modes-on-connect"):
 			conn_modes = ''.join([m for m in conn_modes if m.isalpha() and m not in self.user.modes])
 			modes = list(conn_modes)
-			if self.local.tls:
-				modes.append('z')
 			modes = list(set(modes))
 			if len(modes) > 0:
 				self.add_user_modes(modes)
@@ -935,7 +912,6 @@ class LocalClient:
 	authpass: str = ''
 	socket: socket = None
 	caps: list = field(default_factory=list)
-	tls: OpenSSL = None
 	error_str: str = ''
 	nospoof: str = ''
 	last_msg_received: int = 0
@@ -1664,15 +1640,9 @@ class Channel:
 
 		chanfix_types = IRCD.get_setting("chanfix-types")
 		if not chanfix_types:
-			chanfix_types = "certfp,account,hostmask"
+			chanfix_types = "account,hostmask"
 
-		if "certfp" in chanfix_types.split(',') and self.founder[:7] == "certfp:":
-			certfp = client.get_md_value("certfp")
-			if certfp:
-				certm = "certfp:" + certfp
-				if certm == self.founder:
-					match = True
-		elif "account" in chanfix_types.split(',') and self.founder[:8] == "account:":
+		if "account" in chanfix_types.split(',') and self.founder[:8] == "account:":
 			if client.user.account != "*":
 				acc = "account:" + client.user.account
 				if acc == self.founder:
@@ -1856,7 +1826,6 @@ class IRCD:
 	channels: int = 0
 	channel_count: int = 0
 	rehashing: int = 0
-	default_tlsctx = None
 	current_link_sync: Client = None
 	process_after_eos: ClassVar[list] = []
 	send_after_eos: ClassVar[dict] = {}
@@ -1938,9 +1907,6 @@ class IRCD:
 				continue
 			if what == "spamfilter" and 'F' not in tkl.bantypes:
 				continue
-			if tkl.ident == "~certfp:":
-				if (fp := client.get_md_value("certfp")) and fp == tkl.host:
-					return 1
 			if tkl.ident == "~account:":
 				if client.user.account != '*':
 					if tkl.host == '*' and client.user.account != '*':
@@ -1970,8 +1936,6 @@ class IRCD:
 				"""
 				continue
 
-			if (fp := client.get_md_value("certfp")) and fp in e.certfp_mask:
-				return 1
 			if client.user.account != '*':
 				for account in e.account_mask:
 					if account == '*' and client.user.account != '*':
@@ -2422,9 +2386,7 @@ class IRCD:
 		creator_mask = ''
 		if client.server:
 			return creator_mask
-		if certfp := client.get_md_value("certfp"):
-			creator_mask = f"certfp:{certfp}"
-		elif client.user.account != "*":
+		if client.user.account != "*":
 			creator_mask = f"account:{client.user.account}"
 		else:
 			creator_mask = f"hostmask:{client.fullrealhost}"
@@ -2781,7 +2743,6 @@ class Numeric:
 	RPL_ADMINEMAIL = 259, ":{}"
 	RPL_LOCALUSERS = 265, ":{} user{} on this server. Max: {}"
 	RPL_GLOBALUSERS = 266, ":{} user{} on entire network. Max: {}"
-	RPL_WHOISCERTFP = 276, "{} :has client certificate fingerprint {}"
 	RPL_ACCEPTLIST = 281, "{}"
 	RPL_ENDOFACCEPT = 282, "End of /ACCEPT list."
 	RPL_HELPTLR = 292, ":{}"
@@ -3556,8 +3517,6 @@ class Tkl:
 	ext_names = {
 		"~account:": "~account:",
 		"~a:": "~account:",
-		"~certfp:": "~certfp:",
-		"~S:": "~certfp:",
 	}
 
 	def __init__(self, _type, ident, host, bantypes, expire, set_by, set_time, reason):
@@ -3767,13 +3726,6 @@ class Tkl:
 						return tkl
 					if client.user.account.lower() == tkl.host.lower():
 						return tkl
-				if tkl.ident == "~certfp:":
-					if fp := client.get_md_value("certfp"):
-						if tkl.host.lower() == fp.lower():
-							return tkl
-					else:
-						if tkl.host == '0':
-							return tkl
 				continue
 			if tkl.type in "GkZzs":
 				ident = '*' if not client.user.username else client.user.username

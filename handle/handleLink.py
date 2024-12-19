@@ -3,8 +3,6 @@ import socket
 import time
 import select
 
-import OpenSSL
-
 from classes.errors import Error
 from handle.client import make_client, make_server
 from handle.core import IRCD, Isupport, Client, Channel, Hook, Extban
@@ -140,7 +138,7 @@ def deny_direct_link(client, error: int, *args):
 	client.exit(message)
 
 
-def start_outgoing_link(link, tls=0, auto_connect=0):
+def start_outgoing_link(link, auto_connect=0):
 	link.auto_connect = auto_connect
 	client = None
 	host = link.outgoing["host"]
@@ -159,9 +157,6 @@ def start_outgoing_link(link, tls=0, auto_connect=0):
 		client.name = link.name
 		client.ip = host
 		client.port = port
-		if tls and IRCD.default_tlsctx:
-			client.local.tls = IRCD.default_tlsctx
-			client.local.socket = OpenSSL.SSL.Connection(IRCD.default_tlsctx, socket=client.local.socket)
 		if IRCD.use_poll:
 			IRCD.poller.register(client.local.socket, select.POLLIN | select.POLLPRI | select.POLLHUP | select.POLLERR)
 		IRCD.run_hook(Hook.SERVER_LINK_OUT, client)

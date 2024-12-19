@@ -11,7 +11,7 @@ from handle.core import Flag, Numeric, Command, Usermode, IRCD, Hook
 class WhowasData:
 	entries = []
 
-	def __init__(self, nickname, ident, cloakhost, realhost, ip, realname, signon, signoff, server, account, certfp):
+	def __init__(self, nickname, ident, cloakhost, realhost, ip, realname, signon, signoff, server, account):
 		self.nickname = nickname
 		self.ident = ident
 		self.cloakhost = cloakhost
@@ -22,7 +22,6 @@ class WhowasData:
 		self.signoff = signoff
 		self.server = server
 		self.account = account
-		self.certfp = certfp
 		WhowasData.entries.append(self)
 		WhowasData.remove_old(self.nickname)
 
@@ -52,7 +51,7 @@ def cmd_whowas(client, recv):
 	Syntax: WHOWAS <nickname>
 	-
 	Request saved user information for offline users.
-	This information also includes account and certfp.
+	This information also includes account name.
 	"""
 
 	if len(recv) < 2:
@@ -69,15 +68,12 @@ def cmd_whowas(client, recv):
 		client.sendnumeric(Numeric.RPL_WHOISSERVER, entry.nickname, entry.server, entry.get_date_string())
 		if entry.account != '*':
 			client.sendnumeric(Numeric.RPL_WHOISACCOUNT, entry.nickname, entry.account)
-		if entry.certfp:
-			client.sendnumeric(Numeric.RPL_WHOISCERTFP, entry.nickname, entry.certfp)
 	client.sendnumeric(Numeric.RPL_ENDOFWHOWAS, recv[1])
 
 
 def savewhowas(client, *args):
 	if not client.user:
 		return
-	certfp = client.get_md_value("certfp")
 	WhowasData(nickname=client.name,
 			   ident=client.user.username,
 			   cloakhost=client.user.cloakhost,
@@ -87,8 +83,7 @@ def savewhowas(client, *args):
 			   signon=client.creationtime,
 			   signoff=int(time.time()),
 			   server=client.uplink.name,
-			   account=client.user.account,
-			   certfp=certfp)
+			   account=client.user.account)
 
 
 def cmd_whois(client, recv):

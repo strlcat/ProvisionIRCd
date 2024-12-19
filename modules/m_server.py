@@ -73,20 +73,6 @@ def auth_incoming_link(client):
 			logging.debug(f"Link denied for {client.name}: incoming IP {client.ip} does not incoming:mask for this link.")
 			return 0
 
-	client_certfp = client.get_md_value("certfp")
-	if re.match(r"[A-Fa-f0-9]{64}$", link.password):
-		""" This link requires a certificate fingerprint """
-		if client_certfp and client_certfp == link.password:
-			logging.debug(f"Link authenticated by certificate fingerprint")
-			client.server.link = link
-			return 1
-		# client.send([], f"SQUIT :Remote server requires a certificate fingerprint to link")
-		deny_direct_link(client, Error.SERVER_LINK_NOMATCH_CERTFP)
-		logging.debug(f"Link denied for {client.name}: certificate fingerprint mismatch")
-		# if client.local.incoming:
-		#	 data = f"Link denied for {client.name}: certificate fingerprint mismatch"
-		return 0
-
 	if client.local.authpass != link.password:
 		# client.send([], f"SQUIT :Passwords do not match")
 		deny_direct_link(client, Error.SERVER_LINK_INCORRECT_PASSWORD)

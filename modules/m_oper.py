@@ -126,9 +126,6 @@ def cmd_oper(client, recv):
 			mask_match = 1
 			break
 
-	if (fp := client.get_md_value("certfp")) and fp in oper.certfp_mask:
-		mask_match = 1
-
 	if (account := client.user.account) != '*' and account in oper.account_mask:
 		mask_match = 1
 
@@ -168,14 +165,7 @@ def watch_deoper(client, target, current_modes, new_modes, param):
 def oper_new_connection(client):
 	if client.user.oper:
 		return
-	fingerprint = client.get_md_value("certfp")
-	for oper in [oper for oper in IRCD.configuration.opers if oper.certfp_mask or oper.account_mask]:
-		if fingerprint and fingerprint in oper.certfp_mask:
-			msg = f"TLS fingerprint match: IRC Operator status automatically activated. [block: {oper.name}, class: {oper.operclass.name}]"
-			IRCD.server_notice(client, msg)
-			do_oper_up(client, oper)
-			break
-
+	for oper in [oper for oper in IRCD.configuration.opers if oper.account_mask]:
 		if client.user.account != '*' and client.user.account in oper.account_mask:
 			msg = f"Account match [{client.user.account}]: IRC Operator status automatically activated. [block: {oper.name}, class: {oper.operclass.name}]"
 			IRCD.server_notice(client, msg)
@@ -185,7 +175,7 @@ def oper_new_connection(client):
 def oper_account_login(client):
 	if client.user.account == "*" or client.user.oper or not client.registered or not client.local:
 		return
-	for oper in [oper for oper in IRCD.configuration.opers if oper.certfp_mask or oper.account_mask]:
+	for oper in [oper for oper in IRCD.configuration.opers if oper.account_mask]:
 		if client.user.account in oper.account_mask:
 			msg = f"Account match [{client.user.account}]: IRC Operator status automatically activated. [block: {oper.name}, class: {oper.operclass.name}]"
 			IRCD.server_notice(client, msg)

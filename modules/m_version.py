@@ -2,8 +2,6 @@
 /version command
 """
 
-import OpenSSL
-
 from handle.core import IRCD, Command, Isupport, Numeric
 
 

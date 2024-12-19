@@ -345,24 +345,6 @@ def config_test_listen(block):
 
 		listen = Listen(ip=ip, port=port)
 
-		check = "tls-options:certificate-file"
-		if cert_item := block.get_item(check):
-			cert = block.get_single_value(check)
-			if not os.path.isfile(cert):
-				if IRCD.rehashing:
-					conf_error(f"Cannot find certificate file `{cert}`", item=cert_item)
-			else:
-				listen.cert = cert
-
-		check = "tls-options:key-file"
-		if key_item := block.get_item(check):
-			key = block.get_single_value(check)
-			if not os.path.isfile(key):
-				if IRCD.rehashing:
-					conf_error(f"Cannot find key file `{key}`", item=key_item)
-			else:
-				listen.key = key
-
 		if options := block.get_items("options"):
 			for option in options:
 				opt = option.get_single_value('options')
@@ -500,19 +482,6 @@ def config_test_oper(block):
 				errmsg = f"Unrecognized mask type in {{ {oper_name} }} mask::{mask_what}"
 				conf_error(errmsg, item=oper_mask_item)
 				continue
-
-			if mask_what == "certfp":
-				pattern = r"[A-Fa-f0-9]{64}$"
-				if not re.match(pattern, mask_value):
-					errmsg = f"Invalid certfp: {mask_value} -- must be in format: [A-Fa-f0-9]{64}"
-					conf_error(errmsg, item=oper_mask_item)
-					continue
-
-				""" Fingerprint is valid, check for duplicates. """
-				for conf_oper in IRCD.configuration.opers:
-					if mask_value in conf_oper.certfp:
-						conf_error(f"The cert fingerprint you provided for oper block '{oper_name}' is already in use by oper block '{conf_oper.name}'", item=oper_mask_item)
-						continue
 
 			if mask_what == "account":
 				if c := IRCD.invalid_nickname_char(mask_value):
@@ -655,14 +624,7 @@ def config_test_except(block):
 				conf_error(errmsg, item=mask_item)
 				continue
 
-			if mask_what == "certfp":
-				pattern = r"[A-Fa-f0-9]{64}$"
-				if not re.match(pattern, mask_value):
-					errmsg = f"Invalid certfp: {mask_value} -- must be in format: [A-Fa-f0-9]{64}"
-					conf_error(errmsg, item=mask_item)
-					continue
-
-			elif mask_what == "account":
+			if mask_what == "account":
 				if c := IRCD.invalid_nickname_char(mask_value):
 					errmsg = f"Invalid account name: {mask_value} -- invalid character: {c}"
 					conf_error(errmsg, item=mask_item)

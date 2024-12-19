@@ -6,7 +6,6 @@ import os
 import time
 
 import select
-from OpenSSL.crypto import load_certificate, FILETYPE_PEM, Error
 
 from classes.configuration import ConfigBuild
 from handle.logger import logging
@@ -28,7 +27,6 @@ if __name__ == "__main__":
 	parser.add_argument("-c", "--conf", help="Relative path to main configuration file")
 	parser.add_argument("--debug", help="Show debug output in console", action="store_true")
 	parser.add_argument("--fork", help="Fork to the background", action="store_true")
-	parser.add_argument("--certfp", help="Prints the server certificate fingerprint", action="store_true")
 	try:
 		mkp = 1
 		import bcrypt
@@ -43,18 +41,6 @@ if __name__ == "__main__":
 		hashed = bcrypt.hashpw(args.mkpasswd.encode("utf-8"), bcrypt.gensalt(10)).decode("utf-8")
 		print(f"Your salted password: {hashed}")
 		exit()
-	if args.certfp:
-		for file in [file for file in os.listdir("tls") if file.endswith(".pem")]:
-			with open("tls/" + file, "rb") as cert:
-				try:
-					cert = cert.read()
-					cert = load_certificate(FILETYPE_PEM, cert)
-					fingerprint = cert.digest("sha256").decode().replace(':', '').lower()
-					print(f"[{file}]: {fingerprint}")
-				except Error:
-					pass
-		exit()
-
 	if not args.conf:
 		conffile = "ircd.conf"
 	else:

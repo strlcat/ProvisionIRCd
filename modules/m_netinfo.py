@@ -50,22 +50,7 @@ def cmd_netinfo(client, recv):
 		client.creationtime = creation
 
 	if not client.server.synced:
-		if client.local:
-			if client.local.tls:
-				secure = 1
-			else:
-				secure = 0
-		else:
-			secure = -1
-		match secure:
-			case 0:
-				prefix = f"Insecure l"
-			case 1:
-				prefix = "Secure l"
-			case _:
-				prefix = "L"
-
-		msg = f"{prefix}ink {client.uplink.name} -> {client.name} successfully established"
+		msg = f"Link {client.uplink.name} -> {client.name} successfully established"
 		IRCD.log(client.uplink, "info", "link", "LINK_ESTABLISHED", msg, sync=0)
 
 	data = f":{client.id} {' '.join(recv)}"

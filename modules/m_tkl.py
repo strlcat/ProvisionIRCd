@@ -191,9 +191,6 @@ def cmd_line(client, recv):
 					return IRCD.server_notice(client, f"Value missing for extban {ident}")
 				if expire:
 					expire = int(time.time()) + expire
-				if ident == "~certfp:":
-					if not re.match(r"[A-Fa-f0-9]{64}$", host):
-						return IRCD.server_notice(client, f"Invalid certfp. Must be in format [A-Fa-f0-9]{{64}}")
 
 				if ident == "~account:":
 					if c := IRCD.invalid_nickname_char(host):

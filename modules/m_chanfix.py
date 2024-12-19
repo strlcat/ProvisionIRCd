@@ -142,7 +142,7 @@ def cmd_disown(client, recv):
 def cmd_founder(client, recv):
 	"""
 	Syntax: FOUNDER <channel>
-	Retrieves full certfp/account/hostmask of channel creator, if available.
+	Retrieves full account/hostmask of channel creator, if available.
 	Registered channels (+r) will return "Not applicable".
 	"""
 	if not client.local:

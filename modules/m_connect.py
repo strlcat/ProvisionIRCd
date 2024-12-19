@@ -18,15 +18,11 @@ def connect_to(client, link, auto_connect=0):
 			if client and client.user:
 				IRCD.server_notice(client, f"Unable to process outgoing link {out_host}:{out_port} because destination is localhost.")
 			return
-		is_tls = 0
-		if "tls" in link.outgoing_options or "ssl" in link.outgoing_options:
-			is_tls = 1
-
 		if client.user:
-			msg = f"*** {client.name} ({client.user.username}@{client.fullrealhost}) has opened a{' secure' if is_tls else 'n insecure'} link channel to {link.name}..."
+			msg = f"*** {client.name} ({client.user.username}@{client.fullrealhost}) has opened link channel to {link.name}..."
 			IRCD.log(client, "info", "link", "LINK_CONNECTING", msg)
 		if not IRCD.find_server(link.name) and not IRCD.current_link_sync:
-			IRCD.run_parallel_function(target=start_outgoing_link, args=(link, is_tls, auto_connect))
+			IRCD.run_parallel_function(target=start_outgoing_link, args=(link, auto_connect))
 
 	except Exception as ex:
 		logging.exception(ex)

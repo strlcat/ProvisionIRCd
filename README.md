@@ -10,9 +10,6 @@ The original is located at: <a href="https://github.com/Y4kuzi/ProvisionIRCd/">P
 
 ## Installation
 
-Install the required packages:
-```pip3 install -r requirements.txt```
-
 Edit <b>conf/examples/ircd.example.conf</b> and save it to <b>conf/ircd.conf</b>.<br>
 When you are done editting the configuration files, you can start ProvisionIRCd by running ```python3 ircd.py```
 

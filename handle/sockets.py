@@ -2,7 +2,6 @@ from time import time
 import socket
 
 import select
-from OpenSSL import SSL
 
 from handle.client import (find_client_from_socket,
 						   make_client, make_server, make_user,
@@ -10,11 +9,6 @@ from handle.client import (find_client_from_socket,
 from handle.core import Client, IRCD, Hook
 from handle.functions import logging, fixup_ip6
 from modules.m_connect import connect_to
-
-try:
-	from modules.m_websockets import websock_tunnel
-except ImportError:
-	websock_tunnel = 0
 
 
 def close_socket(socket):
@@ -33,41 +27,10 @@ def close_socket(socket):
 			pass
 
 
-def do_tls_handshake(client):
-	# I hate this but it "works".
-	handshake_start = int(time())
-	attempts = 0
-	while 1:
-		if attempts > 100:
-			fail_time = int(time()) - handshake_start
-			logging.debug(f"TLS handshake failed after {fail_time} seconds.")
-			client.exit("TLS error")
-			return
-		try:
-			client.local.socket.do_handshake()
-			break
-		except SSL.WantReadError:
-			attempts += 1
-			select.select([client.local.socket], [], [], 0.1)
-		except SSL.WantWriteError:
-			attempts += 1
-			select.select([], [client.local.socket], [], 0.1)
-		except SSL.Error:
-			# If handshake fails, close the connection
-			client.exit("TLS error")
-			return
-
-
 def post_accept(conn, client, listen_obj):
 	logging.debug(f"post_accept() called.")
 	if IRCD.use_poll:
 		IRCD.poller.register(conn, select.POLLIN | select.POLLPRI | select.POLLHUP | select.POLLERR | select.EPOLLRDNORM | select.EPOLLRDHUP)
-	if listen_obj.tls:
-		try:
-			client.local.socket.do_handshake()
-		except:
-			pass
-		client.local.tls = listen_obj.tlsctx
 	logging.debug(f"Accepted new socket on {listen_obj.port}: {client.ip} -- fd: {client.local.socket.fileno()}")
 	if "servers" in listen_obj.options:
 		if IRCD.current_link_sync and IRCD.current_link_sync != client:
@@ -308,7 +271,7 @@ def handle_connections():
 							try:
 								while chunk := sock.recv(4096).decode():
 									recv += chunk
-							except (SSL.WantReadError, BlockingIOError):
+							except BlockingIOError:
 								pass
 							except Exception as ex:
 								logging.exception(ex)
@@ -358,7 +321,7 @@ def handle_connections():
 						try:
 							while chunk := sock.recv(4096).decode():
 								recv += chunk
-						except (SSL.WantReadError, BlockingIOError):
+						except BlockingIOError:
 							pass
 						except:
 							recv = ''

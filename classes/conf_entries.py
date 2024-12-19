@@ -3,11 +3,8 @@ import time
 import socket
 import importlib
 
-import OpenSSL.SSL
-
 from handle.core import IRCD
 from handle.functions import logging
-from handle.handle_tls import create_ctx, wrap_socket
 import select
 
 
@@ -42,12 +39,7 @@ class Listen:
 		self.ip = ip
 		self.port = port
 		self.options = []
-		self.tls = 0
-		self.tlsctx = None
 		self.listening = 0
-		self.cert = None
-		self.key = None
-		self.websockets = 0
 		IRCD.configuration.listen.append(self)
 
 	def start_listen(self, output=1):
@@ -58,15 +50,9 @@ class Listen:
 				self.listening = 1
 				IRCD.configuration.our_ports.append(int(self.port))
 				if output:
-					logging.info(f'Listening on {self.ip}:{self.port} :: {"TLS" if "tls" in self.options else "insecure"} '
-								 f'({"servers" if "servers" in self.options else "clients"})')
+					logging.info(f'Listening on {self.ip}:{self.port} ({"servers" if "servers" in self.options else "clients"})')
 				if IRCD.use_poll:
 					IRCD.poller.register(self.sock, select.POLLIN)
-
-			if self.tls and self.cert and self.key:
-				self.tlsctx = create_ctx(cert=self.cert, key=self.key, name=IRCD.me.name)
-				self.sock = wrap_socket(self)
-				self.sock.set_accept_state()
 
 		except Exception as ex:
 			logging.exception(ex)
@@ -79,23 +65,13 @@ class Listen:
 				pass
 		self.listening = 0
 		try:
-			if isinstance(self.sock, OpenSSL.SSL.Connection):
-				self.sock.shutdown()
-			else:
-				self.sock.shutdown(socket.SHUT_RDWR)
+			self.sock.shutdown(socket.SHUT_RDWR)
 		except:
 			pass
 		self.sock.close()
 		logging.info(f"Stopped listening on port: {self.port}")
 
 	def verify_option(self, option):
-		if option == "tls":
-			self.tls = 1
-			if not self.cert:
-				self.cert = IRCD.rootdir + "/tls/server.cert.pem"
-			if not self.key:
-				self.key = IRCD.rootdir + "/tls/server.key.pem"
-
 		self.options.append(option)
 
 	def fileno(self):
@@ -171,7 +147,7 @@ class Operclass:
 
 
 class Oper:
-	mask_types = ["certfp", "account", "ip"]
+	mask_types = ["account", "ip"]
 
 	def __init__(self, name, connectclass, operclass, password, mask):
 		self.name = name
@@ -191,13 +167,6 @@ class Oper:
 			if mask[0] in Oper.mask_types:
 				continue
 			self.host.append(mask[0])
-
-	@property
-	def certfp_mask(self):
-		certfp_mask = []
-		for mask in [m for m in self.mask if m[0] == "certfp"]:
-			certfp_mask.append(mask[1])
-		return certfp_mask
 
 	@property
 	def account_mask(self):
@@ -251,7 +220,7 @@ class Alias:
 
 
 class Except:
-	mask_types = ["certfp", "account", "ip"]
+	mask_types = ["account", "ip"]
 
 	def __init__(self, name, mask, comment="*"):
 		self.name = name
@@ -261,13 +230,6 @@ class Except:
 		self.expire = 0
 		self.types = []
 		IRCD.configuration.excepts.append(self)
-
-	@property
-	def certfp_mask(self):
-		certfp_mask = []
-		for mask in [m for m in self.mask if m[0] == "certfp"]:
-			certfp_mask.append(mask[1])
-		return certfp_mask
 
 	@property
 	def account_mask(self):
