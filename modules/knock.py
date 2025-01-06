@@ -46,7 +46,7 @@ def cmd_knock(client, recv):
 
 	if client.local:
 		IRCD.new_message(client)
-		data = f":{client.fullmask} KNOCK {channel.name}"
+		data = f":{client.fullmask} NOTICE @{channel.name} :User {client.name} asked for invitation"
 
 		broadcast_users = [c for c in channel.clients() if c.local
 			and (channel.client_has_membermodes(c, "oaq") or c.has_permission("channel:see:knock"))]
