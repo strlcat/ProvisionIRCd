@@ -23,9 +23,8 @@ def cmd_knock(client, recv):
 	if 'i' not in channel.modes:
 		return client.sendnumeric(Numeric.ERR_CANNOTKNOCK, channel.name, "Channel is not invite only")
 
-	if 'L' in channel.modes:
-		redir_channel = channel.get_param('L')
-		return client.sendnumeric(Numeric.ERR_CANNOTKNOCK, channel.name, f"Channel has redirection: {redir_channel}")
+	if 'p' in channel.modes:
+		return client.sendnumeric(Numeric.ERR_CANNOTKNOCK, channel.name, "Channel is in private mode")
 
 	if channel.get_invite(client):
 		return client.sendnumeric(Numeric.ERR_CANNOTKNOCK, channel.name, "You have already been invited")
