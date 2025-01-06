@@ -41,7 +41,7 @@ def cmd_invite(client, recv):
 	if (inv := channel.get_invite(invite_client)) and inv.by == client:
 		return
 
-	invite_can_override = 1 if (client.has_permission("channel:override:invite") or channel.client_has_membermodes(client, "oaq")) else 0
+	invite_can_override = 1 if (('g' in channel.modes) or client.has_permission("channel:override:invite") or channel.client_has_membermodes(client, "oaq")) else 0
 	channel.add_invite(to=invite_client, by=client, override=invite_can_override)
 	if oper_override and not client.ulined:
 		s = ''
@@ -68,7 +68,7 @@ def cmd_invite(client, recv):
 	broadcast_users = []
 	for user in [c for c in channel.clients() if c.local and c.has_capability("invite-notify")
 												 and (channel.client_has_membermodes(c, "oaq") or c.has_permission("channel:see:invites"))]:
-		# Only broadcast to +h or above.
+		# Only broadcast to +o or above.
 		broadcast_users.append(user)
 
 	for user in broadcast_users:
