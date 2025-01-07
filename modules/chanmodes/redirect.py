@@ -27,8 +27,9 @@ def validate_redirect(client, channel, action, mode, param, CHK_TYPE):
 			client.sendnumeric(Numeric.ERR_CANNOTCHANGECHANMODE, 'L', f"You must join {param} in order to link to it")
 			return 0
 		if not redirect_channel.client_has_membermodes(client, "aq"):
-			client.sendnumeric(Numeric.ERR_CANNOTCHANGECHANMODE, 'L', f"You must be channel admin or higher on {param} in order to link to it")
-			return 0
+			if not 'Q' in redirect_channel.modes:
+				client.sendnumeric(Numeric.ERR_CANNOTCHANGECHANMODE, 'L', f"You must be channel admin or higher on {param} in order to link to it")
+				return 0
 		if 'F' in redirect_channel.modes:
 			client.sendnumeric(Numeric.ERR_CANNOTCHANGECHANMODE, 'L', f"Destination channel {param} cannot be target for links")
 			return 0
