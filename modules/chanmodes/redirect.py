@@ -23,6 +23,9 @@ def validate_redirect(client, channel, action, mode, param, CHK_TYPE):
 		if 'L' in redirect_channel.modes:
 			client.sendnumeric(Numeric.ERR_CANNOTCHANGECHANMODE, 'L', "Destination channel already has +L set")
 			return 0
+		if 'F' in redirect_channel.modes:
+			client.sendnumeric(Numeric.ERR_CANNOTCHANGECHANMODE, 'L', "Destination channel cannot be target for links")
+			return 0
 		return 1
 
 	if (action == "+" and param.isdigit()) or (action == '-'):
