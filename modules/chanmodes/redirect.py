@@ -21,10 +21,16 @@ def validate_redirect(client, channel, action, mode, param, CHK_TYPE):
 			client.sendnumeric(Numeric.ERR_CANNOTCHANGECHANMODE, 'L', "Channel cannot link to itself")
 			return 0
 		if 'L' in redirect_channel.modes:
-			client.sendnumeric(Numeric.ERR_CANNOTCHANGECHANMODE, 'L', "Destination channel already has +L set")
+			client.sendnumeric(Numeric.ERR_CANNOTCHANGECHANMODE, 'L', f"Destination channel {param} already has +L set")
+			return 0
+		if not redirect_channel.find_member(client):
+			client.sendnumeric(Numeric.ERR_CANNOTCHANGECHANMODE, 'L', f"You must join {param} in order to link to it")
+			return 0
+		if not redirect_channel.client_has_membermodes(client, "aq"):
+			client.sendnumeric(Numeric.ERR_CANNOTCHANGECHANMODE, 'L', f"You must be channel admin or higher on {param} in order to link to it")
 			return 0
 		if 'F' in redirect_channel.modes:
-			client.sendnumeric(Numeric.ERR_CANNOTCHANGECHANMODE, 'L', "Destination channel cannot be target for links")
+			client.sendnumeric(Numeric.ERR_CANNOTCHANGECHANMODE, 'L', f"Destination channel {param} cannot be target for links")
 			return 0
 		return 1
 
