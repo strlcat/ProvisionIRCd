@@ -447,7 +447,6 @@ def cmd_channelmode(client, recv):
 				result_code = cmode.is_ok(client, channel, action, mode, param, cmode.CHK_PARAM)
 				result = ChanPrivReq.ACCESSOK if not client.local else result_code
 				if result == ChanPrivReq.ACCESSOK:
-					logging.debug(f"Allowed to {action}{mode} {param}: {result} by {cmode.is_ok}")
 					if not (param := str(cmode.conv_param(param))) and not client.local:
 						# Param not allowed.
 						continue
@@ -478,15 +477,16 @@ def cmd_channelmode(client, recv):
 					prevaction = add_to_buff(modebuf, parambuf, action, prevaction, mode, param=nick)
 				continue
 
-			if client.local:
-				if not (param := str(cmode.conv_param(param))):
-					# Param not allowed.
-					continue
-
 			if action == '+':
-				if mode not in channel.modes:
-					channel.modes += mode
-					channel.add_param(mode, param)
+				result_code = cmode.is_ok(client, channel, action, mode, param, cmode.CHK_PARAM)
+				result = ChanPrivReq.ACCESSOK if not client.local else result_code
+				if result == ChanPrivReq.ACCESSOK:
+					if not (param := str(cmode.conv_param(param))) and not client.local:
+						# Param not allowed.
+						continue
+					if mode not in channel.modes:
+						channel.modes += mode
+						channel.add_param(mode, param)
 
 			elif action == '-':
 				if mode in channel.modes and param == channel.get_param(mode):
