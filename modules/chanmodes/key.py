@@ -21,6 +21,8 @@ def key_is_ok(client, channel, action, mode, param, CHK_TYPE):
 def can_join_key(client, channel, key):
 	if client.has_permission("channel:override:join:key"):
 		return 0
+	if channel.do_chanfix_check(client):
+		return 0
 	if 'k' in channel.modes and key != channel.get_param('k'):
 		return Numeric.ERR_BADCHANNELKEY
 	return 0

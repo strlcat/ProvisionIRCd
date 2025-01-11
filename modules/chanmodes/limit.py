@@ -48,6 +48,9 @@ def limit_can_join(client, channel, key):
 	if client.has_permission("override:channel:join:limit"):
 		return 0
 
+	if channel.do_chanfix_check(client):
+		return 0
+
 	if limit_param := channel.get_param('l'):
 		if channel.membercount >= int(limit_param):
 			return Numeric.ERR_CHANNELISFULL

@@ -28,7 +28,7 @@ def display_banlist(client, channel, mode):
 		return 1
 
 def ban_can_join(client, channel, key):
-	if (channel.is_banned(client) and not channel.is_exempt(client)) and not client.has_permission("override:channel:join:ban"):
+	if (channel.is_banned(client) and not (channel.is_exempt(client) or channel.do_chanfix_check(client))) and not client.has_permission("override:channel:join:ban"):
 		return Numeric.ERR_BANNEDFROMCHAN
 	return 0
 

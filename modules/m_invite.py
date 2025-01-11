@@ -94,7 +94,7 @@ def expired_invites():
 
 
 def invite_can_join(client, channel, key):
-	if 'i' in channel.modes and not channel.is_invex(client):
+	if 'i' in channel.modes and not (channel.is_invex(client) or channel.do_chanfix_check(client)):
 		return Numeric.ERR_INVITEONLYCHAN
 	return 0
 
