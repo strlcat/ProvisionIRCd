@@ -3,18 +3,16 @@ commands /chanfix, /chown, /disown, /founder and /opme
 Restore operator (or whatever default join empty privilege) on channel
 """
 
-from handle.core import Flag, Numeric, Command, IRCD, Hook
+from handle.core import Flag, Numeric, Command, IRCD, Hook, Usermode
 
 
 def cmd_chanfix(client, recv):
 	"""
-	Syntax: CHANFIX <0|1|channel>
+	Syntax: CHANFIX <channel>
 	Restores lost owner status on given channel.
 	You must be a creator of the channel in order
 	to restore owner status on it. If channel is
 	registered (+r), CHANFIX is disabled on it.
-	If you specify 0 as an argument, CHANFIX will
-	be disabled for you. Reenable it with 1.
 	"""
 	if not client.local:
 		return
@@ -25,16 +23,6 @@ def cmd_chanfix(client, recv):
 		return
 
 	chname = recv[1]
-
-	if len(chname) == 1 and chname in "01" and IRCD.get_setting("chanfix-on-join"):
-		if chname == "0":
-			client.user.do_chanfix = False
-			IRCD.server_notice(client, f"CHANFIX was disabled for you on join")
-			return
-		elif chname == "1":
-			client.user.do_chanfix = True
-			IRCD.server_notice(client, f"CHANFIX is enabled for you on join")
-			return
 
 	channel = IRCD.find_channel(chname)
 	if not channel:
@@ -49,7 +37,7 @@ def cmd_chanfix(client, recv):
 		return
 
 	# Ok let's try to restore privs for the guy.
-	if not channel.do_chanfix_check(client):
+	if not channel.is_owner(client):
 		IRCD.server_notice(client, f"CHANFIX: {chname} seems not to be yours, sorry.")
 	else:
 		channel.do_chanfix(client)
@@ -92,12 +80,17 @@ def cmd_chown(client, recv):
 		client.sendnumeric(Numeric.ERR_NOSUCHNICK, uname)
 		return
 
-	if channel.do_chanfix_check(client) or client.has_permission("channel:override:chown") or len(channel.founder) == 0:
+	if channel.is_owner(client) or client.has_permission("channel:override:chown") or len(channel.founder) == 0:
 		if len(channel.founder) == 0 and client.name.lower() != target.name.lower():
 			IRCD.server_notice(client, f"CHANFIX: {chname} is abandoned, but try to chown it to yourself first.")
 			return
 
 		# Ok to chown, let's do it
+		if channel.find_member(client) and channel.client_has_membermodes(client, "q"):
+			Command.do(IRCD.me, "MODE", channel.name, *"-q".split(), *([client.name * 1]), str(channel.creationtime))
+		if channel.find_member(target) and not channel.client_has_membermodes(target, "q"):
+			Command.do(IRCD.me, "MODE", channel.name, *"+q".split(), *([target.name * 1]), str(channel.creationtime))
+
 		channel.founder = IRCD.channel_founder_fingerprint(target)
 		broadcast_schown(client, channel.name, channel.founder)
 		IRCD.server_notice(client, f"CHANFIX: {chname} ownership was transferred to {uname}")
@@ -132,12 +125,15 @@ def cmd_disown(client, recv):
 		return
 
 	# Ok let's try to relinquish privs of the channel.
-	if not channel.do_chanfix_check(client):
-		IRCD.server_notice(client, f"CHANFIX: {chname} seems not to be yours, sorry.")
-	else:
+	if channel.is_owner(client) or client.has_permission("channel:override:chown"):
+		if channel.find_member(client) and channel.client_has_membermodes(client, "q"):
+			Command.do(IRCD.me, "MODE", channel.name, *"-q".split(), *([client.name * 1]), str(channel.creationtime))
+
 		channel.founder = ''
 		broadcast_schown(client, channel.name, channel.founder)
 		IRCD.server_notice(client, f"CHANFIX: now {chname} is abandoned")
+	else:
+		IRCD.server_notice(client, f"CHANFIX: {chname} seems not to be yours, sorry.")
 
 def cmd_founder(client, recv):
 	"""
@@ -224,6 +220,7 @@ def hook_schown(client, channel):
 	broadcast_schown(client, channel.name, channel.founder)
 
 def init(module):
+	Usermode.add(module, 'C', 1, 0, Usermode.allow_all, "Automatic oper up and CHANFIX is disabled")
 	Command.add(module, cmd_chanfix, "CHANFIX", 1, Flag.CMD_USER)
 	Command.add(module, cmd_chown, "CHOWN", 2, Flag.CMD_USER)
 	Command.add(module, cmd_disown, "DISOWN", 1, Flag.CMD_USER)

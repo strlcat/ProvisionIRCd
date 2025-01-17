@@ -72,10 +72,10 @@ def cmd_kick(client, recv):
 		elif not channel.client_has_membermodes(client, "hoaq"):
 			oper_override = 1
 
-	if (channel.level(target_client) > channel.level(client) or 'q' in target_client.user.modes) and not client.has_permission("channel:override:kick:protected"):
-		return client.sendnumeric(Numeric.ERR_ATTACKDENY, channel.name, target_client.name)
+	if (channel.level(target_client) > channel.level(client) or ('q' in target_client.user.modes or channel.is_owner(target_client))) and not client.has_permission("channel:override:kick:protected"):
+		return client.sendnumeric(Numeric.ERR_ATTACKDENY, channel.name, "kick", target_client.name)
 
-	elif channel.level(target_client) > channel.level(client) or 'q' in target_client.user.modes:
+	elif channel.level(target_client) > channel.level(client) or ('q' in target_client.user.modes or channel.is_owner(target_client)):
 		oper_override = 1
 
 	if not client_can_kick_target(client, target_client, channel, reason):

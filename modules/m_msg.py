@@ -39,7 +39,7 @@ def send_channel_message(client, channel, message: str, sendtype: str, prefix: s
 		else:
 			oper_override += 'n'
 
-	if 'm' in channel.modes and not channel.client_has_membermodes(client, "vhoaq"):
+	if 'm' in channel.modes and not (channel.client_has_membermodes(client, "vhoaq") or channel.is_owner(client)):
 		if not client.has_permission("channel:override:message:moderated"):
 			client.sendnumeric(Numeric.ERR_CANNOTSENDTOCHAN, channel.name, "Cannot send to channel (+m)")
 			return
