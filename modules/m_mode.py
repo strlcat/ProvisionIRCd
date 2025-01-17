@@ -145,6 +145,14 @@ def do_channel_member_mode(client, channel, action, cmode, mode, param):
 		return 0
 
 	override = 0
+	if ('q' in target_client.user.modes or channel.is_owner(target_client)) and client.name != target_client.name:
+		if not client.server:
+			if client.has_permission("channel:override:mode"):
+				override = 1
+			else:
+				client.sendnumeric(Numeric.ERR_ATTACKDENY, channel.name, "change mode of", param)
+				return 0
+
 	if 'S' in target_client.user.modes and client.name != target_client.name:
 		if not client.server:
 			if client.has_permission("channel:override:mode"):

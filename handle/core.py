@@ -942,7 +942,6 @@ class User:
 	realhost: str = ''
 	cloakhost: str = ''
 	c_cloakhost: str = ''
-	do_chanfix: bool = True
 	webirc: bool = False
 	ngxproxytls: bool = False
 	snomask: str = ''
@@ -1627,7 +1626,7 @@ class Channel:
 			IRCD.send_to_servers(client, client.mtags, data)
 		self.remove_client(client)
 
-	def do_chanfix_check(self, client: Client):
+	def is_owner(self, client: Client):
 		match = False
 		if not IRCD.get_setting("chanfix"):
 			return False
@@ -1655,7 +1654,7 @@ class Channel:
 
 	def do_chanfix(self, client: Client):
 		if client.local:
-			if self.do_chanfix_check(client):
+			if self.is_owner(client):
 				if default_join_opmode := IRCD.get_setting("default-join-opmode"):
 					Command.do(IRCD.me, "MODE", self.name, *default_join_opmode.split(), *([client.name] * len(default_join_opmode)), str(self.creationtime))
 
@@ -1686,7 +1685,7 @@ class Channel:
 					if modes_on_join := IRCD.get_setting("modes-on-join"):
 						Command.do(IRCD.me, "MODE", self.name, *modes_on_join.split(), str(self.creationtime))
 
-			if IRCD.get_setting("chanfix") and IRCD.get_setting("chanfix-on-join") and client.user.do_chanfix:
+			if IRCD.get_setting("chanfix") and IRCD.get_setting("chanfix-on-join") and not 'C' in client.user.modes:
 				self.do_chanfix(client)
 
 		if self.name[0] != '&':
@@ -2869,7 +2868,7 @@ class Numeric:
 	ERR_CANNOTKNOCK = 480, ":Cannot knock on {} ({})"
 	ERR_NOPRIVILEGES = 481, ":Permission denied - You do not have the correct IRC Operator privileges"
 	ERR_CHANOPRIVSNEEDED = 482, "{} :{}"
-	ERR_ATTACKDENY = 484, "{} :Cannot kick protected user {}"
+	ERR_ATTACKDENY = 484, "{} :Cannot {} protected user {}"
 	ERR_KILLDENY = 485, ":Cannot kill protected user {}"
 	ERR_SERVERONLY = 487, ":{} is a server-only command"
 	ERR_SECUREONLY = 489, "{} :Cannot join channel (not using a secure connection)"
