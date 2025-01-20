@@ -1306,6 +1306,7 @@ class Channel:
 	topic_time: int = 0
 	creationtime: int = 0
 	founder: str = ''
+	cloakedname: str = '*'
 	List: dict = field(default_factory=dict)
 
 	def init_lists(self):
