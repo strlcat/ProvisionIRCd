@@ -524,6 +524,9 @@ class Client:
 			self.local.sendq_buffer = []
 			return
 		if self.local and self.user:
+			if 'S' in self.user.modes:
+				return
+
 			if not self.local.flood_penalty_time:
 				self.local.flood_penalty_time = int(time())
 			if self.class_:

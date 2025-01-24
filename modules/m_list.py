@@ -68,7 +68,7 @@ def cmd_list(client, recv):
 
 		if ('s' in channel.modes or 'p' in channel.modes) and (not channel.find_member(client) and not channel.is_owner(client) and 'o' not in client.user.modes):
 			if 'p' in channel.modes:
-				client.sendnumeric(Numeric.RPL_LIST, channel.cloakedname, 0, '', "*")
+				client.sendnumeric(Numeric.RPL_LIST, channel.cloakedname, 0, "[+p]", "")
 			continue
 		else:
 			list_modes = ''
