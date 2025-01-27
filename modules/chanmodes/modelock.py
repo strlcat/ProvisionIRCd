@@ -8,6 +8,19 @@ HEADER = {
 	"name": "channelmlocks"
 }
 
+def modelock_change_permitted(client, channel, action, mode, param, CHK_TYPE):
+	err = Channelmode.allow_chanowner(client, channel, action, mode, param, CHK_TYPE)
+	if err == ChanPrivReq.ACCESSOK:
+		if CHK_TYPE == Channelmode.CHK_ACCESS:
+			return ChanPrivReq.ACCESSOK
+		if CHK_TYPE == Channelmode.CHK_PARAM:
+			if param[0] not in 'hoaq':
+				return ChanPrivReq.DONTSENDERROR
+			if param[1] not in ':#':
+				return ChanPrivReq.DONTSENDERROR
+		return ChanPrivReq.ACCESSOK
+	return err
+
 def display_mlocklist(client, channel, mode):
 	if mode == "M":
 		if channel.client_has_membermodes(client, "aq") or client.has_permission("channel:see:mlocklist"):
@@ -23,7 +36,7 @@ def init(module):
 	Chmode_M.sjoin_prefix = '?'
 	Chmode_M.paramcount = 1
 	Chmode_M.unset_with_param = 1
-	Chmode_M.is_ok = Channelmode.allow_chanowner
+	Chmode_M.is_ok = modelock_change_permitted
 	Chmode_M.level = 5
 	Chmode_M.type = Channelmode.LISTMODE
 	Chmode_M.param_help = '<hoaq>:<nick!ident@host>'

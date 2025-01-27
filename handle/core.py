@@ -1333,7 +1333,7 @@ class Channel:
 	topic_time: int = 0
 	creationtime: int = 0
 	founder: str = ''
-	cloakedname: str = '*'
+	cloakedname: str = ''
 	List: dict = field(default_factory=dict)
 
 	def init_lists(self):
@@ -1718,6 +1718,8 @@ class Channel:
 						self.member_give_modes(client, default_join_opmode)
 					if modes_on_join := IRCD.get_setting("modes-on-join"):
 						Command.do(IRCD.me, "MODE", self.name, *modes_on_join.split(), str(self.creationtime))
+						if 'p' in modes_on_join:
+							self.cloakedname = IRCD.get_cloak(client, self.name).split('.')[0]
 
 			if IRCD.get_setting("chanfix") and IRCD.get_setting("chanfix-on-join") and not 'C' in client.user.modes:
 				self.do_chanfix(client)
@@ -2437,6 +2439,7 @@ class IRCD:
 	def create_channel(client, name: str):
 		channel = Channel()
 		channel.name = name
+		channel.cloakedname = name
 		channel.creationtime = int(time())
 		channel.founder = IRCD.channel_founder_fingerprint(client)
 		channel.init_lists()

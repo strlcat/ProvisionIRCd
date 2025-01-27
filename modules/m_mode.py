@@ -4,6 +4,7 @@
 
 from handle.core import Flag, Numeric, Channelmode, Isupport, Command, IRCD, Extban, Hook, ChanPrivReq
 from handle.functions import logging, make_mask, get_higher_opers_than
+from modules.m_kick import do_kick
 
 MAXMODES = 20
 
@@ -91,6 +92,10 @@ def cmd_usermode(client, recv):
 				target.user.modes = target.user.modes.replace(opermode, '')
 				modebuf.append(opermode)
 			target.user.snomask = target.user.snomask = ''
+			if target.local:
+				for channel in target.channels:
+					if 'O' in channel.modes:
+						do_kick(target, channel, target, f"{target.name} is no longer an IRC operator")
 
 		if 's' in set(oldumodes).difference(target.user.modes):
 			target.user.snomask = ''
@@ -431,8 +436,13 @@ def cmd_channelmode(client, recv):
 			param = params[paramcount]
 			param = IRCD.strip_format(param)
 			paramcount += 1
-			if returned_param := handle_mode_list(client, channel, action, mode, param):
-				prevaction = add_to_buff(modebuf, parambuf, action, prevaction, mode, returned_param)
+			result_code = cmode.is_ok(client, channel, action, mode, param, cmode.CHK_PARAM)
+			result = ChanPrivReq.ACCESSOK if not client.local else result_code
+			if result == ChanPrivReq.ACCESSOK:
+				if returned_param := handle_mode_list(client, channel, action, mode, param):
+					prevaction = add_to_buff(modebuf, parambuf, action, prevaction, mode, returned_param)
+			else:
+				report_access_denied(client, channel, result)
 			continue
 
 		oldcmodes = channel.modes
