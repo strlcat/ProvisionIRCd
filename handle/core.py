@@ -89,6 +89,7 @@ class Client:
 	info: str = ''  # GECOS/realname
 	ip: str = None
 	port: int = 0
+	immutable: bool = False
 	hopcount: int = 0
 	lastnick: int = 0
 	moddata: list = field(default_factory=list)

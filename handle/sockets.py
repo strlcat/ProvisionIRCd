@@ -77,6 +77,8 @@ def check_ping_timeouts():
 	for client in list(IRCD.local_clients()):
 		if not client.registered:
 			continue
+		if client.immutable:
+			continue
 		if (int(time()) - client.local.last_msg_received) >= 120:
 			client.exit("Ping timeout")
 
@@ -129,7 +131,7 @@ def remove_delayed_connections():
 
 def send_pings():
 	pingfreq = 90
-	for client in [c for c in IRCD.local_clients() if c.registered]:
+	for client in [c for c in IRCD.local_clients() if c.registered and not c.immutable]:
 		last_ping_sent_int = int((time() * 1000) - client.last_ping_sent) / 1000
 		if (int(time()) - client.local.last_msg_received) >= pingfreq and last_ping_sent_int > pingfreq / 3:
 			if client.user:
