@@ -199,13 +199,19 @@ def cmd_opme(client, recv):
 	else:
 		IRCD.server_notice(client, f"{chname}: no access entry is found for your hostmask.")
 
-def broadcast_schown(client, channame, hostmask):
-	data = f":{client.uplink.id} SCHOWN {channame} {hostmask}"
+def broadcast_schown(client, channel):
+	if len(channel.founder) == 0:
+		foundermask = "*"
+	else:
+		foundermask = channel.founder
+	data = f":{client.uplink.id} SCHOWN {channel.name} {foundermask} {channel.creationtime}"
 	IRCD.send_to_servers(client, [], data)
 
 def cmd_schown(client, recv):
 	chname = recv[1]
 	hostmask = recv[2]
+	chctime = recv[3]
+
 	channel = IRCD.find_channel(chname)
 	if not channel:
 		return
@@ -214,10 +220,17 @@ def cmd_schown(client, recv):
 		channel.founder = ''
 		return
 
+	if hostmask == "*":
+		channel.founder = ''
+		return
+
+	if int(chctime) >= channel.creationtime:
+		return
+
 	channel.founder = hostmask
 
 def hook_schown(client, channel):
-	broadcast_schown(client, channel.name, channel.founder)
+	broadcast_schown(client, channel)
 
 def init(module):
 	Usermode.add(module, 'C', 1, 0, Usermode.allow_all, "Automatic oper up and CHANFIX is disabled")
@@ -226,5 +239,5 @@ def init(module):
 	Command.add(module, cmd_disown, "DISOWN", 1, Flag.CMD_USER)
 	Command.add(module, cmd_founder, "FOUNDER", 1, Flag.CMD_OPER)
 	Command.add(module, cmd_opme, "OPME", 1, Flag.CMD_USER)
-	Command.add(module, cmd_schown, "SCHOWN", 2, Flag.CMD_SERVER)
+	Command.add(module, cmd_schown, "SCHOWN", 3, Flag.CMD_SERVER)
 	Hook.add(Hook.CHANNEL_CREATE, hook_schown)
