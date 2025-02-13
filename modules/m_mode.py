@@ -110,6 +110,12 @@ def cmd_usermode(client, recv):
 			data = f":{target.id} SETHOST :{target.user.cloakhost}"
 			IRCD.send_to_servers(client, [], data)
 
+		if 'p' in set(target.user.modes).difference(oldumodes):
+			target.immutable = True
+
+		if 'p' in set(oldumodes).difference(target.user.modes):
+			target.immutable = False
+
 	if modebuf:
 		# Broadcast buffer.
 		mtags = []

@@ -28,11 +28,19 @@ def umode_q_isok(client):
 		return 1
 	return 0
 
+def umode_p_isok(client):
+	if Usermode.allow_none(client):
+		return 1
+	if 'o' in client.user.modes and client.has_permission("self:become-immutable"):
+		return 1
+	return 0
+
 def init(module):
 	# Params: mode flag, is_global (will be synced to servers), unset_on_deoper bool, can_set method, desc
 	Usermode.add(module, 'i', 1, 0, Usermode.allow_all, "User does not show up in outside /who")
 	Usermode.add(module, 'F', 1, 0, Usermode.allow_all, "Prevent channel redirection (+L)")
 	Usermode.add(module, 'o', 1, 1, Usermode.allow_opers, "Marks the user as an IRC Operator")
+	Usermode.add(module, 'p', 0, 0, umode_p_isok, "Immutable to ping timeouts [Settable by services]")
 	Usermode.add(module, 'q', 1, 1, umode_q_isok, "Protected on all channels")
 	Usermode.add(module, 'r', 1, 0, Usermode.allow_services, "Identifies the nick as being logged in")
 	Usermode.add(module, 's', 1, 1, Usermode.allow_opers, "Can receive server notices")
