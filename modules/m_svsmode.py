@@ -4,6 +4,7 @@
 
 from handle.core import IRCD, Command, Flag, Hook
 from handle.functions import logging
+from modules.m_kick import do_kick
 
 
 def cmd_svsmode(client, recv):
@@ -35,11 +36,39 @@ def cmd_svsmode(client, recv):
 
 		if action == '+':
 			if m not in target.user.modes:
+				if m == 'x':
+					target.setinfo(info=target.user.c_cloakhost, t="host")
+					data = f":{target.id} SETHOST :{target.user.cloakhost}"
+					IRCD.send_to_servers(client, [], data)
+				elif m == 'p':
+					target.immutable = True
+
 				target.user.modes += m
 				modes += m
 
 		elif action == '-':
 			if m in target.user.modes:
+				if m == 'x':
+					target.setinfo(info=target.user.realhost, t="host")
+					data = f":{target.id} SETHOST :{target.user.cloakhost}"
+					IRCD.send_to_servers(client, [], data)
+				elif m == 'p':
+					target.immutable = False
+				elif m == 's':
+					target.user.snomask = ''
+				elif m == 'o':
+					if target.local:
+						target.local.flood_penalty = 0
+					# User de-opered. Also removing relevant oper modes.
+					for opermode in [m for m in target.user.modes if IRCD.get_usermode_by_flag(m).unset_on_deoper]:
+						target.user.modes = target.user.modes.replace(opermode, '')
+						modes += opermode if opermode != 'o' else ''
+					target.user.snomask = target.user.snomask = ''
+					if target.local:
+						for channel in target.channels:
+							if 'O' in channel.modes:
+								do_kick(target, channel, target, f"{target.name} is no longer an IRC operator")
+
 				target.user.modes = target.user.modes.replace(m, '')
 				modes += m
 
