@@ -535,6 +535,8 @@ class Client:
 			return
 		if self.local and self.user:
 			if 'S' in self.user.modes:
+				self.local.flood_penalty = 0
+				self.local.flood_penalty_time = 0
 				return
 
 			if not self.local.flood_penalty_time:
@@ -1123,9 +1125,9 @@ class Usermode:
 
 	@staticmethod
 	def allow_opers(client):
-		if client == IRCD.me or client.server:
+		if Usermode.allow_none(client):
 			return 1
-		return 1 if 'o' in client.user.modes else 0
+		return 1 if 'o' in client.user.modes or 'S' in client.user.modes else 0
 
 	@staticmethod
 	def allow_services(client):

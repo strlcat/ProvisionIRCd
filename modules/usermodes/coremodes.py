@@ -4,32 +4,36 @@ core user modes
 from handle.core import IRCD, Usermode, Snomask, Numeric
 
 def umode_x_isok(client):
-	if Usermode.allow_none(client):
+	if Usermode.allow_services(client):
 		return 1
 	chanlist = client.channels
 	if len(chanlist) == 0:
 		return 1
 	if 'o' in client.user.modes:
 		return 1
+	if 'S' in client.user.modes:
+		return 1
 	client.sendnumeric(Numeric.ERR_CANNOTHIDEHOST)
 	return 0
 
 def umode_S_isok(client):
-	if Usermode.allow_none(client):
+	if Usermode.allow_services(client):
 		return 1
 	if 'o' in client.user.modes and client.has_permission("self:become-service"):
 		return 1
 	return 0
 
 def umode_q_isok(client):
-	if Usermode.allow_none(client):
+	if Usermode.allow_services(client):
 		return 1
 	if 'o' in client.user.modes and client.has_permission("self:become-protected"):
+		return 1
+	if 'S' in client.user.modes:
 		return 1
 	return 0
 
 def umode_p_isok(client):
-	if Usermode.allow_none(client):
+	if Usermode.allow_services(client):
 		return 1
 	if 'o' in client.user.modes and client.has_permission("self:become-immutable"):
 		return 1
