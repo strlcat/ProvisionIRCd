@@ -92,7 +92,7 @@ def cmd_chown(client, recv):
 			Command.do(IRCD.me, "MODE", channel.name, *"+q".split(), *([target.name * 1]), str(channel.creationtime))
 
 		channel.founder = IRCD.channel_founder_fingerprint(target)
-		broadcast_schown(client, channel.name, channel.founder)
+		broadcast_schown(client, channel)
 		IRCD.server_notice(client, f"CHANFIX: {chname} ownership was transferred to {uname}")
 	else:
 		IRCD.server_notice(client, f"CHANFIX: {chname} seems not to be yours, sorry.")
@@ -130,7 +130,7 @@ def cmd_disown(client, recv):
 			Command.do(IRCD.me, "MODE", channel.name, *"-q".split(), *([client.name * 1]), str(channel.creationtime))
 
 		channel.founder = ''
-		broadcast_schown(client, channel.name, channel.founder)
+		broadcast_schown(client, channel)
 		IRCD.server_notice(client, f"CHANFIX: now {chname} is abandoned")
 	else:
 		IRCD.server_notice(client, f"CHANFIX: {chname} seems not to be yours, sorry.")
