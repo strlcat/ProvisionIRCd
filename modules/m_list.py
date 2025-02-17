@@ -7,6 +7,10 @@ from handle.functions import is_match
 from handle.logger import logging
 from time import time
 
+def is_privsecret(client, channel):
+	if ('s' in channel.modes or 'p' in channel.modes) and (not channel.find_member(client) and not channel.is_owner(client) and 'o' not in client.user.modes):
+		return True
+	return False
 
 def cmd_list(client, recv):
 	client.flood_safe_on()
@@ -42,9 +46,10 @@ def cmd_list(client, recv):
 
 	for channel in IRCD.get_channels():
 		channel_open_minutes = int(time()) - channel.creationtime
-		if maxusers and channel.membercount >= int(maxusers):
+		membercount = channel.membercount if not is_privsecret(client, channel) else 0
+		if maxusers and membercount >= int(maxusers):
 			continue
-		if minusers and channel.membercount <= int(minusers):
+		if minusers and membercount <= int(minusers):
 			continue
 		if created_before and channel_open_minutes > int(created_before):
 			continue
@@ -59,14 +64,15 @@ def cmd_list(client, recv):
 
 		if searchmask:
 			searchmask = searchmask.lower()
+			chname = channel.name.lower() if not is_privsecret(client, channel) else channel.cloakedname.lower()
 			if searchmask[0] == '!':
 				searchmask = searchmask[1:]
-				if is_match(searchmask, channel.name.lower()):
+				if is_match(searchmask, chname):
 					continue
-			elif not is_match(searchmask, channel.name.lower()):
+			elif not is_match(searchmask, chname):
 				continue
 
-		if ('s' in channel.modes or 'p' in channel.modes) and (not channel.find_member(client) and not channel.is_owner(client) and 'o' not in client.user.modes):
+		if is_privsecret(client, channel):
 			if 'p' in channel.modes:
 				client.sendnumeric(Numeric.RPL_LIST, channel.cloakedname, 0, "[+p]", "")
 			continue

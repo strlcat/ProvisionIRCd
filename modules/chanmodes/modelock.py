@@ -2,7 +2,7 @@
 provides chmode +M (restrict channel modes to higher operator levels)
 """
 
-from handle.core import IRCD, Command, Numeric, Channelmode, Hook, Isupport
+from handle.core import IRCD, Command, Numeric, Channelmode, Hook, Isupport, ChanPrivReq
 
 HEADER = {
 	"name": "channelmlocks"
