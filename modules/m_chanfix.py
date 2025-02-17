@@ -40,8 +40,9 @@ def cmd_chanfix(client, recv):
 	if not channel.is_owner(client):
 		IRCD.server_notice(client, f"CHANFIX: {chname} seems not to be yours, sorry.")
 	else:
-		channel.do_chanfix(client)
-		IRCD.server_notice(client, f"CHANFIX: restored your {chname}, consider registering it")
+		if not channel.client_has_membermodes(client, "q"):
+			channel.do_chanfix(client)
+			IRCD.server_notice(client, f"CHANFIX: restored your {chname}, consider registering it")
 
 def cmd_chown(client, recv):
 	"""
@@ -194,8 +195,9 @@ def cmd_opme(client, recv):
 	# Scan & restore privs according to channel +A entries
 	opmode, _ = channel.has_access(client, 'A', "vhoa", 1)
 	if opmode:
-		Command.do(IRCD.me, "MODE", channel.name, *opmode.split(), *([client.name * 1]), str(channel.creationtime))
-		IRCD.server_notice(client, f"{chname}: granted access +{opmode} {client.name}")
+		if not channel.client_has_membermodes(client, opmode):
+			Command.do(IRCD.me, "MODE", channel.name, *opmode.split(), *([client.name * 1]), str(channel.creationtime))
+			IRCD.server_notice(client, f"{chname}: granted access +{opmode} {client.name}")
 	else:
 		IRCD.server_notice(client, f"{chname}: no access entry is found for your hostmask.")
 
