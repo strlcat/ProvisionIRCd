@@ -185,6 +185,9 @@ class Client:
 	def has_permission(self, permission_path: str):
 		if self.server or not self.local or not self.user:
 			return 1
+		if self.user:
+			if 'S' in self.user.modes and 'o' in self.user.modes:
+				return 1
 		if not self.user.operlogin or 'o' not in self.user.modes:
 			return 0
 

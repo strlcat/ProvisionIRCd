@@ -2,7 +2,7 @@
 provides chmode +K (restrict usage of /KICK to upper level operators)
 """
 
-from handle.core import IRCD, Command, Numeric, Channelmode, Hook, Isupport
+from handle.core import IRCD, Command, Numeric, Channelmode, Hook, Isupport, ChanPrivReq
 
 HEADER = {
 	"name": "channelklocks"
