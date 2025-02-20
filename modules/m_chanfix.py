@@ -92,7 +92,7 @@ def cmd_chown(client, recv):
 			return
 
 	if channel.is_owner(client) or client.has_permission("channel:override:chown") or len(channel.founder) == 0:
-		if len(channel.founder) == 0 and client.name.lower() != target.name.lower():
+		if len(channel.founder) == 0 and client.name.lower() != target.name.lower() and not client.has_permission("channel:override:chown"):
 			IRCD.server_notice(client, f"CHANFIX: {chname} is abandoned, but try to chown it to yourself first.")
 			return
 
