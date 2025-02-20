@@ -249,7 +249,7 @@ def init(module):
 	Usermode.add(module, 'C', 1, 0, Usermode.allow_all, "Automatic oper up and CHANFIX is disabled")
 	Command.add(module, cmd_chanfix, "CHANFIX", 1, Flag.CMD_USER)
 	Command.add(module, cmd_chown, "CHOWN", 2, Flag.CMD_USER)
-	Command.add(module, cmd_disown, "DISOWN", 1, Flag.CMD_USER)
+	Command.add(module, cmd_disown, "DISOWN", 1, Flag.CMD_OPER)
 	Command.add(module, cmd_founder, "FOUNDER", 1, Flag.CMD_OPER)
 	Command.add(module, cmd_opme, "OPME", 1, Flag.CMD_USER)
 	Command.add(module, cmd_schown, "SCHOWN", 3, Flag.CMD_SERVER)
