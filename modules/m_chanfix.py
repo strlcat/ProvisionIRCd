@@ -82,6 +82,9 @@ def cmd_chown(client, recv):
 		return
 
 	if channel.is_owner(client) or client.has_permission("channel:override:chown") or len(channel.founder) == 0:
+		if IRCD.channel_founder_fingerprint(target) == channel.founder:
+			return
+
 		# Prevent throwaways
 		if not client.has_permission("channel:override:chown"):
 			if not channel.find_member(target):
@@ -96,12 +99,12 @@ def cmd_chown(client, recv):
 			IRCD.server_notice(client, f"CHANFIX: {chname} is abandoned, but try to chown it to yourself first.")
 			return
 
+		# Ok to chown, let's do it
 		for member in channel.members:
 			mclient = member.client
 			if channel.client_has_membermodes(mclient, "q"):
 				Command.do(IRCD.me, "MODE", channel.name, *"-q".split(), *([mclient.name * 1]), str(channel.creationtime))
 
-		# Ok to chown, let's do it
 		if channel.find_member(target) and not channel.client_has_membermodes(target, "q"):
 			Command.do(IRCD.me, "MODE", channel.name, *"+q".split(), *([target.name * 1]), str(channel.creationtime))
 
