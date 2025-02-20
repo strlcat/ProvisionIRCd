@@ -127,11 +127,12 @@ def cmd_disown(client, recv):
 
 	# Ok let's try to relinquish privs of the channel.
 	if channel.is_owner(client) or client.has_permission("channel:override:chown"):
-		if channel.find_member(client) and channel.client_has_membermodes(client, "q"):
-			Command.do(IRCD.me, "MODE", channel.name, *"-q".split(), *([client.name * 1]), str(channel.creationtime))
-
 		channel.founder = ''
 		broadcast_schown(client, channel)
+		for member in channel.members:
+			mclient = member.client
+			if channel.client_has_membermodes(mclient, "q"):
+				Command.do(IRCD.me, "MODE", channel.name, *"-q".split(), *([mclient.name * 1]), str(channel.creationtime))
 		IRCD.server_notice(client, f"CHANFIX: now {chname} is abandoned")
 	else:
 		IRCD.server_notice(client, f"CHANFIX: {chname} seems not to be yours, sorry.")
