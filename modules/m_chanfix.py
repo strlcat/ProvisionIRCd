@@ -81,17 +81,17 @@ def cmd_chown(client, recv):
 		client.sendnumeric(Numeric.ERR_NOSUCHNICK, uname)
 		return
 
-	# Prevent throwaways
-	if not client.has_permission("channel:override:chown"):
-		if not channel.find_member(target):
-			client.sendnumeric(Numeric.ERR_NOTONCHANNEL, uname)
-			return
-
-		if not channel.client_has_membermodes(target, "aq"):
-			IRCD.server_notice(client, f"CHANFIX: please give administrator mode (+a) first to {uname} on {chname}")
-			return
-
 	if channel.is_owner(client) or client.has_permission("channel:override:chown") or len(channel.founder) == 0:
+		# Prevent throwaways
+		if not client.has_permission("channel:override:chown"):
+			if not channel.find_member(target):
+				client.sendnumeric(Numeric.ERR_NOTONCHANNEL, uname)
+				return
+
+			if not channel.client_has_membermodes(target, "aq"):
+				IRCD.server_notice(client, f"CHANFIX: please give administrator mode (+a) first to {uname} on {chname}")
+				return
+
 		if len(channel.founder) == 0 and client.name.lower() != target.name.lower() and not client.has_permission("channel:override:chown"):
 			IRCD.server_notice(client, f"CHANFIX: {chname} is abandoned, but try to chown it to yourself first.")
 			return
