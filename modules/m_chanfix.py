@@ -96,9 +96,12 @@ def cmd_chown(client, recv):
 			IRCD.server_notice(client, f"CHANFIX: {chname} is abandoned, but try to chown it to yourself first.")
 			return
 
+		for member in channel.members:
+			mclient = member.client
+			if channel.client_has_membermodes(mclient, "q"):
+				Command.do(IRCD.me, "MODE", channel.name, *"-q".split(), *([mclient.name * 1]), str(channel.creationtime))
+
 		# Ok to chown, let's do it
-		if channel.find_member(client) and channel.client_has_membermodes(client, "q"):
-			Command.do(IRCD.me, "MODE", channel.name, *"-q".split(), *([client.name * 1]), str(channel.creationtime))
 		if channel.find_member(target) and not channel.client_has_membermodes(target, "q"):
 			Command.do(IRCD.me, "MODE", channel.name, *"+q".split(), *([target.name * 1]), str(channel.creationtime))
 
