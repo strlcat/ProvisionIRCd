@@ -87,7 +87,7 @@ def cmd_chown(client, recv):
 			client.sendnumeric(Numeric.ERR_NOTONCHANNEL, uname)
 			return
 
-		if not channel.client_has_membermodes(target, "a"):
+		if not channel.client_has_membermodes(target, "aq"):
 			IRCD.server_notice(client, f"CHANFIX: please give administrator mode (+a) first to {uname} on {chname}")
 			return
 
