@@ -38,7 +38,7 @@ def cmd_chanfix(client, recv):
 
 	# Ok let's try to restore privs for the guy.
 	if not channel.is_owner(client):
-		IRCD.server_notice(client, f"CHANFIX: {chname} seems not to be yours, sorry.")
+		IRCD.server_notice(client, f"CHANFIX: Access denied for {chname}")
 	else:
 		if not channel.client_has_membermodes(client, "q"):
 			channel.do_chanfix(client)
@@ -112,7 +112,7 @@ def cmd_chown(client, recv):
 		broadcast_schown(client, channel)
 		IRCD.server_notice(client, f"CHANFIX: {chname} ownership was transferred to {uname}")
 	else:
-		IRCD.server_notice(client, f"CHANFIX: {chname} seems not to be yours, sorry.")
+		IRCD.server_notice(client, f"CHANFIX: Access denied for {chname}")
 
 def cmd_disown(client, recv):
 	"""
@@ -128,7 +128,7 @@ def cmd_disown(client, recv):
 
 	IRCD.new_message(client)
 	if not IRCD.get_setting("chanfix"):
-		IRCD.server_notice(client, "Sorry, CHANFIX is not available on this server. Ask IRC operators for help")
+		IRCD.server_notice(client, "CHANFIX is disabled.")
 		return
 
 	chname = recv[1]
@@ -151,7 +151,7 @@ def cmd_disown(client, recv):
 				Command.do(IRCD.me, "MODE", channel.name, *"-q".split(), *([mclient.name * 1]), str(channel.creationtime))
 		IRCD.server_notice(client, f"CHANFIX: now {chname} is abandoned")
 	else:
-		IRCD.server_notice(client, f"CHANFIX: {chname} seems not to be yours, sorry.")
+		IRCD.server_notice(client, f"CHANFIX: Access denied for {chname}")
 
 def cmd_founder(client, recv):
 	"""
