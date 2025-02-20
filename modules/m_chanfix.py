@@ -139,7 +139,7 @@ def cmd_disown(client, recv):
 		return
 
 	# Ok let's try to relinquish privs of the channel.
-	if channel.is_owner(client) or client.has_permission("channel:override:chown"):
+	if channel.is_owner(client) or client.has_permission("channel:override:disown"):
 		channel.founder = ''
 		broadcast_schown(client, channel)
 		for member in channel.members:
