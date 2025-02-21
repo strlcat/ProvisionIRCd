@@ -1568,7 +1568,7 @@ class Channel:
 				continue
 			if n == 2:
 				accmask = accdef.split('@')[0].replace('#', ':').split(':')[1] + '@' + accdef.split('@')[1]
-			elif n == 3 and mode == 'M':
+			elif n == 3 and mode == 'L':
 				modeslock = accdef.split('@')[0].replace('#', ':').split(':')[1]
 				accmask = accdef.split('@')[0].replace('#', ':').split(':')[2] + '@' + accdef.split('@')[1]
 			else:

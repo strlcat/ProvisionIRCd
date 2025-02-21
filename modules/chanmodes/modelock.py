@@ -1,5 +1,5 @@
 """
-provides chmode +M (restrict channel modes to higher operator levels)
+provides chmode +L (restrict channel modes to higher operator levels)
 """
 
 from handle.core import IRCD, Command, Numeric, Channelmode, Hook, Isupport, ChanPrivReq
@@ -22,7 +22,7 @@ def modelock_change_permitted(client, channel, action, mode, param, CHK_TYPE):
 	return err
 
 def display_mlocklist(client, channel, mode):
-	if mode == "M":
+	if mode == "L":
 		if channel.client_has_membermodes(client, "aq") or client.has_permission("channel:see:mlocklist"):
 			for entry in reversed(channel.List[mode]):
 				client.sendnumeric(Numeric.RPL_ANYLIST, channel.name, entry.mask, entry.set_by, entry.set_time)
@@ -31,15 +31,15 @@ def display_mlocklist(client, channel, mode):
 
 def init(module):
 	Hook.add(Hook.CHAN_LIST_ENTRY, display_mlocklist)
-	Chmode_M = Channelmode()
-	Chmode_M.flag = 'M'
-	Chmode_M.sjoin_prefix = '?'
-	Chmode_M.paramcount = 1
-	Chmode_M.unset_with_param = 1
-	Chmode_M.is_ok = modelock_change_permitted
-	Chmode_M.level = 5
-	Chmode_M.type = Channelmode.LISTMODE
-	Chmode_M.param_help = '<hoaq>:<nick!ident@host>'
-	Chmode_M.desc = 'Restricts channel mode changes to specified operator levels'
-	Channelmode.add(module, Chmode_M)
+	Chmode_L = Channelmode()
+	Chmode_L.flag = 'L'
+	Chmode_L.sjoin_prefix = '?'
+	Chmode_L.paramcount = 1
+	Chmode_L.unset_with_param = 1
+	Chmode_L.is_ok = modelock_change_permitted
+	Chmode_L.level = 5
+	Chmode_L.type = Channelmode.LISTMODE
+	Chmode_L.param_help = '<hoaq>:<nick!ident@host>'
+	Chmode_L.desc = 'Restricts channel mode changes to specified operator levels'
+	Channelmode.add(module, Chmode_L)
 	Isupport.add("MLKLIST")
