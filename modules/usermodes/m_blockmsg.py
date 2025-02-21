@@ -28,6 +28,8 @@ def blockmsg_to_user(client, to_client, msg, sendtype):
 			return Hook.DENY
 
 	if 'R' in client.user.modes:
+		if 'S' in to_client.user.modes and 'o' in to_client.user.modes:
+			return msg
 		if 'r' not in client.user.modes:
 			client.sendnumeric(Numeric.ERR_CANTSENDTOUSER, to_client.name, "Message not sent. You have usermode +R but are not using a registered nickname")
 			return Hook.DENY
@@ -44,6 +46,8 @@ def blockmsg_to_user(client, to_client, msg, sendtype):
 			return Hook.DENY
 
 	if 'Z' in client.user.modes:
+		if 'S' in to_client.user.modes and 'o' in to_client.user.modes:
+			return msg
 		if 'z' not in client.user.modes:
 			client.sendnumeric(Numeric.ERR_CANTSENDTOUSER, to_client.name, "Message not sent. You have usermode +Z but are not using a secure connection")
 			return Hook.DENY
