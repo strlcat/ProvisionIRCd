@@ -42,7 +42,7 @@ def umode_p_isok(client):
 def init(module):
 	# Params: mode flag, is_global (will be synced to servers), unset_on_deoper bool, can_set method, desc
 	Usermode.add(module, 'i', 1, 0, Usermode.allow_all, "User does not show up in outside /who")
-	Usermode.add(module, 'F', 1, 0, Usermode.allow_all, "Prevent channel redirection (+L)")
+	Usermode.add(module, 'F', 1, 0, Usermode.allow_all, "Prevent channel redirection (+F)")
 	Usermode.add(module, 'o', 1, 1, Usermode.allow_opers, "Marks the user as an IRC Operator")
 	Usermode.add(module, 'p', 0, 0, umode_p_isok, "Immutable to ping timeouts [Settable by services]")
 	Usermode.add(module, 'q', 1, 1, umode_q_isok, "Protected on all channels")
