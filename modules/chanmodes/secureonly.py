@@ -6,7 +6,7 @@ from handle.core import Numeric, Channelmode, Hook, ChanPrivReq
 
 def chmode_z_is_ok(client, channel, action, mode, param, CHK_TYPE):
 	if CHK_TYPE == Channelmode.CHK_ACCESS:
-		if not channel.client_has_membermodes(client, "oaq"):
+		if not channel.client_has_membermodes(client, "aq"):
 			return ChanPrivReq.NOTOPER
 		if 'z' not in client.user.modes and not client.has_permission("channel:override:mode"):
 			client.sendnumeric(Numeric.ERR_INVALIDMODEPARAM, channel.name, 'z', '*', "You need to be connected with TLS to set mode +z.")
@@ -27,6 +27,7 @@ def init(module):
 	Cmode_z = Channelmode()
 	Cmode_z.flag = 'z'
 	Cmode_z.is_ok = chmode_z_is_ok
+	Cmode_z.level = 4
 	Cmode_z.desc = "Requires a TLS connection to join the channel"
 	Channelmode.add(module, Cmode_z)
 	Hook.add(Hook.CAN_JOIN, chmode_z_only_join)
