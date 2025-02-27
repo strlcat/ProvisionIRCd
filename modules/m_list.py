@@ -79,7 +79,15 @@ def cmd_list(client, recv):
 		else:
 			list_modes = ''
 			if channel.modes:
-				list_modes = "[+" + channel.modes + "]"
+				chanmodes = ''
+				is_anonymous = 'U' in channel.modes and not (channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:see:mode"))
+				if is_anonymous:
+					for m in channel.modes:
+						if m in 'nrt':
+							chanmodes += m
+				else:
+					chanmodes = channel.modes
+				list_modes = "[+" + chanmodes + "]"
 			client.sendnumeric(Numeric.RPL_LIST, channel.name, channel.membercount, list_modes, channel.topic)
 	client.sendnumeric(Numeric.RPL_LISTEND)
 	client.flood_safe_off()
