@@ -11,7 +11,7 @@ MAXMODES = 20
 
 def show_channel_info(client, channel):
 	if ('s' in channel.modes or 'p' in channel.modes) and not channel.find_member(client) and not client.has_permission("channel:see:mode"):
-		return
+		return client.sendnumeric(Numeric.ERR_NOSUCHCHANNEL, channel.name)
 	is_anonymous = 'U' in channel.modes and not (channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:see:mode"))
 	chanmodes = ''
 	show_params = []
@@ -30,13 +30,11 @@ def show_channel_info(client, channel):
 
 def cmd_usermode(client, recv):
 	if not (target := IRCD.find_user(recv[1])):
-		client.sendnumeric(Numeric.ERR_NOSUCHNICK, recv[1])
-		return
+		return client.sendnumeric(Numeric.ERR_NOSUCHNICK, recv[1])
 
 	if len(recv) < 3:
 		if target != client and 'o' not in client.user.modes:
-			client.sendnumeric(Numeric.ERR_USERSDONTMATCH, "see")
-			return
+			return client.sendnumeric(Numeric.ERR_USERSDONTMATCH, "see")
 		return client.sendnumeric(Numeric.RPL_UMODEIS, target.user.modes)
 
 	modes = recv[2]
@@ -331,7 +329,8 @@ def matched_mode_count(modelist, modes):
 	return x, y
 
 def cmd_channelmode(client, recv):
-	channel = IRCD.find_channel(recv[1])
+	if not (channel := IRCD.find_channel(recv[1])):
+		return client.sendnumeric(Numeric.ERR_NOSUCHCHANNEL, recv[1])
 	if len(recv) == 2:
 		# Requesting channel info.
 		return show_channel_info(client, channel)
@@ -546,9 +545,14 @@ def cmd_channelmode(client, recv):
 def cmd_mode(client, recv):
 	target = recv[1]
 	if IRCD.find_channel(target):
-		cmd_channelmode(client, recv)
+		return cmd_channelmode(client, recv)
 	elif IRCD.find_user(target):
-		cmd_usermode(client, recv)
+		return cmd_usermode(client, recv)
+
+	if target[0] in IRCD.CHANPREFIXES:
+		return client.sendnumeric(Numeric.ERR_NOSUCHCHANNEL, target)
+	else:
+		return client.sendnumeric(Numeric.ERR_NOSUCHNICK, target)
 
 def cmd_samode(client, recv):
 	if not client.has_permission("sacmds:samode"):
