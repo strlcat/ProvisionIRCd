@@ -10,9 +10,9 @@ MAXMODES = 20
 
 
 def show_channel_info(client, channel):
-	if ('s' in channel.modes or 'p' in channel.modes) and not channel.find_member(client) and not client.has_permission("channel:see:mode"):
+	if ('s' in channel.modes or 'p' in channel.modes) and not channel.find_member(client) and not client.has_permission("channel:see:mode") and not channel.is_owner(client):
 		return client.sendnumeric(Numeric.ERR_NOSUCHCHANNEL, channel.name)
-	is_anonymous = 'U' in channel.modes and not (channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:see:mode"))
+	is_anonymous = 'U' in channel.modes and not (channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:see:mode") or channel.is_owner(client))
 	chanmodes = ''
 	show_params = []
 	for m in channel.modes:
@@ -24,7 +24,7 @@ def show_channel_info(client, channel):
 			if m in 'nrt':
 				chanmodes += m
 	client.sendnumeric(Numeric.RPL_CHANNELMODEIS, channel.name, chanmodes,
-					   ' '.join(show_params) if show_params and (channel.find_member(client) or client.has_permission("channel:see:mode")) else '')
+					   ' '.join(show_params) if show_params and (channel.find_member(client) or client.has_permission("channel:see:mode") or channel.is_owner(client)) else '')
 	client.sendnumeric(Numeric.RPL_CREATIONTIME, channel.name, channel.creationtime)
 
 

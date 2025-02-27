@@ -80,7 +80,7 @@ def cmd_list(client, recv):
 			list_modes = ''
 			if channel.modes:
 				chanmodes = ''
-				is_anonymous = 'U' in channel.modes and not (channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:see:mode"))
+				is_anonymous = 'U' in channel.modes and not (channel.client_has_membermodes(client, "hoaq") or client.has_permission("channel:see:mode") or channel.is_owner(client))
 				if is_anonymous:
 					for m in channel.modes:
 						if m in 'nrt':
