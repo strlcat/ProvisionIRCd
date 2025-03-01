@@ -461,8 +461,25 @@ def cmd_channelmode(client, recv):
 		if mode not in param_modes + param_modes_unset:
 			if action == "+" and mode not in channel.modes:
 				channel.modes += mode
+				# TODO automatic set-unset of helper modes works only
+				# for parameter-less modes. Can we also unset parametrized
+				# modes in future in this way too?
+				if cmode.sets_modes != '':
+					for m in cmode.sets_modes:
+						if not IRCD.get_channelmode_by_flag(m):
+							continue
+						if m not in channel.modes:
+							channel.modes += m
+							prevaction = add_to_buff(modebuf, parambuf, action, prevaction, m, '')
 			elif action == "-" and mode in channel.modes:
 				channel.modes = channel.modes.replace(mode, '')
+				if cmode.unsets_modes != '':
+					for m in cmode.unsets_modes:
+						if not IRCD.get_channelmode_by_flag(m):
+							continue
+						if m in channel.modes:
+							channel.modes = channel.modes.replace(m, '')
+							prevaction = add_to_buff(modebuf, parambuf, action, prevaction, m, '')
 
 		elif mode in param_modes:
 			# These modes require param on set, but not on unset.

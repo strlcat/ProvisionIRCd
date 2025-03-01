@@ -22,18 +22,23 @@ def cmd_rename(client, recv):
 	Example: /RENAME #home #Home
 	"""
 
-	if not client.has_permission("channel:rename"):
-		return client.sendnumeric(Numeric.ERR_NOPRIVILEGES)
-
+	oldname = recv[1]
 	name = recv[2]
+
+	if oldname.lower() != name.lower():
+		if not client.has_permission("channel:rename"):
+			return client.sendnumeric(Numeric.ERR_NOPRIVILEGES)
 
 	if len(recv) > 2:
 		reason = " ".join(recv[3:])
 	else:
 		reason = ""
 
-	if not (channel := IRCD.find_channel(recv[1])):
+	if not (channel := IRCD.find_channel(oldname)):
 		return IRCD.server_notice(client, f"Channel {name} does not exist.")
+
+	if not (channel.client_has_membermodes(client, "q") or channel.is_owner(client)):
+		return client.sendnumeric(Numeric.ERR_NOPRIVILEGES)
 
 	if name[0] != channel.name[0]:
 		return IRCD.server_notice(client, 'Converting of channel type is not allowed.')
@@ -47,7 +52,7 @@ def cmd_rename(client, recv):
 	if client.local:
 		IRCD.server_notice(client, f'Channel {channel.name} successfully changed to {name}')
 
-	IRCD.send_to_servers(client, f":{client.id} RENAME {channel.name} {name}")
+	IRCD.send_to_servers(client, [], f":{client.id} RENAME {channel.name} {name}")
 
 	old_name = channel.name
 	channel.name = name

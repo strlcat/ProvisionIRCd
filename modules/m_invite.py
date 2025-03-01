@@ -5,6 +5,7 @@
 import time
 
 from handle.core import IRCD, Command, Channelmode, Capability, Flag, Numeric, Hook
+from modules.knock import cmd_knock
 
 
 def cmd_invite(client, recv):
@@ -95,6 +96,9 @@ def expired_invites():
 
 def invite_can_join(client, channel, key):
 	if 'i' in channel.modes and not (channel.is_invex(client) or channel.is_owner(client)):
+		if 'x' in channel.modes:
+			recv = ["KNOCK", channel.name]
+			cmd_knock(client, recv)
 		return Numeric.ERR_INVITEONLYCHAN
 	return 0
 
@@ -104,6 +108,7 @@ def init(module):
 	Hook.add(Hook.CAN_JOIN, invite_can_join)
 	Cmode_i = Channelmode()
 	Cmode_i.flag = 'i'
+	Cmode_i.unsets_modes = 'x'
 	Cmode_i.desc = "You need to be invited to join the channel"
 	Cmode_i.paramcount = 0
 	Cmode_i.is_ok = Channelmode.allow_chanop

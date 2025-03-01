@@ -1177,6 +1177,8 @@ class Channelmode:
 	sjoin_prefix: str = ''
 	paramcount: int = 0
 	unset_with_param: int = 0
+	sets_modes: str = ''
+	unsets_modes: str = ''
 	is_global: int = 1
 	is_ok: Callable = None
 	get_param: callable = lambda p: None
