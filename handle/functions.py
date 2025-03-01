@@ -4,12 +4,33 @@ import time
 import string
 import socket
 import ipaddress
+import hashlib
 from handle.logger import logging
 
-def ip_type(ip):
-	def isxdigit(s):
-		return all(c in string.hexdigits for c in s)
+def isxdigit(s):
+	return all(c in string.hexdigits for c in s)
 
+def xor_block(x, y):
+	return bytes(a ^ b for a, b in zip(x, y))
+
+def xor_shrink(b, mx):
+	r = b'\0' * mx
+	n = len(b)
+	if n % mx:
+		n -= n % mx
+	for x in range(0, n, mx):
+		r = xor_block(r, b[x:])
+	if n % mx:
+		r = xor_block(r, b[n].ljust(mx, b'\0'))
+	return r
+
+def hash_data(key, data):
+	return hashlib.sha256(bytes(key, "utf-8") + data).digest()
+
+def b2h_upper(b):
+	return b.hex().upper()
+
+def ip_type(ip):
 	if isxdigit(ip.replace(':', '')):
 		return socket.AF_INET6
 	if ip.replace('.', '').isdigit():
