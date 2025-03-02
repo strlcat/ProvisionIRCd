@@ -10,8 +10,11 @@ def cmd_names(client, recv):
 	if not (channel := IRCD.find_channel(recv[1])):
 		return client.sendnumeric(Numeric.ERR_NOSUCHCHANNEL, recv[1])
 
-	if not channel.find_member(client) and not client.has_permission("channel:see:names"):
-		return
+	if ('s' in channel.modes or 'p' in channel.modes) and not channel.find_member(client) and not client.has_permission("channel:see:mode") and not channel.is_owner(client):
+		return client.sendnumeric(Numeric.ERR_NOSUCHCHANNEL, recv[1])
+
+	if not channel.find_member(client) and not client.has_permission("channel:see:names") and not channel.is_owner(client):
+		return client.sendnumeric(Numeric.ERR_NOTONCHANNEL, recv[1])
 
 	users = []
 	for member in channel.members:
