@@ -10,9 +10,9 @@ def is_hashed_key(keystr):
 		return True
 	return False
 
-def hash_key(key):
+def hash_key(channame, key):
 	cloak_key = IRCD.get_setting("cloak-key")
-	h = hash_data(cloak_key, bytes(key, "utf-8"))
+	h = hash_data(cloak_key, bytes(key + channame, "utf-8"))
 	hsh = xor_shrink(h, 8)
 	r = b2h_upper(hsh)
 	return r
@@ -40,8 +40,10 @@ def can_join_key(client, channel, key):
 		if key == None or key == "":
 			return Numeric.ERR_BADCHANNELKEY
 		chankey = channel.get_param('k')
-		if is_hashed_key(chankey) and hash_key(key) == chankey:
-			return 0
+		if is_hashed_key(chankey):
+			if hash_key(channel.name.lower(), key) == chankey:
+				return 0
+			return Numeric.ERR_BADCHANNELKEY
 		if key == chankey:
 			return 0
 		return Numeric.ERR_BADCHANNELKEY
@@ -68,7 +70,13 @@ def sjoin_check_key(ourkey, theirkey):
 	return -1
 
 def cmd_makekey(client, recv):
-	IRCD.server_notice(client, f"* hashed key is: {hash_key(recv[1])}")
+	"""
+	Usage: MAKEKEY <channame> <key>
+	Create a hashed key for channel mode +k.
+	Users who are joining channel still will not
+	see plaintext key, for example, if forcibly joined.
+	"""
+	IRCD.server_notice(client, f"* hashed key is: {hash_key(recv[1].lower(), recv[2])}")
 
 def init(module):
 	Cmode_k = Channelmode()
@@ -83,4 +91,4 @@ def init(module):
 	Cmode_k.level = 4
 	Channelmode.add(module, Cmode_k)
 	Hook.add(Hook.CAN_JOIN, can_join_key)
-	Command.add(module, cmd_makekey, "MAKEKEY", 1, Flag.CMD_USER)
+	Command.add(module, cmd_makekey, "MAKEKEY", 2, Flag.CMD_USER)
