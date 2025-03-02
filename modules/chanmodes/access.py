@@ -38,7 +38,7 @@ def access_on_join(client, channel):
 		return
 	opmode, _ = channel.has_access(client, 'A', "vhoa", 1)
 	if opmode:
-		Command.do(IRCD.me, "MODE", channel.name, *opmode.split(), *([client.name * 1]), str(channel.creationtime))
+		Command.do(IRCD.me, "MODE", channel.name, *opmode.split(), *([client.name]), str(channel.creationtime))
 
 def init(module):
 	Hook.add(Hook.CHAN_LIST_ENTRY, display_acclist)

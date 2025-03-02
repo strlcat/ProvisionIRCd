@@ -100,13 +100,20 @@ def cmd_chown(client, recv):
 			return
 
 		# Ok to chown, let's do it
+		ownerlist = []
+		deqlist = []
 		for member in channel.members:
 			mclient = member.client
 			if channel.client_has_membermodes(mclient, "q"):
-				Command.do(IRCD.me, "MODE", channel.name, *"-q".split(), *([mclient.name * 1]), str(channel.creationtime))
+				ownerlist += [mclient.name]
+		if len(ownerlist) > 0:
+			deqlist = ['-' + ('q' * len(ownerlist))]
+		if channel.find_member(target):
+			ownerlist += [target.name]
+			deqlist[0] += "+q"
 
-		if channel.find_member(target) and not channel.client_has_membermodes(target, "q"):
-			Command.do(IRCD.me, "MODE", channel.name, *"+q".split(), *([target.name * 1]), str(channel.creationtime))
+		if len(ownerlist) > 0:
+			Command.do(IRCD.me, "MODE", channel.name, *(deqlist), *(ownerlist), str(channel.creationtime))
 
 		channel.founder = IRCD.channel_founder_fingerprint(target)
 		broadcast_schown(client, channel)
@@ -145,10 +152,15 @@ def cmd_disown(client, recv):
 	if channel.is_owner(client) or client.has_permission("channel:override:disown"):
 		channel.founder = ''
 		broadcast_schown(client, channel)
+
+		ownerlist = []
 		for member in channel.members:
 			mclient = member.client
 			if channel.client_has_membermodes(mclient, "q"):
-				Command.do(IRCD.me, "MODE", channel.name, *"-q".split(), *([mclient.name * 1]), str(channel.creationtime))
+				ownerlist += [mclient.name]
+		if len(ownerlist) > 0:
+			Command.do(IRCD.me, "MODE", channel.name, *(['-' + ('q' * len(ownerlist))]), *(ownerlist), str(channel.creationtime))
+
 		IRCD.server_notice(client, f"CHANFIX: now {chname} is abandoned")
 	else:
 		IRCD.server_notice(client, f"CHANFIX: Access denied for {chname}")
@@ -213,7 +225,7 @@ def cmd_opme(client, recv):
 	opmode, _ = channel.has_access(client, 'A', "vhoa", 1)
 	if opmode:
 		if not channel.client_has_membermodes(client, opmode):
-			Command.do(IRCD.me, "MODE", channel.name, *opmode.split(), *([client.name * 1]), str(channel.creationtime))
+			Command.do(IRCD.me, "MODE", channel.name, *[opmode], *([client.name]), str(channel.creationtime))
 			IRCD.server_notice(client, f"{chname}: granted access +{opmode} {client.name}")
 	else:
 		IRCD.server_notice(client, f"{chname}: no access entry is found for your hostmask.")
