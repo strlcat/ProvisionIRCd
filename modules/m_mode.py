@@ -121,6 +121,16 @@ def cmd_usermode(client, recv):
 		if 'p' in set(oldumodes).difference(target.user.modes):
 			target.immutable = False
 
+		if 'r' in set(oldumodes).difference(target.user.modes):
+			if 'R' in target.user.modes:
+				target.user.modes = target.user.modes.replace('R', '')
+				modebuf.append(opermode)
+
+		if 'z' in set(oldumodes).difference(target.user.modes):
+			if 'Z' in target.user.modes:
+				target.user.modes = target.user.modes.replace('Z', '')
+				modebuf.append(opermode)
+
 	if modebuf:
 		# Broadcast buffer.
 		mtags = []

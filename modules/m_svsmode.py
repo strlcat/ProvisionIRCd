@@ -48,7 +48,15 @@ def cmd_svsmode(client, recv):
 
 		elif action == '-':
 			if m in target.user.modes:
-				if m == 'x':
+				if m == 'r':
+					if 'R' in target.user.modes:
+						target.user.modes = target.user.modes.replace('R', '')
+						modes += 'R'
+				elif m == 'z':
+					if 'Z' in target.user.modes:
+						target.user.modes = target.user.modes.replace('Z', '')
+						modes += 'Z'
+				elif m == 'x':
 					target.setinfo(info=target.user.realhost, t="host")
 					data = f":{target.id} SETHOST :{target.user.cloakhost}"
 					IRCD.send_to_servers(client, [], data)
