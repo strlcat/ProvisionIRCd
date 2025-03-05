@@ -23,6 +23,9 @@ def umode_Z_isok(client):
 	return 0
 
 def blockmsg_to_user(client, to_client, msg, sendtype):
+	if 'o' in client.user.modes and client.has_permission("client:send:message"):
+		return msg
+
 	if 'D' in to_client.user.modes:
 		client.sendnumeric(Numeric.ERR_CANTSENDTOUSER, to_client.name, "This user does not accept private messages")
 		return Hook.DENY
