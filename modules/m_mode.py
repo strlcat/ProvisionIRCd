@@ -126,7 +126,11 @@ def cmd_usermode(client, recv):
 				target.user.modes = target.user.modes.replace('R', '')
 				modebuf.append(opermode)
 
+		if 'z' in set(target.user.modes).difference(oldumodes):
+			target.secure = True
+
 		if 'z' in set(oldumodes).difference(target.user.modes):
+			target.secure = False
 			if 'Z' in target.user.modes:
 				target.user.modes = target.user.modes.replace('Z', '')
 				modebuf.append(opermode)

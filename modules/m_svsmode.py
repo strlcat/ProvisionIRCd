@@ -42,6 +42,8 @@ def cmd_svsmode(client, recv):
 					IRCD.send_to_servers(client, [], data)
 				elif m == 'p':
 					target.immutable = True
+				elif m == 'z':
+					target.secure = True
 
 				target.user.modes += m
 				modes += m
@@ -53,6 +55,7 @@ def cmd_svsmode(client, recv):
 						target.user.modes = target.user.modes.replace('R', '')
 						modes += 'R'
 				elif m == 'z':
+					target.secure = False
 					if 'Z' in target.user.modes:
 						target.user.modes = target.user.modes.replace('Z', '')
 						modes += 'Z'

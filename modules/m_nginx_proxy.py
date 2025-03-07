@@ -43,7 +43,7 @@ def post_load(module):
 
 
 def ngxproxytls_add_umode(client):
-	if client.user.ngxproxytls and 'z' not in client.user.modes:
+	if client.secure and 'z' not in client.user.modes:
 		client.add_user_modes(['z'])
 
 
@@ -66,7 +66,7 @@ def cmd_ngxproxy(client, recv):
 	client.port = recv[4]
 	extport = recv[5]
 	if extport in NginxPROXYConf.external_tls_ports:
-		client.user.ngxproxytls = True
+		client.secure = True
 	if IRCD.get_setting("resolvehost"):
 		try:
 			realhost = gethostbyaddr(client.ip)[0]

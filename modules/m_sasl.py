@@ -24,7 +24,6 @@ class SaslRequest:
 		self.client = client
 		self.user_id = user_id
 		self.token = None
-		self.failed_attempts = 0
 		self.mech = None
 		SaslRequest.table.append(self)
 
@@ -39,11 +38,10 @@ class SaslRequest:
 class SaslInfo:
 	server = None
 
+	require_tls = False
+
 	# Dictionary to hold request init times to check for timeouts.
 	request_init = {}
-
-	# Dictionary to hold failed attempts per client.
-	failed_attempts = {}
 
 
 def cmd_authenticate(client, recv):
@@ -51,6 +49,10 @@ def cmd_authenticate(client, recv):
 		return
 
 	if not SaslInfo.server:
+		return client.sendnumeric(Numeric.ERR_SASLFAIL)
+
+	# FIXME on tls main branch also add check for tls
+	if SaslInfo.require_tls and not (client.secure or 'z' in client.user.modes):
 		return client.sendnumeric(Numeric.ERR_SASLFAIL)
 
 	if not (saslrequest := SaslRequest.get_from_id(client.id)):
@@ -61,6 +63,11 @@ def cmd_authenticate(client, recv):
 		data = f":{IRCD.me.name} SASL {SaslInfo.server.name} {client.id} S {recv[1]}"
 		IRCD.send_to_servers(client, [], data)
 		return
+	else:
+		if recv[1] == '*':
+			client.sendnumeric(Numeric.ERR_SASLABORTED)
+			SaslRequest.table.remove(saslrequest)
+			return
 
 	if not saslrequest.token and saslrequest.mech:
 		saslrequest.token = recv[1]
@@ -83,7 +90,7 @@ def cmd_sasl(client, recv):
 		target_client = IRCD.find_user(recv[2])
 		if not target_client:
 			return
-		if recv[3] == "C":
+		if recv[3] == "C" and len(recv) > 4:
 			target_client.send([], f"AUTHENTICATE {recv[4]}")
 
 		elif recv[3] == "D":  # Done?
@@ -94,9 +101,9 @@ def cmd_sasl(client, recv):
 			elif recv[4] == "F":  # Fail.
 				target_client.sendnumeric(Numeric.ERR_SASLFAIL)
 				saslrequest.mech = None
-				saslrequest.failed_attempts += 1
-				if saslrequest.failed_attempts >= 3:
-					target_client.client.exit("Too many SASL authentication failures")
+				target_client.failed_auth_attempts += 1
+				if target_client.failed_auth_attempts >= 3:
+					target_client.exit("Too many SASL authentication failures")
 		return
 
 	data = f":{client.name} {' '.join(recv)}"
@@ -160,6 +167,7 @@ def post_load(module):
 	if not IRCD.get_setting("sasl-server"):
 		conf_error("[m_sasl] Missing requirement in conf: settings::sasl-server must be a valid server")
 	SaslInfo.server = IRCD.find_server(IRCD.get_setting("sasl-server"))
+	SaslInfo.require_tls = IRCD.get_setting("sasl-require-secure")
 
 
 def init(module):
@@ -174,6 +182,6 @@ def init(module):
 	Hook.add(Hook.REMOTE_QUIT, sasl_cleanup)
 	Hook.add(Hook.SERVER_SYNCED, sasl_server_online)
 	Hook.add(Hook.SERVER_DISCONNECT, sasl_server_offline)
-	Command.add(module, cmd_sasl, "SASL", 2, Flag.CMD_UNKNOWN)
+	Command.add(module, cmd_sasl, "SASL", 2, Flag.CMD_SERVER)
 	Command.add(module, cmd_authenticate, "AUTHENTICATE", 1, Flag.CMD_UNKNOWN)
 	Command.add(module, cmd_svslogin, "SVSLOGIN", 2, Flag.CMD_SERVER)

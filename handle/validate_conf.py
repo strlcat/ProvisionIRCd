@@ -658,6 +658,12 @@ def config_test_except(block):
 			e.comment = comment
 
 
+def config_test_secureaddrs(block):
+	for entry in block.entries:
+		saddr = entry.get_single_value()
+		IRCD.set_setting_list("secureaddrs", saddr)
+
+
 def config_test_qlines(block):
 	for entry in block.entries:
 		qline = entry.get_single_value()

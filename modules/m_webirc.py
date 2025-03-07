@@ -13,6 +13,7 @@ class WebIRCConf:
 	password = None
 	options = []
 	ip_whitelist = []
+	is_secure = False
 
 
 def post_load(module):
@@ -27,6 +28,8 @@ def post_load(module):
 			password = entry_value
 		if entry_name == "options":
 			WebIRCConf.options.append(entry_value)
+		if entry_name == "is-secure":
+			WebIRCConf.is_secure = True
 		if entry_name == "ip-whitelist":
 			for ip in entry.get_path("ip-whitelist"):
 				if ip in WebIRCConf.ip_whitelist:
@@ -43,8 +46,12 @@ def post_load(module):
 
 
 def webirc_add_umode(client):
-	if client.user.webirc and 'v' not in client.user.modes:
-		client.add_user_modes(['v'])
+	if client.user.webirc:
+		if 'v' not in client.user.modes:
+			client.add_user_modes(['v'])
+		if WebIRCConf.is_secure and 'z' not in client.user.modes:
+			client.secure = True
+			client.add_user_modes(['z'])
 
 
 def init(module):

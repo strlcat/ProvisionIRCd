@@ -89,6 +89,8 @@ class Client:
 	ip: str = None
 	port: int = 0
 	immutable: bool = False
+	secure: bool = False
+	failed_auth_attempts: int = 0
 	hopcount: int = 0
 	lastnick: int = 0
 	moddata: list = field(default_factory=list)
@@ -951,7 +953,6 @@ class User:
 	cloakhost: str = ''
 	c_cloakhost: str = ''
 	webirc: bool = False
-	ngxproxytls: bool = False
 	snomask: str = ''
 	swhois: list = field(default_factory=list)  # Swhois dataclasses
 	away: str = ''
