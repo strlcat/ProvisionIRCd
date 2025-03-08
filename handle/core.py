@@ -113,6 +113,9 @@ class Client:
 
 	@property
 	def ulined(self):
+		if self.user:
+			if 'u' in self.user.modes and 'o' in self.user.modes:
+				return 1
 		for uline in IRCD.get_setting("ulines"):
 			if uline.lower() in [self.uplink.name.lower(), self.name.lower()]:
 				return 1
@@ -120,6 +123,9 @@ class Client:
 
 	@property
 	def is_service(self):
+		if self.user:
+			if 'S' in self.user.modes and 'o' in self.user.modes:
+				return 1
 		services = IRCD.get_setting("services")
 		return services.lower() in [self.uplink.name.lower(), self.name.lower()]
 

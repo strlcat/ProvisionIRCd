@@ -23,6 +23,13 @@ def umode_S_isok(client):
 		return 1
 	return 0
 
+def umode_u_isok(client):
+	if Usermode.allow_none(client):
+		return 1
+	if 'o' in client.user.modes and client.has_permission("self:become-ulined"):
+		return 1
+	return 0
+
 def umode_q_isok(client):
 	if Usermode.allow_services(client):
 		return 1
@@ -53,6 +60,7 @@ def init(module):
 	Usermode.add(module, 'z', 1, 0, Usermode.allow_none, "User is using a secure connection")
 	Usermode.add(module, 'H', 1, 1, Usermode.allow_opers, "Hide IRCop status")
 	Usermode.add(module, 'S', 1, 1, umode_S_isok, "Client acts as a network service [Settable by services]")
+	Usermode.add(module, 'u', 1, 1, umode_u_isok, "Client has U:Line permissions [Settable by services]")
 
 	Snomask.add(module, 'c', 0, "Can read local connect/disconnect notices")
 	Snomask.add(module, 'f', 1, "See excess flood alerts")
