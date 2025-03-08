@@ -2714,6 +2714,7 @@ class Numeric:
 	RPL_BOUNCE = 10, "{} {} :Please connect to this server"
 	RPL_CLONES = 30, ":User {} is logged in {} times: {}"
 	RPL_NOCLONES = 31, ":No clones found on this {}"
+	RPL_LAG = 56, "{} :{}ms"
 	RPL_STATSHELP = 210, "{} :- {}"
 	RPL_STATSLINKINFO = 211, "{} {} {} {} {} {} {} {} :{}"
 	RPL_ENDOFSTATS = 219, "{} :End of /STATS report"
