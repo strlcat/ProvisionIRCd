@@ -22,14 +22,14 @@ def cmd_monitor(client, recv):
 	Maintain your MONITOR list. You will be notified when a nickname on your MONITOR list
 	connects or disconnects, even if you don't share a channel.
 	Your watchlist will be cleared when you disconnect.
-	-
-	Add a nickname:		/MONITOR + nickname1[,nickname2]
-	Remove a nickname:	/MONITOR - nickname1[,nickname2]
-	View monitor list:	/MONITOR <param>
-	Param C:		Clears your monitor list.
-	Param L:		Displays your entire monitor list.
-	Param S:		Displays entire monitor list, with status.
-	"""
+        -
+        Add a nickname:         /MONITOR + nickname1[,nickname2]
+        Remove a nickname:      /MONITOR - nickname1[,nickname2]
+        View monitor list:      /MONITOR <param>
+        Param C:                Clears your monitor list.
+        Param L:                Displays your entire monitor list.
+        Param S:                Displays entire monitor list, with status.
+        """
 
 	if int(time.time()) - client.creationtime > 10:
 		client.local.flood_penalty += 100000
