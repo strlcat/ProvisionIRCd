@@ -140,6 +140,7 @@ def send_pings():
 				data = f":{IRCD.me.id} PING {IRCD.me.name} {client.name}"
 			client.send([], data)
 			client.last_ping_sent = time() * 1000
+			IRCD.run_hook(Hook.PING, client, IRCD.me.name)
 
 
 def find_sock_from_fd(fd: int):

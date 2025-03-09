@@ -102,7 +102,10 @@ class Client:
 	last_ping_sent: int = 0
 	last_command: str = ''
 	lag: int = 0
+	reply_to_lag: bool = False
 	exitted: int = 0
+	# Temporaries used by some oper related tasks
+	operated_by: Client = None
 
 	@property
 	def registered(self):
@@ -3110,6 +3113,21 @@ class Hook:
 	# Arguments:		client, recv
 	# Return value is ignored.
 	POST_SOCKREAD = hook()
+
+	# Called when a PING is issued by server to a client or another server.
+	# Arguments:		client, cookie
+	# Return value is ignored.
+	PING = hook()
+
+	# Called when a PONG is received from client.
+	# Argument:		client, recv
+	# Return value is ignored.
+	PONG = hook()
+
+	# Called when a PING is sent by client to server.
+	# Arguments:		client, recv
+	# Return value is ignored.
+	PING_REQUEST = hook()
 
 	# Called in the early phase of changing channel modes.
 	# Arguments:

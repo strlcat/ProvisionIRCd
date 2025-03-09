@@ -3,7 +3,7 @@ ping/pong handler
 """
 
 from time import time
-from handle.core import Flag, Command, IRCD
+from handle.core import Flag, Command, IRCD, Hook
 from handle.logger import logging
 
 
@@ -15,11 +15,13 @@ def cmd_ping(client, recv):
 		if not (ping_to := IRCD.find_server(recv[2])):
 			logging.error(f"Server {ping_from.name} tries to ping unknown server: {recv[2]}")
 			return
+		IRCD.run_hook(Hook.PING_REQUEST, client, recv[1], recv[2])
 		data = f":{ping_to.id} PONG {ping_to.name} {ping_from.name}"
 		client.send([], data)
 		return
 	if len(recv) < 2:
 		return
+	IRCD.run_hook(Hook.PING_REQUEST, client, recv[1], None)
 	response = recv[1].removeprefix(':')
 	client.send([], f":{IRCD.me.name} PONG {IRCD.me.name} :{response}")
 
@@ -37,6 +39,10 @@ def cmd_pong(client, recv):
 	"""
 
 	client.lag = (time() * 1000) - client.last_ping_sent
+	if len(recv) > 1:
+		IRCD.run_hook(Hook.PONG, client, recv[1])
+	else:
+		IRCD.run_hook(Hook.PONG, client, None)
 
 	if client.user:
 		if not client.registered:
