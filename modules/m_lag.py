@@ -20,7 +20,8 @@ def cmd_lag(client, recv):
 		if not target:
 			client.sendnumeric(Numeric.ERR_NOSUCHNICK, recv[1])
 			return
-		if 'S' in target.user.modes or 'u' in target.user.modes:
+		if target.is_service:
+			IRCD.server_notice(client, "*** You cannot use /LAG on services.")
 			return
 		target.operated_by = client
 	target.reply_to_lag = True

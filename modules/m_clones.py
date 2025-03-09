@@ -10,7 +10,7 @@ def cmd_clones(client, recv):
 	for user_client in IRCD.global_users():
 		if user_client.ip not in clones:
 			clones.append(user_client.ip)
-			logins = [c for c in IRCD.global_users() if c.registered and not c.ulined and 'S' not in c.user.modes and c.ip == user_client.ip]
+			logins = [c for c in IRCD.global_users() if c.registered and not c.ulined and not c.is_service and c.ip == user_client.ip]
 			if len(logins) > 1:
 				foundclones = 1
 				nicks = []

@@ -27,7 +27,7 @@ def cmd_sajoinpart(client, recv):
 			if not client.has_permission("sacmds:sapart"):
 				return client.sendnumeric(Numeric.ERR_NOPRIVILEGES)
 
-	if 'S' in target.user.modes or target.ulined or target.is_service:
+	if target.ulined or target.is_service:
 		return IRCD.server_notice(client, f"*** You cannot use /{recv[0].upper()} on services.")
 
 	chan = IRCD.strip_format(recv[2])

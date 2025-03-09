@@ -183,7 +183,7 @@ def do_channel_member_mode(client, channel, action, cmode, mode, param):
 				client.sendnumeric(Numeric.ERR_ATTACKDENY, channel.name, "change mode of", param)
 				return 0
 
-	if 'S' in target_client.user.modes and client.name != target_client.name:
+	if target_client.is_service and client.name != target_client.name:
 		if not client.server:
 			if client.has_permission("channel:override:mode"):
 				override = 1
@@ -563,7 +563,7 @@ def cmd_channelmode(client, recv):
 		send_modelines(client, channel, modebuf, parambuf, send_ts)
 
 		if override and not client.ulined and client.user:
-			if not client.has_permission("self:become-service") or 'S' not in client.user.modes:
+			if not client.has_permission("self:become-service") or not client.is_service:
 				modes_set = ''.join(modebuf)
 				params_set = ' '.join(parambuf)
 				mode_string = f"{modes_set}{' ' + params_set if parambuf else ''}"

@@ -21,7 +21,7 @@ def cmd_sanick(client, recv):
 
 		client.local.flood_penalty += 100000
 
-	if 'S' in target.user.modes or target.ulined or target.is_service:
+	if target.ulined or target.is_service:
 		return IRCD.server_notice(client, f"*** You cannot use /SANICK on services.")
 
 	if target.name == recv[2]:

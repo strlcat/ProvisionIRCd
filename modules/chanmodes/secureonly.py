@@ -14,7 +14,7 @@ def chmode_Z_is_ok(client, channel, action, mode, param, CHK_TYPE):
 			secure = True
 			for member in channel.members:
 				mclient = member.client
-				if not ('z' in mclient.user.modes or 'S' in mclient.user.modes):
+				if not ('z' in mclient.user.modes or mclient.is_service):
 					secure = False
 					break
 			if not secure:

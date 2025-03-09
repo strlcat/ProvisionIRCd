@@ -127,7 +127,7 @@ class Client:
 	@property
 	def is_service(self):
 		if self.user:
-			if 'S' in self.user.modes and 'o' in self.user.modes:
+			if ('S' in self.user.modes or 'u' in self.user.modes) and 'o' in self.user.modes:
 				return 1
 		services = IRCD.get_setting("services")
 		return services.lower() in [self.uplink.name.lower(), self.name.lower()]
@@ -196,8 +196,11 @@ class Client:
 		if self.server or not self.local or not self.user:
 			return 1
 		if self.user:
-			if 'S' in self.user.modes and 'o' in self.user.modes:
+			if 'u' in self.user.modes and 'o' in self.user.modes:
 				return 1
+			if 'S' in self.user.modes and 'o' in self.user.modes:
+				if permission_path != "self:become-ulined":
+					return 1
 		if not self.user.operlogin or 'o' not in self.user.modes:
 			return 0
 
@@ -538,7 +541,7 @@ class Client:
 			self.local.sendq_buffer = []
 			return
 		if self.local and self.user:
-			if 'S' in self.user.modes:
+			if self.is_service:
 				self.local.flood_penalty = 0
 				self.local.flood_penalty_time = 0
 				return
@@ -1113,21 +1116,24 @@ class Usermode:
 
 	@staticmethod
 	def allow_opers(client):
-		if Usermode.allow_none(client):
+		if Usermode.allow_services(client):
 			return 1
-		return 1 if 'o' in client.user.modes or 'S' in client.user.modes else 0
+		return 1 if 'o' in client.user.modes or ('S' in client.user.modes or 'u' in client.user.modes) else 0
 
 	@staticmethod
 	def allow_services(client):
 		if Usermode.allow_none(client):
 			return 1
-		return 1 if 'o' in client.user.modes and 'S' in client.user.modes else 0
+		return 1 if client.is_service else 0
 
 	@staticmethod
 	def allow_none(client):
 		if client == IRCD.me or client.server:
 			return 1
-		return 0 if not client.server else 1
+		if client.user:
+			if 'u' in client.user.modes:
+				return 1
+		return 1 if client.server else 0
 
 	@staticmethod
 	def umodes_sorted_str():
@@ -1249,7 +1255,7 @@ class Channelmode:
 
 	@staticmethod
 	def allow_services(client, channel, *args):
-		return ChanPrivReq.ACCESSOK if 'o' in client.user.modes and 'S' in client.user.modes else ChanPrivReq.DONTSENDERROR
+		return ChanPrivReq.ACCESSOK if client.is_service else ChanPrivReq.DONTSENDERROR
 
 	def level_help_string(self):
 		match self.is_ok:

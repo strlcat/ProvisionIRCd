@@ -27,7 +27,7 @@ def cmd_sajoinpart(client, recv):
 				if not client.has_permission("sacmds:sapart:local"):
 					return client.sendnumeric(Numeric.ERR_NOPRIVILEGES)
 
-		if 'S' in target.user.modes or target.ulined or target.is_service:
+		if target.ulined or target.is_service:
 			return IRCD.server_notice(client, f"*** You cannot use /{recv[0].upper()} on services.")
 
 		client.local.flood_penalty += 100000

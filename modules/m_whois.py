@@ -119,13 +119,13 @@ def cmd_whois(client, recv):
 	if 'o' in client.user.modes or target == client:
 		client.sendnumeric(Numeric.RPL_WHOISMODES, target.name, target.user.modes, " +" + target.user.snomask if target.user.snomask else "")
 
-	if ('o' in client.user.modes or target == client) and not client.ulined and 'S' not in target.user.modes:
+	if ('o' in client.user.modes or target == client) and not client.ulined and not target.is_service:
 		client.sendnumeric(Numeric.RPL_WHOISHOST, target.name, '*', target.user.realhost, target.ip)
 
 	if 'r' in target.user.modes and user.account != '*':
 		client.sendnumeric(Numeric.RPL_WHOISREGNICK, target.name)
 
-	if 'S' not in target.user.modes and not target.ulined:
+	if not target.is_service and not target.ulined:
 		if 'c' not in target.user.modes or ('o' in client.user.modes or target == client):
 			channels = []
 			for channel in target.user.channels:
@@ -167,7 +167,7 @@ def cmd_whois(client, recv):
 				extra_info = "" if "o" not in client.user.modes or not show_acc else f" [{target.user.operclass.name}]"
 			client.sendnumeric(Numeric.RPL_WHOISOPERATOR, target.name, "an IRC Operator", extra_info)
 
-	if 'z' in target.user.modes and 'S' not in target.user.modes and not target.ulined:
+	if 'z' in target.user.modes and not target.is_service and not target.ulined:
 		client.sendnumeric(Numeric.RPL_WHOISSECURE, target.name)
 
 	if target.local and target.local.flood_penalty > 10_000 and 'o' in client.user.modes:
@@ -185,14 +185,13 @@ def cmd_whois(client, recv):
 	for line in lines:
 		client.sendnumeric(*line)
 
-	# FIXME for some reason this does not work as a hook!!
 	if 'v' in target.user.modes and target.user.webirc:
 		client.sendnumeric(Numeric.RPL_WHOISSPECIAL, target.name, "is connected using WebIRC")
 
-	if 'S' not in target.user.modes and not target.ulined:
+	if not target.is_service and not target.ulined:
 		client.sendnumeric(Numeric.RPL_WHOISIDLE, target.name, int(time.time()) - target.idle_since, target.creationtime)
 
-	if 'S' in target.user.modes and not 'H' in target.user.modes:
+	if target.is_service and not 'H' in target.user.modes:
 		client.sendnumeric(Numeric.RPL_WHOISOPERATOR, target.name, "a Network Service", '')
 
 	client.sendnumeric(Numeric.RPL_ENDOFWHOIS, target.name)

@@ -15,7 +15,7 @@ def chmode_R_is_ok(client, channel, action, mode, param, CHK_TYPE):
 			allregs = True
 			for member in channel.members:
 				mclient = member.client
-				if not ('r' in mclient.user.modes or 'S' in mclient.user.modes):
+				if not ('r' in mclient.user.modes or mclient.is_service):
 					allregs = False
 					break
 			if not allregs:

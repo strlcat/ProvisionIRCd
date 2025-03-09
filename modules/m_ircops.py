@@ -16,7 +16,7 @@ def cmd_ircops(client, recv):
 	client.sendnumeric(Numeric.RPL_IRCOPS, "" + allhdr + "")
 	client.sendnumeric(Numeric.RPL_IRCOPS, '-' * len(allhdr))
 	aways, opers = 0, 0
-	for oper_client in [c for c in IRCD.global_users() if 'o' in c.user.modes and ('H' not in c.user.modes or 'o' in client.user.modes) and 'S' not in c.user.modes]:
+	for oper_client in [c for c in IRCD.global_users() if 'o' in c.user.modes and ('H' not in c.user.modes or 'o' in client.user.modes) and not c.is_service]:
 		opers += 1
 		status = ''
 		if oper_client.user.away:
