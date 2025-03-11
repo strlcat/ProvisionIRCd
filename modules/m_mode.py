@@ -134,7 +134,7 @@ def cmd_usermode(client, recv):
 		if 'r' in set(oldumodes).difference(target.user.modes):
 			if 'R' in target.user.modes:
 				target.user.modes = target.user.modes.replace('R', '')
-				modebuf.append(opermode)
+				modebuf.append('Z')
 
 		if 'z' in set(target.user.modes).difference(oldumodes):
 			target.secure = True
@@ -143,7 +143,7 @@ def cmd_usermode(client, recv):
 			target.secure = False
 			if 'Z' in target.user.modes:
 				target.user.modes = target.user.modes.replace('Z', '')
-				modebuf.append(opermode)
+				modebuf.append('Z')
 
 	if modebuf:
 		# Broadcast buffer.
