@@ -28,7 +28,7 @@ def cmd_squit(client, recv):
 	# IRCD.send_to_servers(client, [], data)
 
 	if client.user:
-		msg = f"*** {client.name} ({client.user.username}@{client.user.realhost}) used SQUIT command for {squit_server.name}: {reason}"
+		msg = f"*** {client.name} ({client.user.realuser}@{client.user.realhost}) used SQUIT command for {squit_server.name}: {reason}"
 		IRCD.log(client, "info", "link", "LINK_SQUIT", msg)
 		# IRCD.send_snomask(client, 's', msg)
 

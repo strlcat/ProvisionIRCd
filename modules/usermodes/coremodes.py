@@ -3,6 +3,16 @@ core user modes
 """
 from handle.core import IRCD, Usermode, Snomask, Numeric
 
+def umode_I_isok(client):
+	if len(client.channels) == 0:
+		return 1
+	if client.is_service:
+		return 1
+	if Usermode.allow_opers(client):
+		return 1
+	client.sendnumeric(Numeric.ERR_CANNOTHIDEIDENT)
+	return 0
+
 def umode_x_isok(client):
 	if len(client.channels) == 0:
 		return 1
@@ -44,6 +54,7 @@ def umode_p_isok(client):
 def init(module):
 	# Params: mode flag, is_global (will be synced to servers), unset_on_deoper bool, can_set method, desc
 	Usermode.add(module, 'i', 1, 0, Usermode.allow_all, "User does not show up in outside /who")
+	Usermode.add(module, "I", 1, 0, umode_I_isok, "Hides your ident aka username with cloaked one")
 	Usermode.add(module, 'F', 1, 0, Usermode.allow_all, "Prevent channel redirection (+F)")
 	Usermode.add(module, 'o', 1, 1, Usermode.allow_opers, "Marks the user as an IRC Operator")
 	Usermode.add(module, 'p', 0, 0, umode_p_isok, "Immutable to ping timeouts [Settable by services]")

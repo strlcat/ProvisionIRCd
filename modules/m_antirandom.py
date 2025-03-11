@@ -488,8 +488,8 @@ def antirandom_check(client):
 			return Hook.DENY
 
 	# Aleatory checks on ident? Why the hell not.
-	if client.user.username:
-		ident = client.user.username
+	if client.user.realuser:
+		ident = client.user.realuser
 		score = randomness(ident.lower())
 		if score >= max_score + 1:  # Less strict for idents.
 			client.exit("Please provide a valid ident")

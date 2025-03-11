@@ -28,9 +28,9 @@ def cmd_userhost(client, recv):
 	for nick in recv[1:]:
 		for u_client in [u_client for u_client in IRCD.global_users() if u_client.name.lower() == nick.lower() and u_client.name not in hosts]:
 			if client.has_permission("client:see:hosts") or client.name.lower() == nick.lower():
-				h = f"{u_client.name}*=+{u_client.user.username}@{u_client.user.realhost}"
+				h = f"{u_client.name}*=+{u_client.user.realuser}@{u_client.user.realhost}"
 			else:
-				h = f"{u_client.name}*=+{u_client.user.username}@{u_client.user.cloakhost}"
+				h = f"{u_client.name}*=+{u_client.user.cloakuser}@{u_client.user.cloakhost}"
 			if h not in hosts:
 				hosts.append(h)
 	client.sendnumeric(Numeric.RPL_USERHOST, ' '.join(hosts))

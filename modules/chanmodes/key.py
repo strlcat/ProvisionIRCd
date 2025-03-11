@@ -3,19 +3,9 @@ channel mode +k
 """
 
 from handle.core import IRCD, Numeric, Flag, Command, Channelmode, Hook, ChanPrivReq
-from handle.functions import hash_data, b2h_upper, xor_shrink, isxdigit
+from handle.functions import is_hashed_key, hash_key
 
-def is_hashed_key(keystr):
-	if len(keystr) == 16 and keystr.isalnum and keystr.isupper():
-		return True
-	return False
-
-def hash_key(channame, key):
-	cloak_key = IRCD.get_setting("cloak-key")
-	h = hash_data(cloak_key, bytes(key + channame, "utf-8"))
-	hsh = xor_shrink(h, 8)
-	r = b2h_upper(hsh)
-	return r
+HASHKEYLEN = 16
 
 def key_is_ok(client, channel, action, mode, param, CHK_TYPE):
 	if CHK_TYPE == Channelmode.CHK_ACCESS:
@@ -40,8 +30,9 @@ def can_join_key(client, channel, key):
 		if key == None or key == "":
 			return Numeric.ERR_BADCHANNELKEY
 		chankey = channel.get_param('k')
-		if is_hashed_key(chankey):
-			if hash_key(channel.name.lower(), key) == chankey:
+		if is_hashed_key(chankey, HASHKEYLEN):
+			cloak_key = IRCD.get_setting("cloak-key")
+			if hash_key(cloak_key, channel.name.lower(), key, HASHKEYLEN) == chankey:
 				return 0
 			return Numeric.ERR_BADCHANNELKEY
 		if key == chankey:
@@ -76,7 +67,8 @@ def cmd_makekey(client, recv):
 	Users who are joining channel still will not
 	see plaintext key, for example, if forcibly joined.
 	"""
-	IRCD.server_notice(client, f"* hashed key is: {hash_key(recv[1].lower(), recv[2])}")
+	cloak_key = IRCD.get_setting("cloak-key")
+	IRCD.server_notice(client, f"* hashed key is: {hash_key(cloak_key, recv[1].lower(), recv[2], HASHKEYLEN)}")
 
 def init(module):
 	Cmode_k = Channelmode()

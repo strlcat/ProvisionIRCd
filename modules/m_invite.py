@@ -59,7 +59,7 @@ def cmd_invite(client, recv):
 		elif 'z' in channel.modes and 'z' not in invite_client.modes:
 			s = ' [Overriding +z]'
 		if not client.has_permission("self:become-service") or not client.is_service:
-			msg = f"*** OperOverride by {client.name} ({client.user.username}@{client.user.realhost}) with INVITE {invite_client.name} {channel.name}{s}"
+			msg = f"*** OperOverride by {client.name} ({client.user.realuser}@{client.user.realhost}) with INVITE {invite_client.name} {channel.name}{s}"
 			IRCD.log(client, "info", "oper", "OPER_OVERRIDE", msg, sync=0)
 
 	data = f":{client.fullmask} INVITE {invite_client.name} {channel.name}"
@@ -78,7 +78,7 @@ def cmd_invite(client, recv):
 	# Users who do not have the invite-notify capability should still receive a traditional notice.
 	notice_users = [c for c in channel.clients() if c.local and c not in broadcast_users
 					and (channel.client_has_membermodes(c, "oaq") or c.has_permission("channel:see:invites"))]
-	broadcast_data = f"NOTICE {channel.name} :{client.name} ({client.user.username}@{client.user.cloakhost}) has invited {invite_client.name} to join the channel"
+	broadcast_data = f"NOTICE {channel.name} :{client.name} ({client.user.cloakuser}@{client.user.cloakhost}) has invited {invite_client.name} to join the channel"
 	for notice_user in notice_users:
 		IRCD.server_notice(notice_user, broadcast_data)
 

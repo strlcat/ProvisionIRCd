@@ -11,9 +11,10 @@ from handle.core import Flag, Numeric, Command, Usermode, IRCD, Hook
 class WhowasData:
 	entries = []
 
-	def __init__(self, nickname, ident, cloakhost, realhost, ip, realname, signon, signoff, server, account):
+	def __init__(self, nickname, cloakident, realident, cloakhost, realhost, ip, realname, signon, signoff, server, account):
 		self.nickname = nickname
-		self.ident = ident
+		self.cloakident = cloakident
+		self.realident = realident
 		self.cloakhost = cloakhost
 		self.realhost = realhost
 		self.ip = ip
@@ -75,7 +76,8 @@ def savewhowas(client, *args):
 	if not client.user:
 		return
 	WhowasData(nickname=client.name,
-			   ident=client.user.username,
+			   cloakident=client.user.cloakuser,
+			   realident=client.user.realuser,
 			   cloakhost=client.user.cloakhost,
 			   realhost=client.user.realhost,
 			   ip=client.ip,
@@ -103,7 +105,7 @@ def cmd_whois(client, recv):
 		return
 
 	if 'W' in target.user.modes and target != client:
-		msg = f'*** Notice -- {client.name} ({client.user.username}@{client.user.realhost}) did a /WHOIS on you.'
+		msg = f'*** Notice -- {client.name} ({client.user.realuser}@{client.user.realhost}) did a /WHOIS on you.'
 		if target.local:
 			IRCD.server_notice(target, msg)
 		else:
@@ -114,7 +116,7 @@ def cmd_whois(client, recv):
 
 	user = target.user
 
-	client.sendnumeric(Numeric.RPL_WHOISUSER, target.name, target.user.username, target.user.cloakhost, target.info)
+	client.sendnumeric(Numeric.RPL_WHOISUSER, target.name, target.user.cloakuser, target.user.cloakhost, target.info)
 
 	if 'o' in client.user.modes or target == client:
 		client.sendnumeric(Numeric.RPL_WHOISMODES, target.name, target.user.modes, " +" + target.user.snomask if target.user.snomask else "")

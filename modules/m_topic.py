@@ -100,7 +100,7 @@ def cmd_topic(client, recv):
 
 	if oper_override:
 		if not client.has_permission("self:become-service") or not client.is_service:
-			override_string = f"*** OperOverride by {client.name} ({client.user.username}@{client.user.realhost}) with TOPIC {channel.name} \'{channel.topic}\'"
+			override_string = f"*** OperOverride by {client.name} ({client.user.realuser}@{client.user.realhost}) with TOPIC {channel.name} \'{channel.topic}\'"
 			IRCD.log(client, "info", "oper", "OPER_OVERRIDE", override_string)
 
 	IRCD.run_hook(Hook.TOPIC, client, channel, channel.topic)

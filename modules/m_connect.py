@@ -19,7 +19,7 @@ def connect_to(client, link, auto_connect=0):
 				IRCD.server_notice(client, f"Unable to process outgoing link {out_host}:{out_port} because destination is localhost.")
 			return
 		if client.user:
-			msg = f"*** {client.name} ({client.user.username}@{client.fullrealhost}) has opened link channel to {link.name}..."
+			msg = f"*** {client.name} ({client.user.realuser}@{client.fullrealhost}) has opened link channel to {link.name}..."
 			IRCD.log(client, "info", "link", "LINK_CONNECTING", msg)
 		if not IRCD.find_server(link.name) and not IRCD.current_link_sync:
 			IRCD.run_parallel_function(target=start_outgoing_link, args=(link, auto_connect))

@@ -28,10 +28,12 @@ def cmd_setident(client, recv):
 		if c.lower() not in IRCD.HOSTCHARS:
 			ident = ident.replace(c, '')
 	ident = ident.removeprefix('.').removesuffix('.').strip()
-	if ident and ident != client.user.username:
+	if ident and ident != client.user.cloakuser:
 		client.setinfo(ident, t="ident")
+		if 'I' not in client.user.modes:
+			client.add_user_modes(['I'])
 		if client.local:
-			IRCD.server_notice(client, f"*** Your ident is now '{client.user.username}'")
+			IRCD.server_notice(client, f"*** Your ident is now '{client.user.cloakuser}'")
 	data = f":{client.id} {' '.join(recv)}"
 	IRCD.send_to_servers(client, [], data)
 

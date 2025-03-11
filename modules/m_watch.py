@@ -34,7 +34,7 @@ def cmd_watch(client, recv):
 		if len(recv) == 1:
 			watch_online = [user for user in IRCD.global_clients() if user.registered and user.name.lower() in watch_lower]
 			for watch_client in watch_online:
-				client.sendnumeric(Numeric.RPL_NOWON, watch_client.name, watch_client.user.username, watch_client.user.cloakhost, watch_client.creationtime)
+				client.sendnumeric(Numeric.RPL_NOWON, watch_client.name, watch_client.user.cloakuser, watch_client.user.cloakhost, watch_client.creationtime)
 			client.sendnumeric(Numeric.RPL_ENDOFWATCHLIST, 'l')
 			return
 		else:
@@ -51,7 +51,7 @@ def cmd_watch(client, recv):
 							watch_client = [client for client in IRCD.global_clients() if client.name.lower() == nick.lower() and client.registered]
 							if watch_client:
 								watch_client = watch_client[0]
-								client.sendnumeric(Numeric.RPL_NOWON, watch_client.name, watch_client.user.username, watch_client.user.cloakhost, watch_client.creationtime)
+								client.sendnumeric(Numeric.RPL_NOWON, watch_client.name, watch_client.user.cloakuser, watch_client.user.cloakhost, watch_client.creationtime)
 							else:
 								client.sendnumeric(Numeric.RPL_NOWOFF, nick, '*', '*', '0')
 						client.sendnumeric(Numeric.RPL_WATCHSTAT, len(Watch.watchlist[client]), 0)
@@ -69,7 +69,7 @@ def cmd_watch(client, recv):
 					watch_client = [client for client in IRCD.global_clients() if client.name.lower() == nick.lower() and client.registered]
 					if watch_client:
 						watch_client = watch_client[0]
-						client.sendnumeric(Numeric.RPL_NOWON, watch_client.name, watch_client.user.username, watch_client.user.cloakhost, watch_client.creationtime)
+						client.sendnumeric(Numeric.RPL_NOWON, watch_client.name, watch_client.user.cloakuser, watch_client.user.cloakhost, watch_client.creationtime)
 					else:
 						client.sendnumeric(Numeric.RPL_NOWOFF, nick, '*', '*', '0')
 
@@ -79,7 +79,7 @@ def cmd_watch(client, recv):
 						list_entry = list_entry[0]
 						Watch.watchlist[client].remove(list_entry)
 						is_online = IRCD.find_user(nick)
-						ident = '*' if not is_online else is_online.user.username
+						ident = '*' if not is_online else is_online.user.cloakuser
 						cloakhost = '*' if not is_online else is_online.user.cloakhost
 						signon = '0' if not is_online else is_online.creationtime
 						client.sendnumeric(Numeric.RPL_WATCHOFF, list_entry, ident, cloakhost, signon)
@@ -93,7 +93,7 @@ def watch_user_loggedon(client):
 		Watch.watchlist[client] = []
 	watch_notify = [c for c in IRCD.global_users() if c in Watch.watchlist and client.name.lower() in [x.lower() for x in Watch.watchlist[c]] and not c.has_capability("monitor")]
 	for user in watch_notify:
-		user.sendnumeric(Numeric.RPL_LOGON, client.name, client.user.username, client.user.cloakhost, client.creationtime)
+		user.sendnumeric(Numeric.RPL_LOGON, client.name, client.user.cloakuser, client.user.cloakhost, client.creationtime)
 
 
 def watch_nickchange(client, nick):
@@ -101,16 +101,16 @@ def watch_nickchange(client, nick):
 							c in Watch.watchlist and client.name.lower() in [x.lower() for x in Watch.watchlist[c]] and not c.has_capability("monitor")]
 	watch_notify_online = [c for c in IRCD.global_users() if c in Watch.watchlist and nick.lower() in [x.lower() for x in Watch.watchlist[c]] and not c.has_capability("monitor")]
 	for watch_user in watch_notify_offline:
-		watch_user.sendnumeric(Numeric.RPL_LOGOFF, client.name, client.user.username, client.user.cloakhost, client.creationtime)
+		watch_user.sendnumeric(Numeric.RPL_LOGOFF, client.name, client.user.cloakuser, client.user.cloakhost, client.creationtime)
 	for watch_user in watch_notify_online:
-		watch_user.sendnumeric(Numeric.RPL_LOGON, nick, client.user.username, client.user.cloakhost, client.creationtime)
+		watch_user.sendnumeric(Numeric.RPL_LOGON, nick, client.user.cloakuser, client.user.cloakhost, client.creationtime)
 
 
 def watch_quit(client, reason):
 	watch_notify_offline = [c for c in IRCD.global_users() if
 							c in Watch.watchlist and client.name.lower() in [x.lower() for x in Watch.watchlist[c]] and not c.has_capability("monitor")]
 	for user in watch_notify_offline:
-		user.sendnumeric(Numeric.RPL_LOGOFF, client.name, client.user.username, client.user.cloakhost, client.creationtime)
+		user.sendnumeric(Numeric.RPL_LOGOFF, client.name, client.user.cloakuser, client.user.cloakhost, client.creationtime)
 	if client in Watch.watchlist:
 		del Watch.watchlist[client]
 

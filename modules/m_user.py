@@ -3,7 +3,9 @@
 """
 
 from handle.core import IRCD, Flag, Numeric, Command
+from handle.functions import hash_key
 
+MAXHASHIDENT = 12
 
 def cmd_user(client, recv):
 	if client.handshake_finished():
@@ -12,6 +14,7 @@ def cmd_user(client, recv):
 	if client.server:
 		return client.exit(f"This port is for servers only.")
 
+	# TODO add callback to filter out?
 	if 'nmap' in ''.join(recv).lower():
 		return client.exit("Connection reset by peer")
 
@@ -23,7 +26,10 @@ def cmd_user(client, recv):
 			ident = ident.replace(c, '')
 
 	if ident and realname:
-		client.user.username = ident
+		client.user.realuser = ident
+		cloak_key = IRCD.get_setting("cloak-key")
+		client.user.c_cloakuser = hash_key(cloak_key, client.user.realhost, client.user.realuser, MAXHASHIDENT)
+		client.user.cloakuser = client.user.realuser
 		client.info = realname
 
 		if client.handshake_finished():

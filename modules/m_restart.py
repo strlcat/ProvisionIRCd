@@ -30,7 +30,7 @@ def cmd_restart(client, recv):
 		client.local.flood_penalty += 2500001
 		return client.sendnumeric(Numeric.ERR_NOPRIVILEGES)
 
-	reason = f'RESTART command received by {client.name} ({client.user.username}@{client.user.realhost})'
+	reason = f'RESTART command received by {client.name} ({client.user.realuser}@{client.user.realhost})'
 	msg = f"*** {reason}"
 	IRCD.send_snomask(client, 's', msg)
 

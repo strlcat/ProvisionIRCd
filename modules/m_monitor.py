@@ -148,7 +148,7 @@ def mon_nickchange(client, newnick):
 	mon_notify_on = [u for u in IRCD.global_users() if u in Monitor.monlist and newnick.lower() in [x.lower() for x in Monitor.monlist[u]]]
 	mon_notify_off = [u for u in IRCD.global_users() if u in Monitor.monlist and client.name.lower() in [x.lower() for x in Monitor.monlist[u]]]
 	for user in mon_notify_on:
-		user.sendnumeric(Numeric.RPL_MONONLINE, f"{newnick}!{client.user.username}@{client.user.cloakhost}")
+		user.sendnumeric(Numeric.RPL_MONONLINE, f"{newnick}!{client.user.cloakuser}@{client.user.cloakhost}")
 	for user in mon_notify_off:
 		user.sendnumeric(Numeric.RPL_MONOFFLINE, client.fullmask)
 

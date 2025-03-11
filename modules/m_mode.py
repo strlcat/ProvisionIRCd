@@ -77,7 +77,7 @@ def cmd_usermode(client, recv):
 					for sno in [sno for sno in param if sno in target.user.snomask]:
 						target.user.snomask = target.user.snomask.replace(sno, '')
 				else:
-					for sno in [sno for sno in param if sno in target.user.oper.snomasks and sno not in target.user.snomask]:
+					for sno in [sno for sno in param if (IRCD.is_valid_snomask_flag(sno) and (sno in target.user.oper.snomasks or target.is_service)) and sno not in target.user.snomask]:
 						target.user.snomask += sno
 
 		elif action == "-" and mode in target.user.modes:
@@ -104,6 +104,16 @@ def cmd_usermode(client, recv):
 
 		if 's' in set(oldumodes).difference(target.user.modes):
 			target.user.snomask = ''
+
+		if 'I' in set(oldumodes).difference(target.user.modes):
+			target.setinfo(info=target.user.realuser, t="ident")
+			data = f":{target.id} SETIDENT :{target.user.cloakuser}"
+			IRCD.send_to_servers(client, [], data)
+
+		if 'I' in set(target.user.modes).difference(oldumodes):
+			target.setinfo(info=target.user.c_cloakuser, t="ident")
+			data = f":{target.id} SETIDENT :{target.user.cloakuser}"
+			IRCD.send_to_servers(client, [], data)
 
 		if 'x' in set(oldumodes).difference(target.user.modes):
 			target.setinfo(info=target.user.realhost, t="host")
@@ -567,7 +577,7 @@ def cmd_channelmode(client, recv):
 				modes_set = ''.join(modebuf)
 				params_set = ' '.join(parambuf)
 				mode_string = f"{modes_set}{' ' + params_set if parambuf else ''}"
-				override_string = f"*** OperOverride by {client.name} ({client.user.username}@{client.user.realhost}) with MODE {channel.name} {mode_string}"
+				override_string = f"*** OperOverride by {client.name} ({client.user.realuser}@{client.user.realhost}) with MODE {channel.name} {mode_string}"
 				IRCD.log(client, "info", "oper", "OPER_OVERRIDE", override_string, sync=0)
 
 	if unknown and client.user:

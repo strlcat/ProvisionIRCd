@@ -16,7 +16,7 @@ def cmd_chgname(client, recv):
 	if gecos == target.info or not gecos:
 		return
 	target.setinfo(gecos, t='gecos')
-	IRCD.send_snomask(client, 's', f'*** {client.name} ({client.user.username}@{client.user.realhost}) used CHGNAME to change the GECOS of {target.name} to "{target.info}"')
+	IRCD.send_snomask(client, 's', f'*** {client.name} ({client.user.realuser}@{client.user.realhost}) used CHGNAME to change the GECOS of {target.name} to "{target.info}"')
 	data = f":{client.id} CHGNAME {target.id} :{target.info}"
 	IRCD.send_to_servers(client, [], data)
 

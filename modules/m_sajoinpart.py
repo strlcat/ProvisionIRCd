@@ -65,7 +65,7 @@ def cmd_sajoinpart(client, recv):
 	rootevent = recv[0].lower()
 	event = "LOCAL_" if target.local else "REMOTE_"
 	event += rootevent.upper()
-	msg = f"*** {client.name} ({client.user.username}@{client.user.realhost}) used {recv[0].upper()} to make {target.name} {what} {channel.name}"
+	msg = f"*** {client.name} ({client.user.realuser}@{client.user.realhost}) used {recv[0].upper()} to make {target.name} {what} {channel.name}"
 	IRCD.log(client, "info", rootevent, event, msg, sync=0)
 
 	if target.local:

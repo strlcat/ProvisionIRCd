@@ -115,7 +115,7 @@ def cmd_nick_local(client, recv):
 			Nick.flood[client] = {}
 		Nick.flood[client][time.time()] = True
 		if client.local and Flag.CLIENT_USER_SANICK not in client.flags:
-			msg = f'*** {client.name} ({client.user.username}@{client.user.realhost}) has changed their nickname to {newnick}'
+			msg = f'*** {client.name} ({client.user.realuser}@{client.user.realhost}) has changed their nickname to {newnick}'
 			IRCD.send_snomask(client, 'N', msg)
 
 		IRCD.new_message(client)
@@ -140,7 +140,7 @@ def cmd_nick_remote(client, recv):
 	newnick = str(recv[1]).strip().removeprefix(':')
 	IRCD.run_hook(Hook.REMOTE_NICKCHANGE, client, newnick)
 	broadcast_nickchange(client, newnick)
-	msg = f'*** {client.name} ({client.user.username}@{client.user.realhost}) has changed their nickname to {newnick}'
+	msg = f'*** {client.name} ({client.user.realuser}@{client.user.realhost}) has changed their nickname to {newnick}'
 	IRCD.send_snomask(client, 'N', msg)
 	client.name = newnick
 
@@ -156,7 +156,7 @@ def create_user_from_uid(client, info: list):
 	new_client = make_user(new_client)
 	new_client.name = info[1]
 	new_client.creationtime = int(signon)
-	new_client.user.username = info[4]
+	new_client.user.realuser = info[4]
 	new_client.user.realhost = info[5]
 	new_client.id = info[6]
 	logging.debug(F"Remote client {new_client.name} UID set: {new_client.id}")
@@ -251,7 +251,7 @@ def cmd_uid(client, recv):
 	# logging.debug(f"Remote client server: {client.uplink.name} (synced: {client.server.synced})")
 
 	if client.server.synced and not client.ulined:
-		msg = f"*** Client connecting: {new_client.name} ({new_client.user.username}@{new_client.user.realhost}) [{new_client.ip}]{new_client.get_ext_info()}"
+		msg = f"*** Client connecting: {new_client.name} ({new_client.user.realuser}@{new_client.user.realhost}) [{new_client.ip}]{new_client.get_ext_info()}"
 		IRCD.log(client, "info", "connect", "REMOTE_USER_CONNECT", msg, sync=0)
 
 

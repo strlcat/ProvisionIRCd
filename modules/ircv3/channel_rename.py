@@ -71,7 +71,7 @@ def cmd_rename(client, recv):
 		user.send([], data)
 
 	if client.local:
-		msg = f'*** {client.name} ({client.user.username}@{client.user.realhost}) used RENAME to change channel name {old_name} to {name}'
+		msg = f'*** {client.name} ({client.user.realuser}@{client.user.realhost}) used RENAME to change channel name {old_name} to {name}'
 		IRCD.send_snomask(client, 's', msg)
 
 

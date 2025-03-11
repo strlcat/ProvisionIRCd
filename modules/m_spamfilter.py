@@ -12,7 +12,7 @@ from handle.validate_conf import Spamfilter
 
 
 def spamfilter_match(client, spamfilter, target_cause):  # filtertarget, to_target, target_cause):
-	msg = f"Spamfilter match by {client.name} ({client.user.username}@{client.user.realhost}) matching {spamfilter.match} [{target_cause}] (action: {spamfilter.action})"
+	msg = f"Spamfilter match by {client.name} ({client.user.realuser}@{client.user.realhost}) matching {spamfilter.match} [{target_cause}] (action: {spamfilter.action})"
 	IRCD.send_snomask(client, "F", msg)
 	reason = spamfilter.reason.replace("_", " ")
 	if spamfilter.action == "warn":
@@ -172,7 +172,7 @@ def cmd_spamfilter(client, recv):
 		s = Spamfilter(match_type, action, duration, match, targets, reason, conf=0)
 		s.set_by = client.fullrealhost
 		logging.debug(f"Spamfilter object added: {s}")
-		snotice_string = f"Spamfilter object added by {client.name} ({client.user.username}@{client.user.realhost}) [{match_type} {action} {targets}: {match}]. Reason: {reason}"
+		snotice_string = f"Spamfilter object added by {client.name} ({client.user.realuser}@{client.user.realhost}) [{match_type} {action} {targets}: {match}]. Reason: {reason}"
 		IRCD.send_snomask(client, "f", snotice_string)
 
 	if recv[1] in ["del", "-"]:
@@ -194,7 +194,7 @@ def cmd_spamfilter(client, recv):
 				IRCD.configuration.spamfilters.remove(obj)
 				reason = obj.reason.replace("_", " ")
 				return IRCD.send_snomask(client, "f",
-										 f"Spamfilter entry removed by {client.name} ({client.user.username}@{client.user.realhost}): "
+										 f"Spamfilter entry removed by {client.name} ({client.user.realuser}@{client.user.realhost}): "
 										 f"[{obj.match_type}, {obj.action}, {''.join(obj.target)}: {obj.match}]. Reason: {reason}")
 		return IRCD.server_notice(client, "Could not find a spamfilter entry with that ID.")
 

@@ -70,7 +70,7 @@ def do_oper_up(client, oper):
 				if 'x' not in client.user.modes:
 					client.add_user_modes(['x'])
 
-	msg = f"*** {client.name} ({client.user.username}@{client.user.realhost}) [block: {client.user.operlogin}, operclass: {client.user.operclass.name}] is now an IRC Operator (+{client.user.opermodes})"
+	msg = f"*** {client.name} ({client.user.realuser}@{client.user.realhost}) [block: {client.user.operlogin}, operclass: {client.user.operclass.name}] is now an IRC Operator (+{client.user.opermodes})"
 	IRCD.log(client, "info", "oper", "OPER_UP", msg)
 
 	client.add_md("operlogin", client.user.operlogin)
@@ -92,7 +92,7 @@ def do_oper_up(client, oper):
 def oper_fail(client, opername, reason):
 	client.local.flood_penalty += 350000
 	client.sendnumeric(Numeric.ERR_NOOPERHOST)
-	msg = f"Failed oper attempt by {client.name} [{opername}] ({client.user.username}@{client.user.realhost}): {reason}"
+	msg = f"Failed oper attempt by {client.name} [{opername}] ({client.user.realuser}@{client.user.realhost}): {reason}"
 	IRCD.log(client, "warn", "oper", "OPER_FAILED", msg)
 
 def cmd_oper(client, recv):

@@ -41,7 +41,7 @@ def cmd_sanick(client, recv):
 		return
 
 	event = "LOCAL_SANICK" if target.local else "REMOTE_SANICK"
-	msg = f"*** {client.name} ({client.user.username}@{client.user.realhost}) used SANICK to change {target.name}'s nickname to {newnick}"
+	msg = f"*** {client.name} ({client.user.realuser}@{client.user.realhost}) used SANICK to change {target.name}'s nickname to {newnick}"
 	IRCD.log(client, "info", "sanick", event, msg, sync=0)
 
 	data = f":{client.id} SANICK {target.name} {newnick}"

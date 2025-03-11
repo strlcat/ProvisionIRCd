@@ -209,3 +209,19 @@ def get_higher_opers_than(o):
 		return "q"
 	else:
 		return o
+
+def is_hashed_key(hashstr, length):
+	if length % 2:
+		length += 1
+	length = int(length / 2)
+	if len(hashstr) == length and hashstr.isalnum() and hashstr.isupper():
+		return True
+	return False
+
+def hash_key(master, salt, key, length):
+	h = hash_data(master, bytes(key + salt, "utf-8"))
+	if length % 2:
+		length += 1
+	hsh = xor_shrink(h, int(length / 2))
+	r = b2h_upper(hsh)
+	return r

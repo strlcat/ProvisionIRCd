@@ -24,7 +24,7 @@ def cmd_chghost(client, recv):
 	target.setinfo(host, t="host")
 	if client.user:
 		IRCD.send_snomask(client, 's',
-						  f'*** {client.name} ({client.user.username}@{client.user.realhost}) '
+						  f'*** {client.name} ({client.user.realuser}@{client.user.realhost}) '
 						  f'used CHGHOST to change the host of {target.name} to "{target.user.cloakhost}"')
 	data = f":{client.id} CHGHOST {target.id} :{target.user.cloakhost}"
 	logging.debug(f"Syncing CHGHOST to servers: {data}")
@@ -44,14 +44,14 @@ def cmd_chgident(client, recv):
 		if c.lower() not in IRCD.HOSTCHARS:
 			ident = ident.replace(c, '')
 	ident = ident.removeprefix('.').removesuffix('.').strip()
-	if ident == target.user.username or not ident:
+	if ident == target.user.cloakuser or not ident:
 		return
 	target.setinfo(ident, t="ident")
 	if client.user:
 		IRCD.send_snomask(client, 's',
-						  f'*** {client.name} ({client.user.username}@{client.user.realhost}) '
-						  f'used CHGIDENT to change the ident of {target.name} to "{target.user.username}"')
-	data = f":{client.id} CHGIDENT {target.id} :{target.user.username}"
+						  f'*** {client.name} ({client.user.realuser}@{client.user.realhost}) '
+						  f'used CHGIDENT to change the ident of {target.name} to "{target.user.cloakuser}"')
+	data = f":{client.id} CHGIDENT {target.id} :{target.user.cloakuser}"
 	IRCD.send_to_servers(client, [], data)
 
 

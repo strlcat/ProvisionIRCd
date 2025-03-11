@@ -36,7 +36,11 @@ def cmd_svsmode(client, recv):
 
 		if action == '+':
 			if m not in target.user.modes:
-				if m == 'x':
+				if m == 'I':
+					target.setinfo(info=target.user.c_cloakuser, t="ident")
+					data = f":{target.id} SETIDENT :{target.user.cloakuser}"
+					IRCD.send_to_servers(client, [], data)
+				elif m == 'x':
 					target.setinfo(info=target.user.c_cloakhost, t="host")
 					data = f":{target.id} SETHOST :{target.user.cloakhost}"
 					IRCD.send_to_servers(client, [], data)
@@ -44,6 +48,15 @@ def cmd_svsmode(client, recv):
 					target.immutable = True
 				elif m == 'z':
 					target.secure = True
+				elif m == 's' and target.user.oper:
+					if len(recv) > 3:
+						param = recv[3]
+						if param.startswith('-'):
+							for sno in [sno for sno in param if sno in target.user.snomask]:
+								target.user.snomask = target.user.snomask.replace(sno, '')
+						else:
+							for sno in [sno for sno in param if (IRCD.is_valid_snomask_flag(sno) and (sno in target.user.oper.snomasks or target.is_service)) and sno not in target.user.snomask]:
+								target.user.snomask += sno
 
 				target.user.modes += m
 				modes += m
@@ -59,6 +72,10 @@ def cmd_svsmode(client, recv):
 					if 'Z' in target.user.modes:
 						target.user.modes = target.user.modes.replace('Z', '')
 						modes += 'Z'
+				elif m == 'I':
+					target.setinfo(info=target.user.realuser, t="ident")
+					data = f":{target.id} SETIDENT :{target.user.cloakuser}"
+					IRCD.send_to_servers(client, [], data)
 				elif m == 'x':
 					target.setinfo(info=target.user.realhost, t="host")
 					data = f":{target.id} SETHOST :{target.user.cloakhost}"

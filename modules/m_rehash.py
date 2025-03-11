@@ -21,7 +21,7 @@ def cmd_rehash(client, recv):
 
 	IRCD.rehashing = 1
 	client.local.flood_penalty += 500_000
-	msg = f"*** {client.name} ({client.user.username}@{client.user.realhost}) is rehashing the server configuration file..."
+	msg = f"*** {client.name} ({client.user.realuser}@{client.user.realhost}) is rehashing the server configuration file..."
 	IRCD.log(client, "info", "config", "CONFIG_REHASH", msg)
 
 	reloadmods = 0

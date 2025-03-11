@@ -42,6 +42,7 @@ IRCD = NewType("IRCD", None)
 flag_idx = 100
 hook_idx = 100
 
+MAXHASHIDENT = 12
 
 def flag():
 	global flag_idx
@@ -145,14 +146,14 @@ class Client:
 	@property
 	def fullmask(self):
 		if self.user:
-			return f"{self.name}!{self.user.username}@{self.user.cloakhost}"
+			return f"{self.name}!{self.user.cloakuser}@{self.user.cloakhost}"
 		else:
 			return self.name
 
 	@property
 	def fullrealhost(self):
 		if self.user:
-			ident = self.user.username
+			ident = self.user.realuser
 			if not ident:
 				ident = '*'
 			return f"{self.name}!{ident}@{self.user.realhost if self.user.realhost else '*'}"
@@ -182,7 +183,7 @@ class Client:
 				return 0
 
 		if self.user:
-			if self.name != '*' and self.user.username != '' and self.local.nospoof == 0:
+			if self.name != '*' and self.user.realuser != '' and self.local.nospoof == 0:
 				self.local.authpass = 0
 				return 1
 			return 0
@@ -257,7 +258,7 @@ class Client:
 
 			IRCD.new_message(self)
 			if t in ["ident", "host"]:
-				data = f":{self.fullmask} CHGHOST {info if t == 'ident' else self.user.username} {info if t == 'host' else self.user.cloakhost}"
+				data = f":{self.fullmask} CHGHOST {info if t == 'ident' else self.user.cloakuser} {info if t == 'host' else self.user.cloakhost}"
 				IRCD.send_to_local_common_chans(self, [], "chghost", data)
 			else:  # Setname
 				data = f":{self.fullmask} SETNAME :{info}"
@@ -269,7 +270,9 @@ class Client:
 					self.sendnumeric(Numeric.RPL_HOSTHIDDEN, self.user.cloakhost)
 					logging.debug(f"[setinfo()] Changed host of {self.name} to: {self.user.cloakhost}")
 			elif t == 'ident':
-				self.user.username = info
+				if self.user.cloakuser != info:
+					self.user.cloakuser = info
+					self.sendnumeric(Numeric.RPL_IDENTHIDDEN, self.user.cloakuser)
 			elif t == 'gecos':
 				if self.info != info:
 					self.info = info
@@ -315,7 +318,7 @@ class Client:
 			if umode and umode.is_global:
 				sync_modes += mode
 		binip = ip_to_base64(self.ip)
-		data = f":{self.uplink.id} UID {self.name} {self.hopcount + 1} {self.creationtime} {self.user.username} {self.user.realhost} {self.id} {self.user.account} +{sync_modes} {self.user.cloakhost} {self.user.cloakhost} {binip} :{self.info}"
+		data = f":{self.uplink.id} UID {self.name} {self.hopcount + 1} {self.creationtime} {self.user.realuser} {self.user.realhost} {self.id} {self.user.account} +{sync_modes} {self.user.cloakhost} {self.user.cloakhost} {binip} :{self.info}"
 		if server:
 			server.send(s2smd_tags, data)
 		else:
@@ -348,7 +351,7 @@ class Client:
 		IRCD.global_user_count -= 1
 
 		if (self.local or not self.uplink.server.squit) and self.registered and not self.ulined:
-			msg = f"*** Client exiting: {self.name} ({self.user.username}@{self.user.realhost}) [{self.ip}] ({reason})"
+			msg = f"*** Client exiting: {self.name} ({self.user.realuser}@{self.user.realhost}) [{self.ip}] ({reason})"
 			event = "LOCAL_USER_QUIT" if self.local else "REMOTE_USER_QUIT"
 			IRCD.log(self, "info", "quit", event, msg, sync=0)
 			"""
@@ -364,7 +367,7 @@ class Client:
 
 		if not self.uplink.server.squit:
 			IRCD.new_message(self)
-		data = f":{self.name}!{self.user.username}@{self.user.cloakhost} QUIT :{reason}"
+		data = f":{self.name}!{self.user.cloakuser}@{self.user.cloakhost} QUIT :{reason}"
 		IRCD.send_to_local_common_chans(self, self.mtags, client_cap=None, data=data)
 
 		for channel in list(Channel.table):
@@ -424,7 +427,7 @@ class Client:
 				killed_by = IRCD.me
 				path = IRCD.me.name
 			quitreason = f"Killed by {path} ({reason})"
-			msg = f"*** Received kill msg for {self.name} ({self.user.username}@{self.user.realhost}) Path {path} ({reason})"
+			msg = f"*** Received kill msg for {self.name} ({self.user.realuser}@{self.user.realhost}) Path {path} ({reason})"
 			event = "LOCAL_KILL" if self.local else "GLOBAL_KILL"
 			IRCD.log(self, "info", "kill", event, msg, sync=0)
 			if self.local:
@@ -567,7 +570,7 @@ class Client:
 				flood_limit = recvq if flood_type == "recvq" else sendq
 				if self.registered:
 					IRCD.send_snomask(self, 'f',
-									  f"*** Flood -- {self.name} ({self.user.username}@{self.user.realhost})"
+									  f"*** Flood -- {self.name} ({self.user.realuser}@{self.user.realhost})"
 									  f"has reached their max {'RecvQ' if flood_type == 'recvq' else 'SendQ'} ({flood_amount}) while the limit is {flood_limit}")
 				self.exit("Excess Flood")
 				return
@@ -578,7 +581,7 @@ class Client:
 				if (cmd_len >= max_cmds) and (self.registered and int(time()) - self.creationtime >= 1):
 					if self.registered:
 						IRCD.send_snomask(self, 'f',
-										  f"*** Buffer Flood -- {self.name} ({self.user.username}@{self.user.realhost}) has reached "
+										  f"*** Buffer Flood -- {self.name} ({self.user.realuser}@{self.user.realhost}) has reached "
 										  f"their max buffer length ({cmd_len}) while the limit is {max_cmds}")
 					self.exit("Excess Flood")
 					return
@@ -591,7 +594,7 @@ class Client:
 					if self.local.flood_penalty >= flood_penalty_treshhold:
 						if self.registered:
 							IRCD.send_snomask(self, 'f',
-											  f"*** Flood -- {self.name} ({self.user.username}@{self.user.realhost}) has reached "
+											  f"*** Flood -- {self.name} ({self.user.realuser}@{self.user.realhost}) has reached "
 											  f"their max flood penalty ({self.local.flood_penalty}) while the limit is {flood_penalty_treshhold}")
 						self.exit("Excess Flood")
 						return
@@ -645,8 +648,8 @@ class Client:
 		"""
 		Assign class only after registration is complete.
 		"""
-		clientmask_ip = f"{self.user.username}@{self.ip}"
-		clientmask_host = f"{self.user.username}@{self.user.realhost}"
+		clientmask_ip = f"{self.user.realuser}@{self.ip}"
+		clientmask_host = f"{self.user.realuser}@{self.user.realhost}"
 		for allow in IRCD.configuration.allow:
 			allow_match = is_match(allow.mask, clientmask_host) or is_match(allow.mask, clientmask_ip)
 			if allow_match:
@@ -667,8 +670,8 @@ class Client:
 				# Check for "block" entries.
 				if allow.block:
 					for entry in allow.block:
-						clientmask_ip = f"{self.user.username}@{self.local.ip}"
-						clientmask_host = f"{self.user.username}@{self.user.realhost}"
+						clientmask_ip = f"{self.user.realuser}@{self.local.ip}"
+						clientmask_host = f"{self.user.realuser}@{self.user.realhost}"
 						if is_match(entry, clientmask_ip) or is_match(entry, clientmask_host):
 							logging.info(f"Client {self} blocked by '{allow_class}': {entry}")
 							self.exit("Connection blocked by configuration policy")
@@ -736,7 +739,7 @@ class Client:
 
 		self.flood_safe_on()
 		self.add_flag(Flag.CLIENT_REGISTERED)
-		self.sendnumeric(Numeric.RPL_WELCOME, IRCD.me.name, self.name, self.user.username, self.user.realhost)
+		self.sendnumeric(Numeric.RPL_WELCOME, IRCD.me.name, self.name, self.user.realuser, self.user.realhost)
 		self.sendnumeric(Numeric.RPL_YOURHOST, IRCD.me.name, IRCD.version)
 		created_date = datetime.fromtimestamp(IRCD.boottime).strftime('%a %b %d %Y')
 		created_time = datetime.fromtimestamp(IRCD.boottime).strftime('%H:%M:%S %Z')
@@ -744,7 +747,7 @@ class Client:
 		self.sendnumeric(Numeric.RPL_MYINFO, IRCD.me.name, IRCD.version, IRCD.get_umodes_str(), IRCD.get_chmodes_str())
 		Isupport.send_to_client(self)
 
-		msg = f"*** Client connecting: {self.name} ({self.user.username}@{self.user.realhost}) [{self.ip}] {self.get_ext_info()}"
+		msg = f"*** Client connecting: {self.name} ({self.user.realuser}@{self.user.realhost}) [{self.ip}] {self.get_ext_info()}"
 		IRCD.log(self, "info", "connect", "LOCAL_USER_CONNECT", msg, sync=0)
 
 		Command.do(self, "LUSERS")
@@ -760,6 +763,8 @@ class Client:
 
 		if 'x' in self.user.modes:
 			self.user.cloakhost = self.user.c_cloakhost
+		if 'I' in self.user.modes:
+			self.user.cloakuser = self.user.c_cloakuser
 		self.sendnumeric(Numeric.RPL_HOSTHIDDEN, self.user.cloakhost)
 
 		# Autojoin channels.
@@ -960,7 +965,9 @@ class User:
 	operlogin: str = None  # The oper account as defined in confg.
 	operclass: Operclass = None
 	server: Server = None
-	username: str = ''
+	realuser: str = ''
+	cloakuser: str = ''
+	c_cloakuser: str = ''
 	realhost: str = ''
 	cloakhost: str = ''
 	c_cloakhost: str = ''
@@ -1044,7 +1051,7 @@ class Command:
 		if Flag.CMD_OPER in self.flags and client.user and 'o' not in client.user.modes and client.local:
 			return Numeric.ERR_NOPRIVILEGES,
 
-		if Flag.CMD_SERVER in self.flags and Flag.CMD_USER not in self.flags and Flag.CMD_OPER not in self.flags and not client.server:
+		if Flag.CMD_SERVER in self.flags and Flag.CMD_USER not in self.flags and Flag.CMD_OPER not in self.flags and not client.server and not client.ulined:
 			return Numeric.ERR_SERVERONLY, self.trigger.upper()
 
 		return 0,
@@ -1251,11 +1258,11 @@ class Channelmode:
 
 	@staticmethod
 	def allow_none(client, channel, *args):
-		return ChanPrivReq.ACCESSOK if client.server or not client.local else ChanPrivReq.DONTSENDERROR
+		return ChanPrivReq.ACCESSOK if (client.server or client.ulined) or not client.local else ChanPrivReq.DONTSENDERROR
 
 	@staticmethod
 	def allow_services(client, channel, *args):
-		return ChanPrivReq.ACCESSOK if client.is_service else ChanPrivReq.DONTSENDERROR
+		return ChanPrivReq.ACCESSOK if (client.is_service or client.ulined) else ChanPrivReq.DONTSENDERROR
 
 	def level_help_string(self):
 		match self.is_ok:
@@ -1942,7 +1949,7 @@ class IRCD:
 					if is_match(tkl.host, client.user.account):
 						return 1
 
-			ident = client.user.username
+			ident = client.user.realuser
 			if not ident:
 				ident = '*'
 			for mask in [f"{ident}@{client.user.realhost}", f"{ident}@{client.ip}", client.ip]:
@@ -1976,7 +1983,7 @@ class IRCD:
 				if cidr_match(client.ip, ip):
 					return 1
 			for e_mask in e.mask:
-				ident = client.user.username
+				ident = client.user.realuser
 				if not ident:
 					ident = '*'
 				for mask in [f"{ident}@{client.user.realhost}", f"{ident}@{client.ip}", client.ip]:
@@ -2124,18 +2131,15 @@ class IRCD:
 	def client_match_mask(client, mask):
 		if client.server and not client.user:
 			return 1
-		if is_match(mask, f'{client.name}!{client.user.username}@{client.user.realhost}'):
-			return 1
-		if is_match(mask, f'{client.name}!{client.user.username}@{client.ip}'):
-			return 1
-		if is_match(mask, f'{client.name}!{client.user.username}@{client.user.cloakhost}'):
-			return 1
-		if cidr_match(mask, f'{client.name}!{client.user.username}@{client.user.realhost}'):
-			return 1
-		if cidr_match(mask, f'{client.name}!{client.user.username}@{client.ip}'):
-			return 1
-		if cidr_match(mask, f'{client.name}!{client.user.username}@{client.user.cloakhost}'):
-			return 1
+
+		useritems = (client.user.realuser, client.user.cloakuser, client.user.c_cloakuser)
+		hostitems = (client.user.realhost, client.user.cloakhost, client.user.c_cloakhost)
+		for hitem in hostitems:
+			for uitem in useritems:
+				if is_match(mask, f'{client.name}!{uitem}@{hitem}'):
+					return 1
+				if cidr_match(mask, f'{client.name}!{uitem}@{hitem}'):
+					return 1
 		return 0
 
 	@staticmethod
@@ -2257,8 +2261,8 @@ class IRCD:
 	def get_allow(client):
 		# Assign a class to client based on allow-block.
 		for allow in IRCD.configuration.allow:
-			clientmask_ip = f'{client.user.username}@{client.ip}'
-			clientmask_hostname = f'{client.user.username}@{client.hostname}'
+			clientmask_ip = f'{client.user.realuser}@{client.ip}'
+			clientmask_hostname = f'{client.user.realuser}@{client.hostname}'
 			allow_match = is_match(allow.mask, clientmask_ip) or is_match(allow.mask, clientmask_hostname)
 			if allow_match:
 				return allow
@@ -2539,6 +2543,13 @@ class IRCD:
 					break
 
 	@staticmethod
+	def is_valid_snomask_flag(flag: str):
+		for s in Snomask.table:
+			if s.flag == flag:
+				return True
+		return False
+
+	@staticmethod
 	def get_snomask(flag: str):
 		return next((sn for sn in Snomask.table if sn.flag == flag), 0)
 
@@ -2815,6 +2826,7 @@ class Numeric:
 	RPL_TIME = 391, ":{}"
 	RPL_ENDOFIRCOPS = 387, ":End of /IRCOPS."
 	RPL_HOSTHIDDEN = 396, "{} :is now your displayed host"
+	RPL_IDENTHIDDEN = 397, "{} :is now your displayed ident"
 
 	RPL_LOGON = 600, "{} {} {} {} :logged online"
 	RPL_LOGOFF = 601, "{} {} {} {} :logged offline"
@@ -2862,8 +2874,9 @@ class Numeric:
 	ERR_USERONCHANNEL = 443, "{} :is already on channel {}"
 	ERR_NONICKCHANGE = 447, ":{} Nick changes are not allowed on this channel"
 	ERR_FORBIDDENCHANNEL = 448, "{} {}"
+	ERR_CANNOTHIDEHOST = 450, "Leave all channels first to hide or restore your cloak hostname"
 	ERR_NOTREGISTERED = 451, "You have not registered"
-	ERR_CANNOTHIDEHOST = 452, "Leave all channels first to hide or restore your cloak hostname"
+	ERR_CANNOTHIDEIDENT = 454, "Leave all channels first to hide or restore your cloak ident"
 	ERR_ACCEPTEXIST = 457, "{} :does already exist on your ACCEPT list."
 	ERR_ACCEPTNOT = 458, "{} :is not found on your ACCEPT list."
 	ERR_NEEDMOREPARAMS = 461, ":{} Not enough parameters"
@@ -2964,7 +2977,7 @@ class Stat:
 	def show(self, client):
 		self.func(client)
 		client.sendnumeric(Numeric.RPL_ENDOFSTATS, self.letter)
-		msg = f'* Stats "{self.letter}" requested by {client.name} ({client.user.username}@{client.user.realhost})'
+		msg = f'* Stats "{self.letter}" requested by {client.name} ({client.user.realuser}@{client.user.realhost})'
 		IRCD.send_snomask(client, 's', msg)
 
 
@@ -3753,7 +3766,7 @@ class Tkl:
 						return tkl
 				continue
 			if tkl.type in "GkZzs":
-				ident = '*' if not client.user.username else client.user.username
+				ident = '*' if not client.user.realuser else client.user.realuser
 				test_cases = [f"{ident.lower()}@{client.ip}", f"{ident.lower()}@{client.ip}"]
 				for test in test_cases:
 					if is_match(tkl.mask.lower(), test):

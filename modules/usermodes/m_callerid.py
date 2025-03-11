@@ -111,7 +111,7 @@ def callerid_can_send_to_user(client, target, msg, sendtype):
 			if target.local:
 				CallerIDEntry(source=client, target=target, message=msg, sendtype=sendtype)
 				if CallerIDData.send_notify(client, target):
-					target.sendnumeric(Numeric.RPL_UMODEGMSG, client.name, f"{client.user.username}@{client.user.cloakhost}")
+					target.sendnumeric(Numeric.RPL_UMODEGMSG, client.name, f"{client.user.cloakuser}@{client.user.cloakhost}")
 				return Hook.DENY
 	return Hook.CONTINUE
 

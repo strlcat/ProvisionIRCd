@@ -50,7 +50,7 @@ class WhoData:
 			WhoData.replies.append(self)
 
 	def make(self, client):
-		self.username = self.who_client.user.username
+		self.username = self.who_client.user.cloakuser
 		self.cloakhost = self.who_client.user.cloakhost
 		# self.server_name = self.who_client.user.server.name
 		self.server_name = self.who_client.uplink.name
@@ -67,7 +67,7 @@ class WhoData:
 
 	def who_reply(self):
 		# Invalid: *  9b798cb3.20126204.b5c219d3.IP dev.provisionweb.org * H :0
-		# mask, user_client.user.username, user_client.user.cloakhost, client.user.server.name, user_client.name, status, user_client.hopcount, user_client.info
+		# mask, user_client.user.cloakuser, user_client.user.cloakhost, client.user.server.name, user_client.name, status, user_client.hopcount, user_client.info
 		return '*' if not self.channel else self.channel.name, self.username, self.cloakhost, self.server_name, self.name, self.status, self.hopcount, self.user_info
 
 
@@ -163,7 +163,7 @@ def cmd_who(client, recv):
 
 				if char == 'u':
 					who_matches = []
-					for find_client in [c for c in IRCD.global_registered_clients() if is_match(mask.lower(), c.user.username.lower())]:
+					for find_client in [c for c in IRCD.global_registered_clients() if is_match(mask.lower(), c.user.cloakuser.lower())]:
 						if find_client not in who_matches:
 							who_matches.append(find_client)
 
@@ -244,7 +244,7 @@ def cmd_who(client, recv):
 						who_reply.fields[1] = chan
 
 					if char == 'u':
-						who_reply.fields[2] = who_client.user.username
+						who_reply.fields[2] = who_client.user.cloakuser
 
 					if char == 'i':
 						if 'o' in client.user.modes:
