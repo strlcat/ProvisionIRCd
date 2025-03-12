@@ -2818,6 +2818,7 @@ class Numeric:
 	RPL_MOTD = 372, ":- {}"
 	RPL_MOTDSTART = 375, ":{} - Message of the Day"
 	RPL_ENDOFMOTD = 376, ":End of /MOTD command."
+	RPL_WHOISIDENT = 377, "{} :has username set to {}"
 	RPL_WHOISHOST = 378, "{} :is connecting from {}@{} {}"
 	RPL_WHOISMODES = 379, "{} :is using modes: +{}{}"
 	RPL_YOUREOPER = 381, ":You are now an IRC Operator."

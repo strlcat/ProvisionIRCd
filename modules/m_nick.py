@@ -157,7 +157,9 @@ def create_user_from_uid(client, info: list):
 	new_client.name = info[1]
 	new_client.creationtime = int(signon)
 	new_client.user.realuser = info[4]
+	new_client.user.cloakuser = info[4]
 	new_client.user.realhost = info[5]
+	new_client.user.cloakhost = info[5]
 	new_client.id = info[6]
 	logging.debug(F"Remote client {new_client.name} UID set: {new_client.id}")
 	existing_uid = [c.name for c in Client.table if c != new_client and c.id == new_client.id]

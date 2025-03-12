@@ -63,9 +63,12 @@ def cmd_whowas(client, recv):
 		return
 
 	for entry in entries:
-		client.sendnumeric(Numeric.RPL_WHOWASUSER, entry.nickname, entry.ident, entry.cloakhost, entry.realname)
+		client.sendnumeric(Numeric.RPL_WHOWASUSER, entry.nickname, entry.cloakident, entry.cloakhost, entry.realname)
 		if 'o' in client.user.modes:
-			client.sendnumeric(Numeric.RPL_WHOISHOST, entry.nickname, '*', entry.realhost, entry.ip)
+			if client.has_permission("client:see:hosts"):
+				client.sendnumeric(Numeric.RPL_WHOISHOST, entry.nickname, '*', entry.realhost, entry.ip)
+			if client.has_permission("client:see:idents"):
+				client.sendnumeric(Numeric.RPL_WHOISIDENT, entry.nickname, entry.realident)
 		client.sendnumeric(Numeric.RPL_WHOISSERVER, entry.nickname, entry.server, entry.get_date_string())
 		if entry.account != '*':
 			client.sendnumeric(Numeric.RPL_WHOISACCOUNT, entry.nickname, entry.account)
@@ -121,8 +124,11 @@ def cmd_whois(client, recv):
 	if 'o' in client.user.modes or target == client:
 		client.sendnumeric(Numeric.RPL_WHOISMODES, target.name, target.user.modes, " +" + target.user.snomask if target.user.snomask else "")
 
-	if ('o' in client.user.modes or target == client) and not client.ulined and not target.is_service:
-		client.sendnumeric(Numeric.RPL_WHOISHOST, target.name, '*', target.user.realhost, target.ip)
+	if ('o' in client.user.modes or target == client) and not target.is_service:
+		if target == client or client.has_permission("client:see:hosts"):
+			client.sendnumeric(Numeric.RPL_WHOISHOST, target.name, '*', target.user.realhost, target.ip)
+		if target == client or client.has_permission("client:see:idents"):
+			client.sendnumeric(Numeric.RPL_WHOISIDENT, target.name, target.user.realuser)
 
 	if 'r' in target.user.modes and user.account != '*':
 		client.sendnumeric(Numeric.RPL_WHOISREGNICK, target.name)
