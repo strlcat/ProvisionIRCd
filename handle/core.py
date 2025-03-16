@@ -2762,6 +2762,7 @@ class Numeric:
 	RPL_ADMINLOC1 = 257, ":{}"
 	RPL_ADMINLOC2 = 258, ":{}"
 	RPL_ADMINEMAIL = 259, ":{}"
+	RPL_DEBUG = 260, ":{}"
 	RPL_LOCALUSERS = 265, ":{} user{} on this server. Max: {}"
 	RPL_GLOBALUSERS = 266, ":{} user{} on entire network. Max: {}"
 	RPL_ACCEPTLIST = 281, "{}"
