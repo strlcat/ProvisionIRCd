@@ -2,7 +2,7 @@
 /setname command
 """
 
-from handle.core import IRCD, Command, Isupport, Capability
+from handle.core import IRCD, Command, Isupport, Capability, Numeric
 from handle.logger import logging
 
 NAMELEN = 50
@@ -13,6 +13,11 @@ def cmd_setname(client, recv):
 	Changes your own 'real name' (GECOS)
 	Syntax:	 SETNAME <real name>
 	"""
+
+	if client.restricted:
+		client.sendnumeric(Numeric.ERR_RESTRICTED, client.name, "Your session is restricted")
+		return
+
 	realname = ' '.join(recv[1:])[:NAMELEN].rstrip().removeprefix(':')
 	if realname and realname != client.info:
 		client.setinfo(realname, t='gecos')

@@ -14,6 +14,11 @@ def cmd_knock(client, recv):
 	Knock on an invite-only (+i) channel to request an invitation.
 	Syntax:	 KNOCK <channel>
 	"""
+
+	if client.restricted:
+		client.sendnumeric(Numeric.ERR_RESTRICTED, client.name, "Your session is restricted")
+		return
+
 	if not (channel := IRCD.find_channel(recv[1])):
 		return client.sendnumeric(Numeric.ERR_NOSUCHCHANNEL, recv[1])
 

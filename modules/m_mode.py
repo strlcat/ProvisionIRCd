@@ -193,6 +193,14 @@ def do_channel_member_mode(client, channel, action, cmode, mode, param):
 				client.sendnumeric(Numeric.ERR_ATTACKDENY, channel.name, "change mode of", param)
 				return 0
 
+	if target_client.restricted:
+		if not client.server:
+			if client.has_permission("channel:override:mode"):
+				override = 1
+			else:
+				client.sendnumeric(Numeric.ERR_RESTRICTED, channel.name, "has a restricted session")
+				return 0
+
 	if target_client.is_service and client.name != target_client.name:
 		if not client.server:
 			if client.has_permission("channel:override:mode"):

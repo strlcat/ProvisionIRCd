@@ -1,4 +1,5 @@
 class OperData:
+	_guarded_writes = 1 # for /debug
 	clients = {}
 
 	@staticmethod

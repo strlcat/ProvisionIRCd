@@ -31,6 +31,10 @@ def send_channel_message(client, channel, message: str, sendtype: str, prefix: s
 	if client.local and client.user and 'o' not in client.user.modes:
 		client.local.flood_penalty += len(message) * 200
 
+	if client.restricted:
+		client.sendnumeric(Numeric.ERR_CANNOTSENDTOCHAN, channel.name, "Your session is restricted")
+		return
+
 	oper_override = ''
 	if 'n' in channel.modes and not channel.find_member(client):
 		if not client.has_permission("channel:override:message:outside"):
@@ -99,6 +103,10 @@ def send_channel_message(client, channel, message: str, sendtype: str, prefix: s
 def send_user_message(client, to_client, message, sendtype):
 	if client.local and client.user and 'o' not in client.user.modes:
 		client.local.flood_penalty += len(message) * 200
+
+	if client.restricted and not to_client.is_service:
+		client.sendnumeric(Numeric.ERR_CANTSENDTOUSER, to_client.name, "Your session is restricted")
+		return
 
 	if client.user and to_client.user and client.local:
 		allow = 1

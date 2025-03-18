@@ -67,6 +67,11 @@ def cmd_makekey(client, recv):
 	Users who are joining channel still will not
 	see plaintext key, for example, if forcibly joined.
 	"""
+
+	if client.restricted:
+		client.sendnumeric(Numeric.ERR_RESTRICTED, client.name, "Your session is restricted")
+		return
+
 	cloak_key = IRCD.get_setting("cloak-key")
 	IRCD.server_notice(client, f"* hashed key is: {hash_key(cloak_key, recv[1].lower(), recv[2], HASHKEYLEN)}")
 

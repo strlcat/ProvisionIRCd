@@ -17,6 +17,9 @@ def cmd_chanfix(client, recv):
 	if not client.local:
 		return
 
+	if client.restricted:
+		return
+
 	IRCD.new_message(client)
 	if not IRCD.get_setting("chanfix"):
 		IRCD.server_notice(client, "Sorry, CHANFIX is not available on this server. Ask IRC operators for help")
@@ -34,6 +37,10 @@ def cmd_chanfix(client, recv):
 
 	if 'r' in channel.modes:
 		IRCD.server_notice(client, f"CHANFIX is disabled for {chname} because it is registered (+r)")
+		return
+
+	if channel.founder == "*":
+		IRCD.server_notice(client, f"CHANFIX: Access denied for {chname}")
 		return
 
 	# Ok let's try to restore privs for the guy.
@@ -81,7 +88,7 @@ def cmd_chown(client, recv):
 		client.sendnumeric(Numeric.ERR_NOSUCHNICK, uname)
 		return
 
-	if channel.is_owner(client) or client.has_permission("channel:override:chown") or len(channel.founder) == 0:
+	if channel.is_owner(client) or client.has_permission("channel:override:chown") or channel.founder == "*":
 		if IRCD.channel_founder_fingerprint(target) == channel.founder:
 			return
 
@@ -95,7 +102,7 @@ def cmd_chown(client, recv):
 				IRCD.server_notice(client, f"CHANFIX: please give administrator mode (+a) first to {uname} on {chname}")
 				return
 
-		if len(channel.founder) == 0 and client.name.lower() != target.name.lower() and not client.has_permission("channel:override:chown"):
+		if channel.founder == "*" and client.name.lower() != target.name.lower() and not client.has_permission("channel:override:chown"):
 			IRCD.server_notice(client, f"CHANFIX: {chname} is abandoned, but try to chown it to yourself first.")
 			return
 
@@ -108,6 +115,8 @@ def cmd_chown(client, recv):
 				ownerlist += [mclient.name]
 		if len(ownerlist) > 0:
 			deqlist = ['-' + ('q' * len(ownerlist))]
+		else:
+			deqlist = ['']
 		if channel.find_member(target):
 			ownerlist += [target.name]
 			deqlist[0] += "+q"
@@ -150,7 +159,7 @@ def cmd_disown(client, recv):
 
 	# Ok let's try to relinquish privs of the channel.
 	if channel.is_owner(client) or client.has_permission("channel:override:disown"):
-		channel.founder = ''
+		channel.founder = "*"
 		broadcast_schown(client, channel)
 
 		ownerlist = []
@@ -211,6 +220,9 @@ def cmd_opme(client, recv):
 	if not client.local:
 		return
 
+	if client.restricted:
+		return
+
 	IRCD.new_message(client)
 
 	chname = recv[1]
@@ -231,7 +243,7 @@ def cmd_opme(client, recv):
 		IRCD.server_notice(client, f"{chname}: no access entry is found for your hostmask.")
 
 def broadcast_schown(client, channel):
-	if len(channel.founder) == 0:
+	if channel.founder == "*":
 		foundermask = "*"
 	else:
 		foundermask = channel.founder
@@ -248,11 +260,11 @@ def cmd_schown(client, recv):
 		return
 
 	if 'r' in channel.modes:
-		channel.founder = ''
+		channel.founder = "*"
 		return
 
 	if hostmask == "*":
-		channel.founder = ''
+		channel.founder = "*"
 		return
 
 	if int(chctime) >= channel.creationtime:

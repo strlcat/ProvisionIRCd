@@ -11,6 +11,10 @@ def cmd_ison(client, recv):
 	Example: /ISON Nick1 SomeOthernick
 	"""
 
+	if client.restricted:
+		client.sendnumeric(Numeric.ERR_RESTRICTED, client.name, "Your session is restricted")
+		return
+
 	nicks = []
 	for nick in recv[1:]:
 		for u_client in [u_client for u_client in IRCD.global_users() if u_client.name.lower() == nick.lower() and u_client.name not in nicks]:
@@ -23,6 +27,10 @@ def cmd_userhost(client, recv):
 	Returns the cloaked (or, if permitted, real) userhost of the given user.
 	Example: /USERHOST John
 	"""
+
+	if client.restricted:
+		client.sendnumeric(Numeric.ERR_RESTRICTED, client.name, "Your session is restricted")
+		return
 
 	hosts = []
 	for nick in recv[1:]:
@@ -41,6 +49,10 @@ def cmd_userip(client, recv):
 	Returns the cloaked (or, if permitted, real) userip of the given user.
 	Example: /USERIP John
 	"""
+
+	if client.restricted:
+		client.sendnumeric(Numeric.ERR_RESTRICTED, client.name, "Your session is restricted")
+		return
 
 	hosts = []
 	for nick in recv[1:]:

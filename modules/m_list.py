@@ -13,6 +13,8 @@ def is_privsecret(client, channel):
 	return False
 
 def cmd_list(client, recv):
+	if client.restricted:
+		return client.sendnumeric(Numeric.ERR_RESTRICTED, client.name, "Your session is restricted")
 	client.flood_safe_on()
 	client.sendnumeric(Numeric.RPL_LISTSTART)
 	minusers, maxusers = None, None

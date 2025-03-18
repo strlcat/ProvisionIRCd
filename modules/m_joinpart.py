@@ -58,6 +58,9 @@ def cmd_join(client, recv):
 			if IRCD.get_setting("onlyopersjoin") and 'o' not in client.user.modes and client.local:
 				IRCD.server_notice(client, "*** Channel creation is limited to IRC operators.")
 				continue
+			if client.restricted:
+				IRCD.server_notice(client, "*** Channel creation is restricted to you currently.")
+				continue
 			channel = IRCD.create_channel(client, chan)
 
 		if client.local and not override:
@@ -109,6 +112,9 @@ def cmd_part(client, recv):
 		for result, callback in h:
 			if result:
 				reason = result
+
+		if client.restricted:
+			reason = client.name
 
 		channel.do_part(client, reason)
 

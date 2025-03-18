@@ -47,15 +47,15 @@ def post_load(module):
 
 def webirc_add_umode(client):
 	if client.user.webirc:
-		if 'v' not in client.user.modes:
-			client.add_user_modes(['v'])
+		if 'W' not in client.user.modes:
+			client.add_user_modes(['W'])
 		if WebIRCConf.is_secure and 'z' not in client.user.modes:
 			client.secure = True
 			client.add_user_modes(['z'])
 
 
 def init(module):
-	Usermode.add(module, 'v', 1, 0, Usermode.allow_none, "User is connected through WebIRC")
+	Usermode.add(module, 'W', 1, 0, Usermode.allow_none, "User is connected through WebIRC")
 	Command.add(module, cmd_webirc, "WEBIRC", 4, Flag.CMD_UNKNOWN)
 	Hook.add(Hook.LOCAL_CONNECT, webirc_add_umode, 200)
 

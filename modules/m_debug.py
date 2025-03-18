@@ -14,12 +14,13 @@ from pprint import pprint
 from RestrictedPython import compile_restricted as compile
 from RestrictedPython.PrintCollector import PrintCollector
 from RestrictedPython.Eval import default_guarded_getiter, default_guarded_getitem
-from RestrictedPython.Guards import safe_builtins, guarded_iter_unpack_sequence, safer_getattr
+from RestrictedPython.Guards import safe_builtins, guarded_iter_unpack_sequence, safer_getattr, full_write_guard
 
 safe_builtins['__metaclass__'] = type
 safe_builtins['_print_'] = PrintCollector
 safe_builtins['_getiter_'] = default_guarded_getiter
 safe_builtins['_getitem_'] = default_guarded_getitem
+safe_builtins['_write_'] = full_write_guard
 safe_builtins['_iter_unpack_sequence_'] = guarded_iter_unpack_sequence
 safe_builtins['pprint'] = pprint
 safe_builtins['vars'] = vars
@@ -28,7 +29,7 @@ safe_builtins['traceback'] = traceback
 import handle.core as core; safe_builtins['core'] = core
 import handle.logger as logger; safe_builtins['logger'] = logger
 import handle.functions as functions; safe_builtins['functions'] = functions
-import handle.client as client; safe_builtins['client'] = client
+import handle.client as client_; safe_builtins['client'] = client_
 import handle.handleLink as handleLink; safe_builtins['handleLink'] = handleLink
 import handle.log as log; safe_builtins['log'] = log
 import handle.sockets as sockets; safe_builtins['sockets'] = sockets
@@ -53,23 +54,23 @@ def oprint(obj):
 	pprint(vars(obj))
 safe_builtins['oprint'] = oprint
 
-def cmd_debug(client_, recv):
-	if not client_.local:
+def cmd_debug(client, recv):
+	if not client.local or client.server:
 		return
-	if not client_.is_service:
-		client_.sendnumeric(Numeric.ERR_NOPRIVILEGES)
+	if not client.is_superuser:
+		client.sendnumeric(Numeric.ERR_NOPRIVILEGES)
 		return
 
 	dbgcmd = ' '.join(recv[1:])
 
 	# we need to log this shit everywhere
-	msg = f"*** /DEBUG invocation from {client_.fullrealhost}: '{dbgcmd}'"
+	msg = f"*** /DEBUG invocation from {client.fullrealhost}: '{dbgcmd}'"
 	logging.debug(msg)
-	IRCD.log(client_, "debug", "debug", "DEBUG", msg)
+	IRCD.log(client, "debug", "debug", "DEBUG", msg)
 
 	output = exec_(dbgcmd)
 	for line in output.split('\n'):
-		client_.sendnumeric(Numeric.RPL_DEBUG, line)
+		client.sendnumeric(Numeric.RPL_DEBUG, line)
 
 def init(module):
 	Command.add(module, cmd_debug, "DEBUG", 1, Flag.CMD_OPER)

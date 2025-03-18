@@ -9,6 +9,11 @@ def cmd_ircops(client, recv):
 	"""
 	Displays all online IRC Operators.
 	"""
+
+	if client.restricted:
+		client.sendnumeric(Numeric.ERR_RESTRICTED, client.name, "Your session is restricted")
+		return
+
 	nickhdr = "Nick"
 	stathdr = "Status"
 	servhdr = "Server"

@@ -4,6 +4,9 @@ core user modes
 from handle.core import IRCD, Usermode, Snomask, Numeric
 
 def umode_I_isok(client):
+	if client.restricted:
+		client.sendnumeric(Numeric.ERR_RESTRICTED, client.name, "Your session is restricted")
+		return
 	if len(client.channels) == 0:
 		return 1
 	if client.is_service:
@@ -14,6 +17,9 @@ def umode_I_isok(client):
 	return 0
 
 def umode_x_isok(client):
+	if client.restricted:
+		client.sendnumeric(Numeric.ERR_RESTRICTED, client.name, "Your session is restricted")
+		return
 	if len(client.channels) == 0:
 		return 1
 	if client.is_service:
@@ -62,11 +68,19 @@ def init(module):
 	Usermode.add(module, 'r', 1, 0, Usermode.allow_services, "Identifies the nick as being logged in")
 	Usermode.add(module, 's', 1, 1, Usermode.allow_opers, "Can receive server notices")
 	Usermode.add(module, "x", 1, 0, umode_x_isok, "Hides real host with cloaked host")
-	Usermode.add(module, 'X', 0, 0, Usermode.allow_none, "Extended usermodes are in effect (reserved for future use)")
 	Usermode.add(module, 'z', 1, 0, Usermode.allow_none, "User is using a secure connection")
+	Usermode.add(module, 'd', 1, 0, Usermode.allow_services, "You are currently restricted (cannot send messages, create channels etc.)")
 	Usermode.add(module, 'H', 1, 1, Usermode.allow_opers, "Hide IRCop status")
 	Usermode.add(module, 'S', 1, 1, umode_S_isok, "Client acts as a network service [Settable by services]")
 	Usermode.add(module, 'u', 1, 1, umode_u_isok, "Client has U:Line permissions [Settable by services]")
+	Usermode.add_generic('a') # unrealircd sadmin
+	Usermode.add_generic('A') # unrealircd server admin
+	Usermode.add_generic('G') # unrealircd badwords
+	Usermode.add_generic('N') # unrealircd netadmin
+	Usermode.add_generic('T') # unrealircd block ctcps
+	Usermode.add_generic('h') # helpop
+	Usermode.add_generic('v') # wallops operator
+	Usermode.add_generic('X') # extended usermodes
 
 	Snomask.add(module, 'c', 0, "Can read local connect/disconnect notices")
 	Snomask.add(module, 'f', 1, "See excess flood alerts")

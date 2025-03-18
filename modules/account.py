@@ -56,7 +56,7 @@ def cmd_logout(client, recv):
 		client.send([], data)
 		data = f":{client.id} MODE {client.name} -r"
 		IRCD.send_to_servers(client, [], data)
-	client.sendnumeric(Numeric.RPL_LOGGEDOUT)
+	client.sendnumeric(Numeric.RPL_LOGGEDOUT, client.name)
 
 
 def init(module):

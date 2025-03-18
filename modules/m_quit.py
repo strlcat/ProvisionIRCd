@@ -20,6 +20,9 @@ def cmd_quit(client, recv):
 	if static_quit := IRCD.get_setting("static-quit"):
 		reason = static_quit[:128]
 
+	if client.restricted:
+		reason = client.name
+
 	if not reason.strip():
 		reason = client.name
 

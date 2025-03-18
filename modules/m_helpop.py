@@ -22,7 +22,7 @@ def cmd_ircdhelp(client, recv):
 
 	if recv[1].lower() == 'umodes':
 		client.sendnumeric(Numeric.RPL_HELPTLR, '-')
-		umodes_sorted = sorted([umode for umode in Usermode.table], key=lambda u: u.flag, reverse=False)
+		umodes_sorted = sorted([umode for umode in Usermode.table if umode.module != None], key=lambda u: u.flag, reverse=False)
 		for m in [m for m in umodes_sorted if m.desc]:
 			special_perm = f" [{m.get_level_string()}]" if m.get_level_string() else ''
 			client.sendnumeric(Numeric.RPL_HELPTLR, f"{m.flag} = {m.desc}{special_perm}")
@@ -33,7 +33,7 @@ def cmd_ircdhelp(client, recv):
 		client.sendnumeric(Numeric.RPL_HELPTLR, '-')
 
 		help_modes = []
-		member_modes = sorted([m for m in Channelmode.table if m.prefix and m.rank and m.type == Channelmode.MEMBER], key=lambda c: c.rank, reverse=True)
+		member_modes = sorted([m for m in Channelmode.table if m.module != None and m.prefix and m.rank and m.type == Channelmode.MEMBER], key=lambda c: c.rank, reverse=True)
 		help_modes.extend(member_modes)
 		for mode in member_modes:
 			if not mode.desc:
@@ -41,27 +41,27 @@ def cmd_ircdhelp(client, recv):
 			client.sendnumeric(Numeric.RPL_HELPTLR, f" {mode.flag} <nickname> - {mode.desc} [{mode.level_help_string()}]")
 
 		client.sendnumeric(Numeric.RPL_HELPTLR, '-')
-		list_modes = [m for m in Channelmode.table if m.type == Channelmode.LISTMODE]
+		list_modes = [m for m in Channelmode.table if m.module != None and m.type == Channelmode.LISTMODE]
 		help_modes.extend(list_modes)
 		for mode in list_modes:
 			client.sendnumeric(Numeric.RPL_HELPTLR, f" {mode.flag} {mode.param_help} - {mode.desc} [{mode.level_help_string()}]")
 
 		client.sendnumeric(Numeric.RPL_HELPTLR, '-')
-		type1_modes = sorted([m for m in Channelmode.table if m.unset_with_param and m not in help_modes], key=lambda c: c.flag, reverse=False)
+		type1_modes = sorted([m for m in Channelmode.table if m.module != None and m.unset_with_param and m not in help_modes], key=lambda c: c.flag, reverse=False)
 		help_modes.extend(type1_modes)
 
 		for mode in type1_modes:
 			client.sendnumeric(Numeric.RPL_HELPTLR, f" {mode.flag} {mode.param_help} - {mode.desc} [{mode.level_help_string()}]")
 
 		client.sendnumeric(Numeric.RPL_HELPTLR, '-')
-		type2_modes = sorted([m for m in Channelmode.table if m.paramcount and not m.unset_with_param and m not in help_modes], key=lambda c: c.flag, reverse=False)
+		type2_modes = sorted([m for m in Channelmode.table if m.module != None and m.paramcount and not m.unset_with_param and m not in help_modes], key=lambda c: c.flag, reverse=False)
 		help_modes.extend(type2_modes)
 
 		for mode in type2_modes:
 			client.sendnumeric(Numeric.RPL_HELPTLR, f" {mode.flag} {mode.param_help} - {mode.desc} [{mode.level_help_string()}]")
 
 		client.sendnumeric(Numeric.RPL_HELPTLR, '-')
-		type3_modes = sorted([m for m in Channelmode.table if not m.paramcount and m not in help_modes], key=lambda c: c.flag, reverse=False)
+		type3_modes = sorted([m for m in Channelmode.table if m.module != None and not m.paramcount and m not in help_modes], key=lambda c: c.flag, reverse=False)
 		help_modes.extend(type3_modes)
 
 		for mode in type3_modes:

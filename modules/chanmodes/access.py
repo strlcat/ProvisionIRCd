@@ -34,6 +34,8 @@ def display_acclist(client, channel, mode):
 def access_on_join(client, channel):
 	if not client.local:
 		return
+	if client.restricted:
+		return
 	if 'C' in client.user.modes:
 		return
 	opmode, _ = channel.has_access(client, 'A', "vhoa", 1)

@@ -126,6 +126,10 @@ def cmd_who(client, recv):
 	 u <ident>	  = Filter by username/ident.
 	"""
 
+	if client.restricted:
+		client.sendnumeric(Numeric.ERR_RESTRICTED, client.name, "Your session is restricted")
+		return
+
 	WhoData.replies = []
 
 	if len(recv) == 1 or recv[1] == '*':

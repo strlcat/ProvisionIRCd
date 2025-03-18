@@ -47,6 +47,8 @@ def expired_nickflood():
 
 
 def cmd_nick_local(client, recv):
+	if client.registered and client.restricted:
+		return client.sendnumeric(Numeric.ERR_RESTRICTED, client.name, "Your session is restricted")
 	newnick = str(recv[1]).strip().removeprefix(':')
 	if not newnick.strip():
 		return client.sendnumeric(Numeric.ERR_NONICKNAMEGIVEN)

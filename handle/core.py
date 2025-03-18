@@ -76,6 +76,7 @@ class Flag(Enum):
 
 @dataclass(eq=False)
 class Client:
+	_guarded_writes = 1 # for /debug
 	table: ClassVar[list] = []
 	server: Server = None
 	user: User = None
@@ -116,10 +117,23 @@ class Client:
 			logging.warning(f"Remote client {self.name} is not marked as registered")
 
 	@property
-	def ulined(self):
+	def restricted(self):
+		if self.user:
+			if 'd' in self.user.modes and 'o' not in self.user.modes:
+				return 1
+		return 0
+
+	@property
+	def is_superuser(self):
 		if self.user:
 			if 'u' in self.user.modes and 'o' in self.user.modes:
 				return 1
+		return 0
+
+	@property
+	def ulined(self):
+		if self.is_superuser:
+			return 1
 		for uline in IRCD.get_setting("ulines"):
 			if uline.lower() in [self.uplink.name.lower(), self.name.lower()]:
 				return 1
@@ -127,8 +141,10 @@ class Client:
 
 	@property
 	def is_service(self):
+		if self.is_superuser:
+			return 1
 		if self.user:
-			if ('S' in self.user.modes or 'u' in self.user.modes) and 'o' in self.user.modes:
+			if 'S' in self.user.modes and 'o' in self.user.modes:
 				return 1
 		services = IRCD.get_setting("services")
 		return services.lower() in [self.uplink.name.lower(), self.name.lower()]
@@ -194,14 +210,13 @@ class Client:
 		return cap in self.local.caps
 
 	def has_permission(self, permission_path: str):
+		if self.is_superuser:
+			return 1
 		if self.server or not self.local or not self.user:
 			return 1
-		if self.user:
-			if 'u' in self.user.modes and 'o' in self.user.modes:
+		if self.is_service:
+			if permission_path != "self:become-ulined":
 				return 1
-			if 'S' in self.user.modes and 'o' in self.user.modes:
-				if permission_path != "self:become-ulined":
-					return 1
 		if not self.user.operlogin or 'o' not in self.user.modes:
 			return 0
 
@@ -935,6 +950,7 @@ class Client:
 
 @dataclass(eq=False)
 class LocalClient:
+	_guarded_writes = 1 # for /debug
 	allow: Allow = None
 	authpass: str = ''
 	socket: socket = None
@@ -960,6 +976,7 @@ class LocalClient:
 
 @dataclass(eq=False)
 class User:
+	_guarded_writes = 1 # for /debug
 	account: str = '*'
 	modes: str = ''
 	operlogin: str = None  # The oper account as defined in confg.
@@ -991,6 +1008,7 @@ class User:
 
 @dataclass(eq=False)
 class Server:
+	_guarded_writes = 1 # for /debug
 	user = None
 	mtags = []
 	recv_mtags = []
@@ -1000,6 +1018,7 @@ class Server:
 	link = None
 	local: LocalClient = None
 	ulined: int = 0
+	restricted: int = 0
 
 	def flood_safe_off(self):
 		pass
@@ -1010,12 +1029,14 @@ class Server:
 
 @dataclass(eq=False)
 class ChannelMember:
+	_guarded_writes = 1 # for /debug
 	client: Client = None
 	modes: str = ''
 
 
 @dataclass(eq=False)
 class Command:
+	_guarded_writes = 1 # for /debug
 	table: ClassVar[list] = []
 	trigger: str = ''
 	parameters: int = 0
@@ -1108,6 +1129,7 @@ class Command:
 
 @dataclass(eq=False)
 class Usermode:
+	_guarded_writes = 1 # for /debug
 	table: ClassVar[list] = []
 
 	flag: str = ''
@@ -1123,23 +1145,26 @@ class Usermode:
 
 	@staticmethod
 	def allow_opers(client):
+		if client.is_superuser:
+			return 1
 		if Usermode.allow_services(client):
 			return 1
-		return 1 if 'o' in client.user.modes or ('S' in client.user.modes or 'u' in client.user.modes) else 0
+		return 1 if 'o' in client.user.modes else 0
 
 	@staticmethod
 	def allow_services(client):
+		if client.is_superuser:
+			return 1
 		if Usermode.allow_none(client):
 			return 1
 		return 1 if client.is_service else 0
 
 	@staticmethod
 	def allow_none(client):
+		if client.is_superuser:
+			return 1
 		if client == IRCD.me or client.server:
 			return 1
-		if client.user:
-			if 'u' in client.user.modes:
-				return 1
 		return 1 if client.server else 0
 
 	@staticmethod
@@ -1178,12 +1203,15 @@ class Usermode:
 		umode.module = None
 		umode.flag = flag
 		umode.can_set = Usermode.allow_none
+		umode.desc = "Reserved for future use"
 		Usermode.table.append(umode)
+		Isupport.add("USERMODES", Usermode.umodes_sorted_str(), server_isupport=1)
 		logging.debug(f"Adding generic support for missing user mode: {flag}")
 
 
 @dataclass(eq=False)
 class Channelmode:
+	_guarded_writes = 1 # for /debug
 	table: ClassVar[list] = []
 	MEMBER: ClassVar[int] = 1
 	LISTMODE: ClassVar[int] = 2
@@ -1233,7 +1261,9 @@ class Channelmode:
 		if cat == 2:
 			cmode.unset_with_param = 1
 
+		cmode.desc = "Reserved for future use"
 		Channelmode.table.append(cmode)
+		Isupport.add("CHANMODES", IRCD.get_chmodes_str_categorized(), server_isupport=1)
 		logging.debug(f"Adding generic support for missing channel mode: {flag}")
 
 	@staticmethod
@@ -1294,6 +1324,7 @@ class Channelmode:
 
 @dataclass(eq=False)
 class Snomask:
+	_guarded_writes = 1 # for /debug
 	table: ClassVar[list] = []
 	flag: str = ''
 	is_global: int = 0
@@ -1324,6 +1355,7 @@ class ChanPrivReq:
 
 @dataclass(eq=False)
 class Channel:
+	_guarded_writes = 1 # for /debug
 	# channel.membermodes.client
 	table: ClassVar[list] = []
 	name: str = ''
@@ -1338,7 +1370,7 @@ class Channel:
 	topic_author: str = None
 	topic_time: int = 0
 	creationtime: int = 0
-	founder: str = ''
+	founder: str = '*'
 	cloakedname: str = ''
 	List: dict = field(default_factory=dict)
 
@@ -1671,6 +1703,9 @@ class Channel:
 		if 'r' in self.modes:
 			return False
 
+		if self.founder == "*":
+			return False
+
 		chanfix_types = IRCD.get_setting("chanfix-types")
 		if not chanfix_types:
 			chanfix_types = "account,hostmask"
@@ -1765,6 +1800,7 @@ class Swhois:
 
 @dataclass
 class Invite:
+	_guarded_writes = 1 # for /debug
 	table: ClassVar[list] = []
 	by: Client = None
 	to: Client = None
@@ -1772,6 +1808,7 @@ class Invite:
 
 
 class Configuration:
+	_guarded_writes = 1 # for /debug
 	def __init__(self):
 		self.entries = []
 
@@ -1843,6 +1880,7 @@ class Configuration:
 
 @dataclass(eq=False)
 class IRCD:
+	_guarded_writes = 1 # for /debug
 	me: None
 	configuration: Configuration = Configuration()  # Final configuration class.
 	build_conf: Configuration = Configuration()  # Configuration class.
@@ -2395,7 +2433,7 @@ class IRCD:
 
 	@staticmethod
 	def channel_founder_fingerprint(client: Client):
-		creator_mask = ''
+		creator_mask = "*"
 		if client.server:
 			return creator_mask
 		if client.user.account != "*":
@@ -2406,11 +2444,16 @@ class IRCD:
 
 	@staticmethod
 	def create_channel(client, name: str):
+		can_be_owner = False
+		if (join_opmode := IRCD.get_setting("default-join-opmode")):
+			can_be_owner = True if 'q' in join_opmode else False
+		if client.restricted:
+			can_be_owner = False
 		channel = Channel()
 		channel.name = name
 		channel.cloakedname = name
 		channel.creationtime = int(time())
-		channel.founder = IRCD.channel_founder_fingerprint(client)
+		channel.founder = IRCD.channel_founder_fingerprint(client) if can_be_owner else "*"
 		channel.init_lists()
 		Channel.table.append(channel)
 		IRCD.channel_count += 1
@@ -2581,6 +2624,7 @@ class IRCD:
 
 @dataclass(eq=False)
 class Isupport:
+	_guarded_writes = 1 # for /debug
 	table: ClassVar[list] = []
 	name: str = ''
 	value: str = ''
@@ -2628,6 +2672,7 @@ class Isupport:
 
 @dataclass(eq=False)
 class MessageTag:
+	_guarded_writes = 1 # for /debug
 	table: ClassVar[list] = []
 
 	name: str = ''
@@ -2897,6 +2942,7 @@ class Numeric:
 	ERR_ATTACKDENY = 484, "{} :Cannot {} protected user {}"
 	ERR_KILLDENY = 485, ":Cannot kill protected user {}"
 	ERR_SERVERONLY = 487, ":{} is a server-only command"
+	ERR_RESTRICTED = 488, "{} :{}"
 	ERR_SECUREONLY = 489, "{} :Cannot join channel (not using a secure connection)"
 	ERR_NOOPERHOST = 491, ":No O:lines for your host"
 	ERR_SERVICESAGENT = 493, "{} :{} is a services agent"
@@ -2920,6 +2966,7 @@ class Numeric:
 
 @dataclass
 class Capability:
+	_guarded_writes = 1 # for /debug
 	table: ClassVar[list] = []
 	name: str = ''
 	value: str = ''
@@ -2956,6 +3003,7 @@ class Capability:
 
 
 class Stat:
+	_guarded_writes = 1 # for /debug
 	table = []
 	letter = ''
 	func = None
@@ -2984,6 +3032,7 @@ class Stat:
 
 
 class Extban:
+	_guarded_writes = 1 # for /debug
 	table = []
 	symbol = "~"
 
@@ -3551,6 +3600,7 @@ class TklFlag:
 
 
 class Tkl:
+	_guarded_writes = 1 # for /debug
 	table = []
 	flags = []
 

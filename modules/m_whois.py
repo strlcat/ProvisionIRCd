@@ -55,6 +55,10 @@ def cmd_whowas(client, recv):
 	This information also includes account name.
 	"""
 
+	if client.restricted:
+		client.sendnumeric(Numeric.ERR_RESTRICTED, client.name, "Your session is restricted")
+		return
+
 	if len(recv) < 2:
 		return client.sendnumeric(Numeric.ERR_NONICKNAMEGIVEN)
 	if not (entries := WhowasData.get_nick_entries(recv[1])):
@@ -99,6 +103,11 @@ def cmd_whois(client, recv):
 	Example: WHOIS Alice
 	"""
 
+	if client.restricted:
+		if len(recv) >= 2 and client.name.lower() != recv[1].lower(): # XXX
+			client.sendnumeric(Numeric.ERR_RESTRICTED, client.name, "Your session is restricted")
+			return
+
 	if len(recv) < 2:
 		client.sendnumeric(Numeric.ERR_NONICKNAMEGIVEN)
 		return
@@ -107,7 +116,7 @@ def cmd_whois(client, recv):
 		client.sendnumeric(Numeric.RPL_ENDOFWHOIS, recv[1])
 		return
 
-	if 'W' in target.user.modes and target != client:
+	if 'V' in target.user.modes and target != client:
 		msg = f'*** Notice -- {client.name} ({client.user.realuser}@{client.user.realhost}) did a /WHOIS on you.'
 		if target.local:
 			IRCD.server_notice(target, msg)
@@ -193,8 +202,11 @@ def cmd_whois(client, recv):
 	for line in lines:
 		client.sendnumeric(*line)
 
-	if 'v' in target.user.modes and target.user.webirc:
+	if 'W' in target.user.modes and target.user.webirc:
 		client.sendnumeric(Numeric.RPL_WHOISSPECIAL, target.name, "is connected using WebIRC")
+
+	if target.restricted:
+		client.sendnumeric(Numeric.RPL_WHOISSPECIAL, target.name, "has restricted session")
 
 	if not target.is_service and not target.ulined:
 		client.sendnumeric(Numeric.RPL_WHOISIDLE, target.name, int(time.time()) - target.idle_since, target.creationtime)
@@ -215,7 +227,7 @@ def init(module):
 	Command.add(module, cmd_whois, "WHOIS", 0, Flag.CMD_USER)
 	Command.add(module, cmd_whowas, "WHOWAS", 0, Flag.CMD_USER)
 	Usermode.add(module, 'c', 1, 0, Usermode.allow_all, "Hide channels in /WHOIS")
-	Usermode.add(module, 'W', 1, 1, Usermode.allow_opers, "See when people are doing a /WHOIS on you")
+	Usermode.add(module, 'V', 1, 1, Usermode.allow_opers, "See when people are doing a /WHOIS on you")
 	Hook.add(Hook.LOCAL_QUIT, savewhowas)
 	Hook.add(Hook.REMOTE_QUIT, savewhowas)
 	Hook.add(Hook.LOCAL_NICKCHANGE, savewhowas)

@@ -9,6 +9,7 @@ import select
 
 
 class ConnectClass:
+	_guarded_writes = 1 # for /debug
 	def __init__(self, name, sendq, recvq, maxc):
 		self.name = name
 		self.sendq = int(sendq)
@@ -21,6 +22,7 @@ class ConnectClass:
 
 
 class Allow:
+	_guarded_writes = 1 # for /debug
 	def __init__(self, mask, class_obj, maxperip):
 		self.mask = mask
 		self.class_obj = class_obj
@@ -35,6 +37,7 @@ class Allow:
 
 
 class Listen:
+	_guarded_writes = 1 # for /debug
 	def __init__(self, ip, port):
 		self.ip = ip
 		self.port = port
@@ -82,6 +85,7 @@ class Listen:
 
 
 class Spamfilter:
+	_guarded_writes = 1 # for /debug
 	entry_num = 0
 
 	def __init__(self, match_type, action, duration, match, target, reason, conf_file, conf=1):
@@ -107,6 +111,7 @@ class Spamfilter:
 
 
 class Operclass:
+	_guarded_writes = 1 # for /debug
 	def __init__(self, name, permissions: list):
 		self.name = name
 		self.parent = None
@@ -147,6 +152,7 @@ class Operclass:
 
 
 class Oper:
+	_guarded_writes = 1 # for /debug
 	mask_types = ["account", "ip"]
 
 	def __init__(self, name, connectclass, operclass, password, mask):
@@ -187,6 +193,7 @@ class Oper:
 
 
 class Link:
+	_guarded_writes = 1 # for /debug
 	def __init__(self, name, password, connectclass):
 		self.name = name
 		self.password = password
@@ -206,6 +213,7 @@ class Link:
 
 
 class Alias:
+	_guarded_writes = 1 # for /debug
 	def __init__(self, name, _type):
 		self.name = name
 		self.type = _type
@@ -220,6 +228,7 @@ class Alias:
 
 
 class Except:
+	_guarded_writes = 1 # for /debug
 	mask_types = ["account", "ip"]
 
 	def __init__(self, name, mask, comment="*"):
