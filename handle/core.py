@@ -3075,7 +3075,9 @@ class Extban:
 		if param.startswith(Extban.symbol):
 			if len(param.split('@')[0].split(':')) < 2:
 				return -1
-			param_split = param.split('@')[0].split(':')
+			host_split = param.split('@')
+			param_split = host_split[0].split(':')
+			param_host = '@'.join(host_split[1:]) if len(host_split) != 1 else "*"
 			for it in param_split:
 				if not it:
 					return -1
@@ -3086,7 +3088,10 @@ class Extban:
 					continue
 				if name == extban.flag:
 					param_split[0] = Extban.symbol + extban.name
-				param = ':'.join(param_split)
+				if len(host_split) != 1:
+					param = f"{':'.join(param_split)}@{param_host}"
+				else:
+					param = f"{':'.join(param_split)}"
 				if returned_param := extban.is_ok(client, channel, action, mode, param):
 					return returned_param
 			return -1
@@ -3107,7 +3112,9 @@ class Extban:
 		+b ~t:1:~T:block:xd	 ->  ~b ~timed:1:~text:block:xd
 		"""
 
-		param_split = param.split('@')[0].split(':')
+		host_split = param.split('@')
+		param_split = host_split[0].split(':')
+		param_host = '@'.join(host_split[1:]) if len(host_split) != 1 else "*"
 		converted = []
 		for item in param_split:
 			if not item:
@@ -3122,8 +3129,10 @@ class Extban:
 			else:
 				converted.append(item)
 
-		converted_str = ':'.join(converted)
-		return converted_str
+		if len(host_split) != 1:
+			return f"{':'.join(converted)}@{param_host}"
+		else:
+			return f"{':'.join(converted)}"
 
 
 class Hook:

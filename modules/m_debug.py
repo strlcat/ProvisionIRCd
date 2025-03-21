@@ -54,6 +54,18 @@ def oprint(obj):
 	pprint(vars(obj))
 safe_builtins['oprint'] = oprint
 
+def getmodule(name):
+	for m in IRCD.configuration.modules:
+		if name == m.name:
+			return m
+	return None
+safe_builtins['getmodule'] = getmodule
+
+safe_builtins['finduser'] = core.IRCD.find_user
+safe_builtins['findchan'] = core.IRCD.find_channel
+safe_builtins['findserv'] = core.IRCD.find_server
+safe_builtins['findclnt'] = core.IRCD.find_client
+
 def cmd_debug(client, recv):
 	if not client.local or client.server:
 		return
@@ -67,6 +79,9 @@ def cmd_debug(client, recv):
 	msg = f"*** /DEBUG invocation from {client.fullrealhost}: '{dbgcmd}'"
 	logging.debug(msg)
 	IRCD.log(client, "debug", "debug", "DEBUG", msg)
+
+	safe_builtins['me'] = client
+	safe_builtins['recv'] = recv
 
 	output = exec_(dbgcmd)
 	for line in output.split('\n'):
